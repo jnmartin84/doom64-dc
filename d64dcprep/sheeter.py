@@ -9,9 +9,9 @@ for filename in filenames:
         data = json.load(read_file)
         for sprite in data['sprites']:
             if "non_enemy" in filename:
-                fname = "doom64nonenemy/" + sprite['fileName'].upper().replace("PNG","png")
+                fname = "nonenemy/" + sprite['fileName'].upper().replace("PNG","png")
             else:
-                fname = "doom64monster/" + sprite['fileName'].upper().replace("PNG","png")
+                fname = "monster/" + sprite['fileName'].upper().replace("PNG","png")
 #            print(fname)
             x = int(sprite['x'])
             y = int(sprite['y'])
@@ -20,6 +20,6 @@ for filename in filenames:
             image_n = Image.open(fname)
             result.paste(im=image_n, box=(x,y))
     if "non_enemy" in filename:
-        result.save("sheets/unc/" + filename[5:-5] + ".png")
+        result.save("sheets/" + filename[5:-5] + ".png")
     else:
-        result.save("sheets/vq/" + filename[5:-5] + ".png")   
+        result.save("sheets/" + filename[5:-5] + ".png")   
