@@ -1,0 +1,282 @@
+{
+  "sprites": [
+    {
+      "fileName": "rectk0.png",
+      "width": 168,
+      "height": 153,
+      "x": 176,
+      "y": 0
+    },
+    {
+      "fileName": "rectg2g8.png",
+      "width": 112,
+      "height": 150,
+      "x": 632,
+      "y": 152
+    },
+    {
+      "fileName": "rectf2f8.png",
+      "width": 144,
+      "height": 163,
+      "x": 176,
+      "y": 153
+    },
+    {
+      "fileName": "rectf5.png",
+      "width": 160,
+      "height": 162,
+      "x": 0,
+      "y": 156
+    },
+    {
+      "fileName": "fattf2f8.png",
+      "width": 96,
+      "height": 105,
+      "x": 544,
+      "y": 621
+    },
+    {
+      "fileName": "fatte4e6.png",
+      "width": 96,
+      "height": 104,
+      "x": 640,
+      "y": 621
+    },
+    {
+      "fileName": "fattf1.png",
+      "width": 120,
+      "height": 103,
+      "x": 160,
+      "y": 318
+    },
+    {
+      "fileName": "fatte5.png",
+      "width": 96,
+      "height": 103,
+      "x": 96,
+      "y": 729
+    },
+    {
+      "fileName": "fatte2e8.png",
+      "width": 104,
+      "height": 105,
+      "x": 744,
+      "y": 437
+    },
+    {
+      "fileName": "fatte3e7.png",
+      "width": 96,
+      "height": 106,
+      "x": 448,
+      "y": 621
+    },
+    {
+      "fileName": "fattf3f7.png",
+      "width": 104,
+      "height": 104,
+      "x": 744,
+      "y": 542
+    },
+    {
+      "fileName": "recth5.png",
+      "width": 136,
+      "height": 161,
+      "x": 496,
+      "y": 0
+    },
+    {
+      "fileName": "rectm0.png",
+      "width": 176,
+      "height": 156,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "fileName": "rectc5.png",
+      "width": 128,
+      "height": 161,
+      "x": 496,
+      "y": 161
+    },
+    {
+      "fileName": "recta2a8.png",
+      "width": 112,
+      "height": 145,
+      "x": 632,
+      "y": 302
+    },
+    {
+      "fileName": "recte2e8.png",
+      "width": 160,
+      "height": 143,
+      "x": 0,
+      "y": 318
+    },
+    {
+      "fileName": "recta5.png",
+      "width": 128,
+      "height": 160,
+      "x": 0,
+      "y": 461
+    },
+    {
+      "fileName": "rectb5.png",
+      "width": 120,
+      "height": 160,
+      "x": 128,
+      "y": 461
+    },
+    {
+      "fileName": "fattg2g8.png",
+      "width": 104,
+      "height": 110,
+      "x": 744,
+      "y": 111
+    },
+    {
+      "fileName": "fattg1.png",
+      "width": 112,
+      "height": 106,
+      "x": 224,
+      "y": 621
+    },
+    {
+      "fileName": "fattg3g7.png",
+      "width": 104,
+      "height": 109,
+      "x": 744,
+      "y": 221
+    },
+    {
+      "fileName": "fattg4g6.png",
+      "width": 120,
+      "height": 104,
+      "x": 496,
+      "y": 322
+    },
+    {
+      "fileName": "fattg5.png",
+      "width": 96,
+      "height": 104,
+      "x": 0,
+      "y": 729
+    },
+    {
+      "fileName": "fattf4f6.png",
+      "width": 104,
+      "height": 102,
+      "x": 384,
+      "y": 318
+    },
+    {
+      "fileName": "fattf5.png",
+      "width": 104,
+      "height": 103,
+      "x": 280,
+      "y": 318
+    },
+    {
+      "fileName": "recth2h8.png",
+      "width": 112,
+      "height": 152,
+      "x": 632,
+      "y": 0
+    },
+    {
+      "fileName": "recte5.png",
+      "width": 144,
+      "height": 158,
+      "x": 344,
+      "y": 152
+    },
+    {
+      "fileName": "rectd2d8.png",
+      "width": 120,
+      "height": 144,
+      "x": 496,
+      "y": 461
+    },
+    {
+      "fileName": "rectd5.png",
+      "width": 120,
+      "height": 160,
+      "x": 248,
+      "y": 461
+    },
+    {
+      "fileName": "rectj0.png",
+      "width": 152,
+      "height": 152,
+      "x": 344,
+      "y": 0
+    },
+    {
+      "fileName": "rectb2b8.png",
+      "width": 112,
+      "height": 145,
+      "x": 632,
+      "y": 447
+    },
+    {
+      "fileName": "rectc2c8.png",
+      "width": 128,
+      "height": 144,
+      "x": 368,
+      "y": 461
+    },
+    {
+      "fileName": "fatth1.png",
+      "width": 112,
+      "height": 108,
+      "x": 0,
+      "y": 621
+    },
+    {
+      "fileName": "fatti1.png",
+      "width": 112,
+      "height": 108,
+      "x": 112,
+      "y": 621
+    },
+    {
+      "fileName": "fatth2h8.png",
+      "width": 104,
+      "height": 111,
+      "x": 744,
+      "y": 0
+    },
+    {
+      "fileName": "fatth4h6.png",
+      "width": 104,
+      "height": 107,
+      "x": 744,
+      "y": 330
+    },
+    {
+      "fileName": "fatth3h7.png",
+      "width": 72,
+      "height": 110,
+      "x": 848,
+      "y": 108
+    },
+    {
+      "fileName": "fatth5.png",
+      "width": 112,
+      "height": 106,
+      "x": 336,
+      "y": 621
+    },
+    {
+      "fileName": "fatti2i8.png",
+      "width": 88,
+      "height": 108,
+      "x": 848,
+      "y": 0
+    }
+  ],
+  "packMode": "bin",
+  "padding": 0,
+  "backgroundColor": "rgba(0, 0, 0, 0)",
+  "spriteSheetWidth": 936,
+  "spriteSheetHeight": 833
+}

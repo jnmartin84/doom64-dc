@@ -1,0 +1,478 @@
+{
+  "sprites": [
+    {
+      "fileName": "sarga1.png",
+      "width": 64,
+      "height": 84,
+      "x": 850,
+      "y": 2
+    },
+    {
+      "fileName": "sarga2a8.png",
+      "width": 72,
+      "height": 84,
+      "x": 698,
+      "y": 429
+    },
+    {
+      "fileName": "sarga4a6.png",
+      "width": 72,
+      "height": 80,
+      "x": 774,
+      "y": 539
+    },
+    {
+      "fileName": "sarga3a7.png",
+      "width": 80,
+      "height": 79,
+      "x": 170,
+      "y": 678
+    },
+    {
+      "fileName": "sarga5.png",
+      "width": 64,
+      "height": 76,
+      "x": 546,
+      "y": 766
+    },
+    {
+      "fileName": "sargb1.png",
+      "width": 64,
+      "height": 79,
+      "x": 850,
+      "y": 616
+    },
+    {
+      "fileName": "sargb2b8.png",
+      "width": 64,
+      "height": 77,
+      "x": 206,
+      "y": 766
+    },
+    {
+      "fileName": "sargb3b7.png",
+      "width": 64,
+      "height": 77,
+      "x": 274,
+      "y": 766
+    },
+    {
+      "fileName": "sargb4b6.png",
+      "width": 64,
+      "height": 77,
+      "x": 342,
+      "y": 766
+    },
+    {
+      "fileName": "sargb5.png",
+      "width": 64,
+      "height": 79,
+      "x": 2,
+      "y": 766
+    },
+    {
+      "fileName": "sargc1.png",
+      "width": 64,
+      "height": 82,
+      "x": 850,
+      "y": 265
+    },
+    {
+      "fileName": "sargc2c8.png",
+      "width": 72,
+      "height": 85,
+      "x": 698,
+      "y": 340
+    },
+    {
+      "fileName": "sargc3c7.png",
+      "width": 80,
+      "height": 81,
+      "x": 454,
+      "y": 510
+    },
+    {
+      "fileName": "sargc4c6.png",
+      "width": 72,
+      "height": 83,
+      "x": 774,
+      "y": 178
+    },
+    {
+      "fileName": "sargc5.png",
+      "width": 64,
+      "height": 78,
+      "x": 138,
+      "y": 766
+    },
+    {
+      "fileName": "sargd1.png",
+      "width": 64,
+      "height": 80,
+      "x": 850,
+      "y": 448
+    },
+    {
+      "fileName": "sargd3d7.png",
+      "width": 64,
+      "height": 77,
+      "x": 410,
+      "y": 766
+    },
+    {
+      "fileName": "sargd2d8.png",
+      "width": 64,
+      "height": 80,
+      "x": 850,
+      "y": 532
+    },
+    {
+      "fileName": "sargd4d6.png",
+      "width": 64,
+      "height": 75,
+      "x": 498,
+      "y": 678
+    },
+    {
+      "fileName": "sarge1.png",
+      "width": 80,
+      "height": 82,
+      "x": 370,
+      "y": 510
+    },
+    {
+      "fileName": "sargd5.png",
+      "width": 64,
+      "height": 77,
+      "x": 478,
+      "y": 766
+    },
+    {
+      "fileName": "sarge2e8.png",
+      "width": 88,
+      "height": 82,
+      "x": 278,
+      "y": 510
+    },
+    {
+      "fileName": "sarge3e7.png",
+      "width": 72,
+      "height": 82,
+      "x": 774,
+      "y": 265
+    },
+    {
+      "fileName": "sarge4e6.png",
+      "width": 72,
+      "height": 78,
+      "x": 774,
+      "y": 623
+    },
+    {
+      "fileName": "sarge5.png",
+      "width": 80,
+      "height": 77,
+      "x": 338,
+      "y": 678
+    },
+    {
+      "fileName": "sargf1.png",
+      "width": 80,
+      "height": 84,
+      "x": 2,
+      "y": 678
+    },
+    {
+      "fileName": "sargf2f8.png",
+      "width": 88,
+      "height": 84,
+      "x": 186,
+      "y": 510
+    },
+    {
+      "fileName": "sargf3f7.png",
+      "width": 80,
+      "height": 83,
+      "x": 86,
+      "y": 678
+    },
+    {
+      "fileName": "sargf5.png",
+      "width": 80,
+      "height": 79,
+      "x": 254,
+      "y": 678
+    },
+    {
+      "fileName": "sargf4f6.png",
+      "width": 80,
+      "height": 81,
+      "x": 538,
+      "y": 510
+    },
+    {
+      "fileName": "sargg2g8.png",
+      "width": 72,
+      "height": 84,
+      "x": 698,
+      "y": 517
+    },
+    {
+      "fileName": "sargg3g7.png",
+      "width": 72,
+      "height": 84,
+      "x": 774,
+      "y": 2
+    },
+    {
+      "fileName": "sargg4g6.png",
+      "width": 64,
+      "height": 79,
+      "x": 70,
+      "y": 766
+    },
+    {
+      "fileName": "sargh1.png",
+      "width": 64,
+      "height": 90,
+      "x": 774,
+      "y": 351
+    },
+    {
+      "fileName": "sargh2h8.png",
+      "width": 56,
+      "height": 93,
+      "x": 850,
+      "y": 351
+    },
+    {
+      "fileName": "sargg1.png",
+      "width": 72,
+      "height": 84,
+      "x": 774,
+      "y": 90
+    },
+    {
+      "fileName": "sargh4h6.png",
+      "width": 64,
+      "height": 84,
+      "x": 850,
+      "y": 90
+    },
+    {
+      "fileName": "sargh5.png",
+      "width": 64,
+      "height": 83,
+      "x": 850,
+      "y": 178
+    },
+    {
+      "fileName": "sargh3h7.png",
+      "width": 64,
+      "height": 90,
+      "x": 774,
+      "y": 445
+    },
+    {
+      "fileName": "sargi0.png",
+      "width": 80,
+      "height": 99,
+      "x": 510,
+      "y": 340
+    },
+    {
+      "fileName": "sargg5.png",
+      "width": 72,
+      "height": 76,
+      "x": 622,
+      "y": 510
+    },
+    {
+      "fileName": "sargj0.png",
+      "width": 80,
+      "height": 100,
+      "x": 374,
+      "y": 176
+    },
+    {
+      "fileName": "sargk0.png",
+      "width": 72,
+      "height": 71,
+      "x": 186,
+      "y": 598
+    },
+    {
+      "fileName": "sargl0.png",
+      "width": 72,
+      "height": 75,
+      "x": 422,
+      "y": 678
+    },
+    {
+      "fileName": "sargm0.png",
+      "width": 72,
+      "height": 64,
+      "x": 698,
+      "y": 605
+    },
+    {
+      "fileName": "sargn0.png",
+      "width": 64,
+      "height": 42,
+      "x": 850,
+      "y": 699
+    },
+    {
+      "fileName": "cybra1.png",
+      "width": 120,
+      "height": 163,
+      "x": 2,
+      "y": 2
+    },
+    {
+      "fileName": "cybra3.png",
+      "width": 96,
+      "height": 163,
+      "x": 598,
+      "y": 338
+    },
+    {
+      "fileName": "cybra2.png",
+      "width": 112,
+      "height": 167,
+      "x": 2,
+      "y": 169
+    },
+    {
+      "fileName": "cybra4.png",
+      "width": 88,
+      "height": 162,
+      "x": 326,
+      "y": 340
+    },
+    {
+      "fileName": "cybra5.png",
+      "width": 120,
+      "height": 158,
+      "x": 250,
+      "y": 2
+    },
+    {
+      "fileName": "cybra6.png",
+      "width": 104,
+      "height": 163,
+      "x": 218,
+      "y": 340
+    },
+    {
+      "fileName": "cybra7.png",
+      "width": 88,
+      "height": 162,
+      "x": 418,
+      "y": 340
+    },
+    {
+      "fileName": "cybra8.png",
+      "width": 88,
+      "height": 162,
+      "x": 94,
+      "y": 510
+    },
+    {
+      "fileName": "cybrb1.png",
+      "width": 112,
+      "height": 165,
+      "x": 118,
+      "y": 169
+    },
+    {
+      "fileName": "cybrb2.png",
+      "width": 104,
+      "height": 170,
+      "x": 374,
+      "y": 2
+    },
+    {
+      "fileName": "cybrb3.png",
+      "width": 72,
+      "height": 167,
+      "x": 698,
+      "y": 2
+    },
+    {
+      "fileName": "cybrb4.png",
+      "width": 104,
+      "height": 168,
+      "x": 482,
+      "y": 163
+    },
+    {
+      "fileName": "cybrb6.png",
+      "width": 88,
+      "height": 164,
+      "x": 2,
+      "y": 510
+    },
+    {
+      "fileName": "cybrb5.png",
+      "width": 112,
+      "height": 162,
+      "x": 234,
+      "y": 169
+    },
+    {
+      "fileName": "cybrb7.png",
+      "width": 64,
+      "height": 163,
+      "x": 698,
+      "y": 173
+    },
+    {
+      "fileName": "cybrb8.png",
+      "width": 96,
+      "height": 164,
+      "x": 598,
+      "y": 2
+    },
+    {
+      "fileName": "cybrc1.png",
+      "width": 104,
+      "height": 164,
+      "x": 110,
+      "y": 340
+    },
+    {
+      "fileName": "cybrc3.png",
+      "width": 96,
+      "height": 164,
+      "x": 598,
+      "y": 170
+    },
+    {
+      "fileName": "cybrc5.png",
+      "width": 112,
+      "height": 157,
+      "x": 482,
+      "y": 2
+    },
+    {
+      "fileName": "cybrc4.png",
+      "width": 120,
+      "height": 163,
+      "x": 126,
+      "y": 2
+    },
+    {
+      "fileName": "cybrc2.png",
+      "width": 104,
+      "height": 166,
+      "x": 2,
+      "y": 340
+    }
+  ],
+  "packMode": "bin",
+  "padding": 2,
+  "backgroundColor": "rgba(0, 0, 0, 0)",
+  "spriteSheetWidth": 916,
+  "spriteSheetHeight": 847
+}

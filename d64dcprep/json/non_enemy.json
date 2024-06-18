@@ -1,0 +1,2725 @@
+{
+  "sprites": [
+    {
+      "fileName": "a001a0.png",
+      "width": 32,
+      "height": 91,
+      "x": 792,
+      "y": 61
+    },
+    {
+      "fileName": "a003a0.png",
+      "width": 32,
+      "height": 83,
+      "x": 792,
+      "y": 208
+    },
+    {
+      "fileName": "a004a0.png",
+      "width": 32,
+      "height": 64,
+      "x": 840,
+      "y": 366
+    },
+    {
+      "fileName": "a005a0.png",
+      "width": 16,
+      "height": 60,
+      "x": 936,
+      "y": 773
+    },
+    {
+      "fileName": "a006a0.png",
+      "width": 32,
+      "height": 80,
+      "x": 792,
+      "y": 455
+    },
+    {
+      "fileName": "a007a0.png",
+      "width": 48,
+      "height": 19,
+      "x": 672,
+      "y": 603
+    },
+    {
+      "fileName": "a010a0.png",
+      "width": 32,
+      "height": 58,
+      "x": 640,
+      "y": 314
+    },
+    {
+      "fileName": "a008a0.png",
+      "width": 32,
+      "height": 37,
+      "x": 936,
+      "y": 256
+    },
+    {
+      "fileName": "a012a0.png",
+      "width": 48,
+      "height": 101,
+      "x": 672,
+      "y": 184
+    },
+    {
+      "fileName": "a013a0.png",
+      "width": 32,
+      "height": 93,
+      "x": 672,
+      "y": 510
+    },
+    {
+      "fileName": "a014a0.png",
+      "width": 48,
+      "height": 19,
+      "x": 496,
+      "y": 580
+    },
+    {
+      "fileName": "a014b0.png",
+      "width": 48,
+      "height": 19,
+      "x": 544,
+      "y": 580
+    },
+    {
+      "fileName": "a015a0.png",
+      "width": 16,
+      "height": 95,
+      "x": 888,
+      "y": 366
+    },
+    {
+      "fileName": "a016a0.png",
+      "width": 48,
+      "height": 7,
+      "x": 920,
+      "y": 904
+    },
+    {
+      "fileName": "a017a0.png",
+      "width": 48,
+      "height": 61,
+      "x": 792,
+      "y": 0
+    },
+    {
+      "fileName": "a018a0.png",
+      "width": 32,
+      "height": 80,
+      "x": 792,
+      "y": 535
+    },
+    {
+      "fileName": "a019a0.png",
+      "width": 32,
+      "height": 56,
+      "x": 888,
+      "y": 0
+    },
+    {
+      "fileName": "a020a0.png",
+      "width": 48,
+      "height": 20,
+      "x": 920,
+      "y": 834
+    },
+    {
+      "fileName": "a021a0.png",
+      "width": 32,
+      "height": 95,
+      "x": 760,
+      "y": 580
+    },
+    {
+      "fileName": "a022a0.png",
+      "width": 32,
+      "height": 79,
+      "x": 792,
+      "y": 615
+    },
+    {
+      "fileName": "a023a0.png",
+      "width": 32,
+      "height": 98,
+      "x": 728,
+      "y": 580
+    },
+    {
+      "fileName": "a026a0.png",
+      "width": 48,
+      "height": 69,
+      "x": 728,
+      "y": 394
+    },
+    {
+      "fileName": "a027a0.png",
+      "width": 64,
+      "height": 15,
+      "x": 488,
+      "y": 553
+    },
+    {
+      "fileName": "a028a0.png",
+      "width": 64,
+      "height": 72,
+      "x": 0,
+      "y": 622
+    },
+    {
+      "fileName": "a029a0.png",
+      "width": 64,
+      "height": 64,
+      "x": 64,
+      "y": 622
+    },
+    {
+      "fileName": "a030a0.png",
+      "width": 16,
+      "height": 43,
+      "x": 952,
+      "y": 213
+    },
+    {
+      "fileName": "a030b0.png",
+      "width": 16,
+      "height": 46,
+      "x": 824,
+      "y": 208
+    },
+    {
+      "fileName": "a030c0.png",
+      "width": 16,
+      "height": 46,
+      "x": 824,
+      "y": 455
+    },
+    {
+      "fileName": "a030d0.png",
+      "width": 16,
+      "height": 47,
+      "x": 904,
+      "y": 672
+    },
+    {
+      "fileName": "a030e0.png",
+      "width": 16,
+      "height": 45,
+      "x": 704,
+      "y": 510
+    },
+    {
+      "fileName": "a031a0.png",
+      "width": 16,
+      "height": 43,
+      "x": 904,
+      "y": 417
+    },
+    {
+      "fileName": "a031b0.png",
+      "width": 16,
+      "height": 46,
+      "x": 824,
+      "y": 535
+    },
+    {
+      "fileName": "a031c0.png",
+      "width": 16,
+      "height": 46,
+      "x": 824,
+      "y": 615
+    },
+    {
+      "fileName": "a031e0.png",
+      "width": 16,
+      "height": 45,
+      "x": 704,
+      "y": 555
+    },
+    {
+      "fileName": "a031d0.png",
+      "width": 16,
+      "height": 47,
+      "x": 872,
+      "y": 366
+    },
+    {
+      "fileName": "a032a0.png",
+      "width": 16,
+      "height": 43,
+      "x": 824,
+      "y": 108
+    },
+    {
+      "fileName": "a032b0.png",
+      "width": 16,
+      "height": 46,
+      "x": 776,
+      "y": 394
+    },
+    {
+      "fileName": "a032c0.png",
+      "width": 16,
+      "height": 46,
+      "x": 776,
+      "y": 463
+    },
+    {
+      "fileName": "a032d0.png",
+      "width": 16,
+      "height": 47,
+      "x": 824,
+      "y": 61
+    },
+    {
+      "fileName": "a032e0.png",
+      "width": 16,
+      "height": 45,
+      "x": 648,
+      "y": 144
+    },
+    {
+      "fileName": "a033a0.png",
+      "width": 32,
+      "height": 73,
+      "x": 640,
+      "y": 227
+    },
+    {
+      "fileName": "a034a0.png",
+      "width": 32,
+      "height": 58,
+      "x": 640,
+      "y": 400
+    },
+    {
+      "fileName": "a035a0.png",
+      "width": 16,
+      "height": 80,
+      "x": 920,
+      "y": 256
+    },
+    {
+      "fileName": "a036a0.png",
+      "width": 16,
+      "height": 61,
+      "x": 920,
+      "y": 773
+    },
+    {
+      "fileName": "ammoa0.png",
+      "width": 32,
+      "height": 30,
+      "x": 920,
+      "y": 854
+    },
+    {
+      "fileName": "aplsa0.png",
+      "width": 32,
+      "height": 21,
+      "x": 288,
+      "y": 934
+    },
+    {
+      "fileName": "aplsb0.png",
+      "width": 16,
+      "height": 17,
+      "x": 968,
+      "y": 336
+    },
+    {
+      "fileName": "aplsc0.png",
+      "width": 48,
+      "height": 37,
+      "x": 480,
+      "y": 840
+    },
+    {
+      "fileName": "aplsd0.png",
+      "width": 48,
+      "height": 33,
+      "x": 672,
+      "y": 880
+    },
+    {
+      "fileName": "aplse0.png",
+      "width": 32,
+      "height": 23,
+      "x": 888,
+      "y": 854
+    },
+    {
+      "fileName": "aplsf0.png",
+      "width": 16,
+      "height": 16,
+      "x": 984,
+      "y": 353
+    },
+    {
+      "fileName": "aplsg0.png",
+      "width": 16,
+      "height": 11,
+      "x": 968,
+      "y": 455
+    },
+    {
+      "fileName": "arm1a0.png",
+      "width": 48,
+      "height": 30,
+      "x": 920,
+      "y": 93
+    },
+    {
+      "fileName": "aplsh0.png",
+      "width": 16,
+      "height": 10,
+      "x": 984,
+      "y": 455
+    },
+    {
+      "fileName": "arm2a0.png",
+      "width": 48,
+      "height": 30,
+      "x": 920,
+      "y": 123
+    },
+    {
+      "fileName": "art1a0.png",
+      "width": 48,
+      "height": 40,
+      "x": 840,
+      "y": 596
+    },
+    {
+      "fileName": "arm1b0.png",
+      "width": 48,
+      "height": 30,
+      "x": 920,
+      "y": 153
+    },
+    {
+      "fileName": "art1b0.png",
+      "width": 48,
+      "height": 40,
+      "x": 840,
+      "y": 636
+    },
+    {
+      "fileName": "arm2b0.png",
+      "width": 48,
+      "height": 30,
+      "x": 920,
+      "y": 183
+    },
+    {
+      "fileName": "art1c0.png",
+      "width": 48,
+      "height": 40,
+      "x": 840,
+      "y": 676
+    },
+    {
+      "fileName": "art1d0.png",
+      "width": 48,
+      "height": 40,
+      "x": 840,
+      "y": 716
+    },
+    {
+      "fileName": "art1e0.png",
+      "width": 48,
+      "height": 40,
+      "x": 840,
+      "y": 756
+    },
+    {
+      "fileName": "art2a0.png",
+      "width": 48,
+      "height": 40,
+      "x": 840,
+      "y": 796
+    },
+    {
+      "fileName": "art2b0.png",
+      "width": 48,
+      "height": 40,
+      "x": 792,
+      "y": 746
+    },
+    {
+      "fileName": "art2c0.png",
+      "width": 48,
+      "height": 40,
+      "x": 416,
+      "y": 259
+    },
+    {
+      "fileName": "art2d0.png",
+      "width": 48,
+      "height": 40,
+      "x": 0,
+      "y": 840
+    },
+    {
+      "fileName": "art2e0.png",
+      "width": 48,
+      "height": 40,
+      "x": 48,
+      "y": 840
+    },
+    {
+      "fileName": "art3a0.png",
+      "width": 48,
+      "height": 40,
+      "x": 96,
+      "y": 840
+    },
+    {
+      "fileName": "art3c0.png",
+      "width": 48,
+      "height": 40,
+      "x": 144,
+      "y": 840
+    },
+    {
+      "fileName": "bal1a0.png",
+      "width": 32,
+      "height": 22,
+      "x": 640,
+      "y": 484
+    },
+    {
+      "fileName": "art3d0.png",
+      "width": 48,
+      "height": 40,
+      "x": 192,
+      "y": 840
+    },
+    {
+      "fileName": "art3b0.png",
+      "width": 48,
+      "height": 40,
+      "x": 240,
+      "y": 840
+    },
+    {
+      "fileName": "bal1b0.png",
+      "width": 32,
+      "height": 22,
+      "x": 752,
+      "y": 743
+    },
+    {
+      "fileName": "art3e0.png",
+      "width": 48,
+      "height": 40,
+      "x": 288,
+      "y": 840
+    },
+    {
+      "fileName": "bal1c0.png",
+      "width": 32,
+      "height": 22,
+      "x": 0,
+      "y": 934
+    },
+    {
+      "fileName": "bal1d0.png",
+      "width": 48,
+      "height": 45,
+      "x": 840,
+      "y": 188
+    },
+    {
+      "fileName": "bal1f0.png",
+      "width": 48,
+      "height": 41,
+      "x": 840,
+      "y": 514
+    },
+    {
+      "fileName": "bal1e0.png",
+      "width": 48,
+      "height": 42,
+      "x": 840,
+      "y": 430
+    },
+    {
+      "fileName": "bal1g0.png",
+      "width": 48,
+      "height": 34,
+      "x": 624,
+      "y": 840
+    },
+    {
+      "fileName": "bal2a0.png",
+      "width": 32,
+      "height": 35,
+      "x": 920,
+      "y": 506
+    },
+    {
+      "fileName": "bal1h0.png",
+      "width": 48,
+      "height": 33,
+      "x": 720,
+      "y": 880
+    },
+    {
+      "fileName": "bal2b0.png",
+      "width": 48,
+      "height": 35,
+      "x": 528,
+      "y": 840
+    },
+    {
+      "fileName": "bal1i0.png",
+      "width": 48,
+      "height": 31,
+      "x": 920,
+      "y": 0
+    },
+    {
+      "fileName": "bal2d0.png",
+      "width": 80,
+      "height": 46,
+      "x": 384,
+      "y": 622
+    },
+    {
+      "fileName": "bal2f0.png",
+      "width": 64,
+      "height": 43,
+      "x": 128,
+      "y": 743
+    },
+    {
+      "fileName": "bal2c0.png",
+      "width": 48,
+      "height": 31,
+      "x": 920,
+      "y": 31
+    },
+    {
+      "fileName": "bal2e0.png",
+      "width": 64,
+      "height": 43,
+      "x": 192,
+      "y": 743
+    },
+    {
+      "fileName": "bal2h0.png",
+      "width": 80,
+      "height": 42,
+      "x": 464,
+      "y": 622
+    },
+    {
+      "fileName": "bal2g0.png",
+      "width": 64,
+      "height": 41,
+      "x": 320,
+      "y": 743
+    },
+    {
+      "fileName": "bal2i0.png",
+      "width": 80,
+      "height": 43,
+      "x": 480,
+      "y": 391
+    },
+    {
+      "fileName": "bal2j0.png",
+      "width": 64,
+      "height": 43,
+      "x": 256,
+      "y": 743
+    },
+    {
+      "fileName": "bal3a0.png",
+      "width": 32,
+      "height": 22,
+      "x": 32,
+      "y": 934
+    },
+    {
+      "fileName": "bal3b0.png",
+      "width": 32,
+      "height": 22,
+      "x": 64,
+      "y": 934
+    },
+    {
+      "fileName": "bal3c0.png",
+      "width": 32,
+      "height": 22,
+      "x": 96,
+      "y": 934
+    },
+    {
+      "fileName": "bal3d0.png",
+      "width": 48,
+      "height": 45,
+      "x": 840,
+      "y": 233
+    },
+    {
+      "fileName": "bal3e0.png",
+      "width": 48,
+      "height": 42,
+      "x": 840,
+      "y": 472
+    },
+    {
+      "fileName": "bal3g0.png",
+      "width": 48,
+      "height": 34,
+      "x": 672,
+      "y": 840
+    },
+    {
+      "fileName": "bal3f0.png",
+      "width": 48,
+      "height": 41,
+      "x": 840,
+      "y": 555
+    },
+    {
+      "fileName": "bal3h0.png",
+      "width": 48,
+      "height": 33,
+      "x": 768,
+      "y": 880
+    },
+    {
+      "fileName": "bal3i0.png",
+      "width": 48,
+      "height": 31,
+      "x": 920,
+      "y": 62
+    },
+    {
+      "fileName": "bal7a1a5.png",
+      "width": 32,
+      "height": 20,
+      "x": 416,
+      "y": 934
+    },
+    {
+      "fileName": "bal7a2a8.png",
+      "width": 32,
+      "height": 17,
+      "x": 640,
+      "y": 580
+    },
+    {
+      "fileName": "bal7a3a7.png",
+      "width": 48,
+      "height": 15,
+      "x": 552,
+      "y": 553
+    },
+    {
+      "fileName": "bal7a4a6.png",
+      "width": 32,
+      "height": 18,
+      "x": 608,
+      "y": 934
+    },
+    {
+      "fileName": "bal7b1b5.png",
+      "width": 32,
+      "height": 18,
+      "x": 640,
+      "y": 934
+    },
+    {
+      "fileName": "bal7b2b8.png",
+      "width": 48,
+      "height": 17,
+      "x": 592,
+      "y": 580
+    },
+    {
+      "fileName": "bal7b3b7.png",
+      "width": 48,
+      "height": 15,
+      "x": 600,
+      "y": 553
+    },
+    {
+      "fileName": "bal7b4b6.png",
+      "width": 32,
+      "height": 17,
+      "x": 896,
+      "y": 934
+    },
+    {
+      "fileName": "bal7c0.png",
+      "width": 64,
+      "height": 55,
+      "x": 728,
+      "y": 120
+    },
+    {
+      "fileName": "bal7d0.png",
+      "width": 64,
+      "height": 46,
+      "x": 576,
+      "y": 694
+    },
+    {
+      "fileName": "bal7f0.png",
+      "width": 48,
+      "height": 49,
+      "x": 528,
+      "y": 789
+    },
+    {
+      "fileName": "bal7e0.png",
+      "width": 64,
+      "height": 48,
+      "x": 192,
+      "y": 694
+    },
+    {
+      "fileName": "bal7g0.png",
+      "width": 64,
+      "height": 48,
+      "x": 256,
+      "y": 694
+    },
+    {
+      "fileName": "bal7h0.png",
+      "width": 64,
+      "height": 49,
+      "x": 0,
+      "y": 694
+    },
+    {
+      "fileName": "bal8a1a5.png",
+      "width": 32,
+      "height": 20,
+      "x": 448,
+      "y": 934
+    },
+    {
+      "fileName": "bal8a2a8.png",
+      "width": 32,
+      "height": 17,
+      "x": 928,
+      "y": 934
+    },
+    {
+      "fileName": "bal8a3a7.png",
+      "width": 48,
+      "height": 15,
+      "x": 432,
+      "y": 914
+    },
+    {
+      "fileName": "bal8b1b5.png",
+      "width": 32,
+      "height": 18,
+      "x": 672,
+      "y": 934
+    },
+    {
+      "fileName": "bal8a4a6.png",
+      "width": 32,
+      "height": 18,
+      "x": 704,
+      "y": 934
+    },
+    {
+      "fileName": "bal8b2b8.png",
+      "width": 48,
+      "height": 17,
+      "x": 336,
+      "y": 914
+    },
+    {
+      "fileName": "bal8b3b7.png",
+      "width": 48,
+      "height": 15,
+      "x": 480,
+      "y": 914
+    },
+    {
+      "fileName": "bal8b4b6.png",
+      "width": 32,
+      "height": 17,
+      "x": 968,
+      "y": 0
+    },
+    {
+      "fileName": "bal8c0.png",
+      "width": 64,
+      "height": 55,
+      "x": 728,
+      "y": 175
+    },
+    {
+      "fileName": "bal8d0.png",
+      "width": 64,
+      "height": 46,
+      "x": 640,
+      "y": 694
+    },
+    {
+      "fileName": "bal8e0.png",
+      "width": 64,
+      "height": 48,
+      "x": 320,
+      "y": 694
+    },
+    {
+      "fileName": "bal8f0.png",
+      "width": 48,
+      "height": 49,
+      "x": 576,
+      "y": 789
+    },
+    {
+      "fileName": "bal8g0.png",
+      "width": 64,
+      "height": 48,
+      "x": 384,
+      "y": 694
+    },
+    {
+      "fileName": "bal8h0.png",
+      "width": 64,
+      "height": 49,
+      "x": 64,
+      "y": 694
+    },
+    {
+      "fileName": "bar1a0.png",
+      "width": 48,
+      "height": 50,
+      "x": 192,
+      "y": 789
+    },
+    {
+      "fileName": "bar1b0.png",
+      "width": 48,
+      "height": 54,
+      "x": 792,
+      "y": 401
+    },
+    {
+      "fileName": "bar1c0.png",
+      "width": 48,
+      "height": 55,
+      "x": 792,
+      "y": 291
+    },
+    {
+      "fileName": "bar1d0.png",
+      "width": 48,
+      "height": 55,
+      "x": 792,
+      "y": 346
+    },
+    {
+      "fileName": "bar1e0.png",
+      "width": 64,
+      "height": 57,
+      "x": 728,
+      "y": 0
+    },
+    {
+      "fileName": "bexpa0.png",
+      "width": 48,
+      "height": 38,
+      "x": 384,
+      "y": 840
+    },
+    {
+      "fileName": "bexpb0.png",
+      "width": 48,
+      "height": 48,
+      "x": 768,
+      "y": 789
+    },
+    {
+      "fileName": "bexpc0.png",
+      "width": 48,
+      "height": 50,
+      "x": 240,
+      "y": 789
+    },
+    {
+      "fileName": "bexpd0.png",
+      "width": 48,
+      "height": 51,
+      "x": 0,
+      "y": 789
+    },
+    {
+      "fileName": "bexpe0.png",
+      "width": 48,
+      "height": 52,
+      "x": 792,
+      "y": 694
+    },
+    {
+      "fileName": "bexpf0.png",
+      "width": 48,
+      "height": 51,
+      "x": 48,
+      "y": 789
+    },
+    {
+      "fileName": "bexpg0.png",
+      "width": 48,
+      "height": 51,
+      "x": 96,
+      "y": 789
+    },
+    {
+      "fileName": "bfe2a0.png",
+      "width": 48,
+      "height": 56,
+      "x": 792,
+      "y": 152
+    },
+    {
+      "fileName": "bfe2b0.png",
+      "width": 32,
+      "height": 43,
+      "x": 920,
+      "y": 213
+    },
+    {
+      "fileName": "bfe2c0.png",
+      "width": 32,
+      "height": 33,
+      "x": 920,
+      "y": 610
+    },
+    {
+      "fileName": "bfe2d0.png",
+      "width": 32,
+      "height": 32,
+      "x": 920,
+      "y": 709
+    },
+    {
+      "fileName": "bfe2e0.png",
+      "width": 32,
+      "height": 27,
+      "x": 888,
+      "y": 461
+    },
+    {
+      "fileName": "bfe2f0.png",
+      "width": 16,
+      "height": 12,
+      "x": 968,
+      "y": 431
+    },
+    {
+      "fileName": "bfgga0.png",
+      "width": 160,
+      "height": 79,
+      "x": 0,
+      "y": 229
+    },
+    {
+      "fileName": "bfggb0.png",
+      "width": 160,
+      "height": 76,
+      "x": 160,
+      "y": 229
+    },
+    {
+      "fileName": "bfggc0.png",
+      "width": 120,
+      "height": 31,
+      "x": 424,
+      "y": 522
+    },
+    {
+      "fileName": "bfggd0.png",
+      "width": 136,
+      "height": 50,
+      "x": 256,
+      "y": 391
+    },
+    {
+      "fileName": "bfgge0.png",
+      "width": 136,
+      "height": 63,
+      "x": 0,
+      "y": 391
+    },
+    {
+      "fileName": "bflma0.png",
+      "width": 16,
+      "height": 35,
+      "x": 952,
+      "y": 506
+    },
+    {
+      "fileName": "bflmb0.png",
+      "width": 16,
+      "height": 36,
+      "x": 952,
+      "y": 470
+    },
+    {
+      "fileName": "bflmc0.png",
+      "width": 16,
+      "height": 36,
+      "x": 824,
+      "y": 254
+    },
+    {
+      "fileName": "bflmd0.png",
+      "width": 16,
+      "height": 35,
+      "x": 952,
+      "y": 541
+    },
+    {
+      "fileName": "bflme0.png",
+      "width": 16,
+      "height": 32,
+      "x": 968,
+      "y": 17
+    },
+    {
+      "fileName": "bfs1a0.png",
+      "width": 64,
+      "height": 55,
+      "x": 728,
+      "y": 230
+    },
+    {
+      "fileName": "bfs1b0.png",
+      "width": 64,
+      "height": 54,
+      "x": 728,
+      "y": 340
+    },
+    {
+      "fileName": "bfs1c0.png",
+      "width": 160,
+      "height": 119,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "fileName": "bfs1d0.png",
+      "width": 160,
+      "height": 117,
+      "x": 160,
+      "y": 0
+    },
+    {
+      "fileName": "bfs1e0.png",
+      "width": 160,
+      "height": 110,
+      "x": 0,
+      "y": 119
+    },
+    {
+      "fileName": "bfs1f0.png",
+      "width": 160,
+      "height": 109,
+      "x": 160,
+      "y": 119
+    },
+    {
+      "fileName": "bfs1g0.png",
+      "width": 144,
+      "height": 86,
+      "x": 320,
+      "y": 0
+    },
+    {
+      "fileName": "bfs1h0.png",
+      "width": 64,
+      "height": 60,
+      "x": 320,
+      "y": 622
+    },
+    {
+      "fileName": "bfuga0.png",
+      "width": 80,
+      "height": 24,
+      "x": 368,
+      "y": 364
+    },
+    {
+      "fileName": "bkeya0.png",
+      "width": 16,
+      "height": 18,
+      "x": 984,
+      "y": 299
+    },
+    {
+      "fileName": "bluda0.png",
+      "width": 16,
+      "height": 12,
+      "x": 984,
+      "y": 431
+    },
+    {
+      "fileName": "bludb0.png",
+      "width": 16,
+      "height": 8,
+      "x": 984,
+      "y": 476
+    },
+    {
+      "fileName": "bludc0.png",
+      "width": 16,
+      "height": 6,
+      "x": 984,
+      "y": 485
+    },
+    {
+      "fileName": "bludd0.png",
+      "width": 16,
+      "height": 4,
+      "x": 968,
+      "y": 492
+    },
+    {
+      "fileName": "bolta0.png",
+      "width": 16,
+      "height": 2,
+      "x": 968,
+      "y": 496
+    },
+    {
+      "fileName": "bon1a0.png",
+      "width": 16,
+      "height": 23,
+      "x": 984,
+      "y": 156
+    },
+    {
+      "fileName": "bon1b0.png",
+      "width": 16,
+      "height": 23,
+      "x": 968,
+      "y": 220
+    },
+    {
+      "fileName": "bon1c0.png",
+      "width": 16,
+      "height": 23,
+      "x": 984,
+      "y": 220
+    },
+    {
+      "fileName": "bon1d0.png",
+      "width": 16,
+      "height": 23,
+      "x": 968,
+      "y": 243
+    },
+    {
+      "fileName": "bon2a0.png",
+      "width": 32,
+      "height": 18,
+      "x": 736,
+      "y": 934
+    },
+    {
+      "fileName": "bon2b0.png",
+      "width": 32,
+      "height": 18,
+      "x": 768,
+      "y": 934
+    },
+    {
+      "fileName": "bon2c0.png",
+      "width": 32,
+      "height": 18,
+      "x": 800,
+      "y": 934
+    },
+    {
+      "fileName": "bon2d0.png",
+      "width": 32,
+      "height": 18,
+      "x": 832,
+      "y": 934
+    },
+    {
+      "fileName": "bpaka0.png",
+      "width": 32,
+      "height": 36,
+      "x": 936,
+      "y": 293
+    },
+    {
+      "fileName": "broka0.png",
+      "width": 64,
+      "height": 27,
+      "x": 608,
+      "y": 522
+    },
+    {
+      "fileName": "bskua0.png",
+      "width": 16,
+      "height": 28,
+      "x": 968,
+      "y": 128
+    },
+    {
+      "fileName": "canda0.png",
+      "width": 16,
+      "height": 31,
+      "x": 968,
+      "y": 97
+    },
+    {
+      "fileName": "candb0.png",
+      "width": 16,
+      "height": 30,
+      "x": 984,
+      "y": 97
+    },
+    {
+      "fileName": "cella0.png",
+      "width": 32,
+      "height": 19,
+      "x": 512,
+      "y": 934
+    },
+    {
+      "fileName": "celpa0.png",
+      "width": 32,
+      "height": 27,
+      "x": 888,
+      "y": 488
+    },
+    {
+      "fileName": "chgga0.png",
+      "width": 112,
+      "height": 72,
+      "x": 560,
+      "y": 0
+    },
+    {
+      "fileName": "chggb0.png",
+      "width": 112,
+      "height": 72,
+      "x": 560,
+      "y": 72
+    },
+    {
+      "fileName": "chggc0.png",
+      "width": 32,
+      "height": 27,
+      "x": 888,
+      "y": 515
+    },
+    {
+      "fileName": "chggd0.png",
+      "width": 32,
+      "height": 26,
+      "x": 888,
+      "y": 542
+    },
+    {
+      "fileName": "clipa0.png",
+      "width": 16,
+      "height": 17,
+      "x": 984,
+      "y": 336
+    },
+    {
+      "fileName": "csawa0.png",
+      "width": 64,
+      "height": 16,
+      "x": 728,
+      "y": 678
+    },
+    {
+      "fileName": "darta1.png",
+      "width": 16,
+      "height": 12,
+      "x": 968,
+      "y": 443
+    },
+    {
+      "fileName": "darta2a8.png",
+      "width": 32,
+      "height": 11,
+      "x": 968,
+      "y": 266
+    },
+    {
+      "fileName": "darta3a7.png",
+      "width": 32,
+      "height": 11,
+      "x": 968,
+      "y": 277
+    },
+    {
+      "fileName": "darta4a6.png",
+      "width": 32,
+      "height": 11,
+      "x": 968,
+      "y": 288
+    },
+    {
+      "fileName": "darta5.png",
+      "width": 16,
+      "height": 10,
+      "x": 968,
+      "y": 466
+    },
+    {
+      "fileName": "firea0.png",
+      "width": 32,
+      "height": 50,
+      "x": 888,
+      "y": 316
+    },
+    {
+      "fileName": "fireb0.png",
+      "width": 32,
+      "height": 51,
+      "x": 888,
+      "y": 214
+    },
+    {
+      "fileName": "firec0.png",
+      "width": 32,
+      "height": 52,
+      "x": 888,
+      "y": 110
+    },
+    {
+      "fileName": "fired0.png",
+      "width": 32,
+      "height": 51,
+      "x": 888,
+      "y": 265
+    },
+    {
+      "fileName": "firee0.png",
+      "width": 32,
+      "height": 52,
+      "x": 888,
+      "y": 162
+    },
+    {
+      "fileName": "lasra0.png",
+      "width": 128,
+      "height": 90,
+      "x": 320,
+      "y": 86
+    },
+    {
+      "fileName": "lasrb0.png",
+      "width": 96,
+      "height": 47,
+      "x": 320,
+      "y": 259
+    },
+    {
+      "fileName": "lassa0.png",
+      "width": 16,
+      "height": 15,
+      "x": 984,
+      "y": 386
+    },
+    {
+      "fileName": "lassb0.png",
+      "width": 16,
+      "height": 13,
+      "x": 984,
+      "y": 417
+    },
+    {
+      "fileName": "launa0.png",
+      "width": 80,
+      "height": 19,
+      "x": 336,
+      "y": 580
+    },
+    {
+      "fileName": "lmp1a0.png",
+      "width": 32,
+      "height": 54,
+      "x": 888,
+      "y": 56
+    },
+    {
+      "fileName": "lmp2a0.png",
+      "width": 32,
+      "height": 12,
+      "x": 968,
+      "y": 184
+    },
+    {
+      "fileName": "lsrga0.png",
+      "width": 80,
+      "height": 18,
+      "x": 464,
+      "y": 373
+    },
+    {
+      "fileName": "manfa1.png",
+      "width": 32,
+      "height": 35,
+      "x": 920,
+      "y": 541
+    },
+    {
+      "fileName": "manfa2a8.png",
+      "width": 64,
+      "height": 32,
+      "x": 576,
+      "y": 743
+    },
+    {
+      "fileName": "manfa3a7.png",
+      "width": 80,
+      "height": 34,
+      "x": 560,
+      "y": 484
+    },
+    {
+      "fileName": "manfa4a6.png",
+      "width": 64,
+      "height": 40,
+      "x": 384,
+      "y": 743
+    },
+    {
+      "fileName": "manfa5.png",
+      "width": 48,
+      "height": 46,
+      "x": 840,
+      "y": 142
+    },
+    {
+      "fileName": "manfb1.png",
+      "width": 32,
+      "height": 36,
+      "x": 920,
+      "y": 470
+    },
+    {
+      "fileName": "manfb2b8.png",
+      "width": 64,
+      "height": 31,
+      "x": 544,
+      "y": 522
+    },
+    {
+      "fileName": "manfb3b7.png",
+      "width": 80,
+      "height": 32,
+      "x": 624,
+      "y": 622
+    },
+    {
+      "fileName": "manfb4b6.png",
+      "width": 64,
+      "height": 40,
+      "x": 448,
+      "y": 743
+    },
+    {
+      "fileName": "manfb5.png",
+      "width": 48,
+      "height": 50,
+      "x": 288,
+      "y": 789
+    },
+    {
+      "fileName": "manfc1.png",
+      "width": 32,
+      "height": 32,
+      "x": 920,
+      "y": 741
+    },
+    {
+      "fileName": "manfc2c8.png",
+      "width": 64,
+      "height": 32,
+      "x": 640,
+      "y": 743
+    },
+    {
+      "fileName": "manfc3c7.png",
+      "width": 80,
+      "height": 33,
+      "x": 544,
+      "y": 622
+    },
+    {
+      "fileName": "manfc4c6.png",
+      "width": 64,
+      "height": 39,
+      "x": 512,
+      "y": 743
+    },
+    {
+      "fileName": "manfc5.png",
+      "width": 48,
+      "height": 47,
+      "x": 840,
+      "y": 48
+    },
+    {
+      "fileName": "manfd0.png",
+      "width": 48,
+      "height": 50,
+      "x": 336,
+      "y": 789
+    },
+    {
+      "fileName": "manfe0.png",
+      "width": 48,
+      "height": 50,
+      "x": 384,
+      "y": 789
+    },
+    {
+      "fileName": "manff0.png",
+      "width": 48,
+      "height": 51,
+      "x": 144,
+      "y": 789
+    },
+    {
+      "fileName": "manfg0.png",
+      "width": 48,
+      "height": 50,
+      "x": 432,
+      "y": 789
+    },
+    {
+      "fileName": "manfh0.png",
+      "width": 48,
+      "height": 49,
+      "x": 624,
+      "y": 789
+    },
+    {
+      "fileName": "manfi0.png",
+      "width": 48,
+      "height": 40,
+      "x": 336,
+      "y": 840
+    },
+    {
+      "fileName": "media0.png",
+      "width": 32,
+      "height": 22,
+      "x": 128,
+      "y": 934
+    },
+    {
+      "fileName": "megaa0.png",
+      "width": 48,
+      "height": 34,
+      "x": 720,
+      "y": 840
+    },
+    {
+      "fileName": "megab0.png",
+      "width": 48,
+      "height": 34,
+      "x": 768,
+      "y": 840
+    },
+    {
+      "fileName": "megac0.png",
+      "width": 48,
+      "height": 34,
+      "x": 816,
+      "y": 840
+    },
+    {
+      "fileName": "megad0.png",
+      "width": 48,
+      "height": 34,
+      "x": 0,
+      "y": 880
+    },
+    {
+      "fileName": "mguna0.png",
+      "width": 80,
+      "height": 22,
+      "x": 256,
+      "y": 580
+    },
+    {
+      "fileName": "misla1.png",
+      "width": 16,
+      "height": 16,
+      "x": 968,
+      "y": 370
+    },
+    {
+      "fileName": "misla2a8.png",
+      "width": 48,
+      "height": 15,
+      "x": 528,
+      "y": 914
+    },
+    {
+      "fileName": "misla3a7.png",
+      "width": 64,
+      "height": 16,
+      "x": 424,
+      "y": 553
+    },
+    {
+      "fileName": "misla4a6.png",
+      "width": 48,
+      "height": 17,
+      "x": 384,
+      "y": 914
+    },
+    {
+      "fileName": "misla5.png",
+      "width": 32,
+      "height": 18,
+      "x": 864,
+      "y": 934
+    },
+    {
+      "fileName": "mislb0.png",
+      "width": 96,
+      "height": 103,
+      "x": 464,
+      "y": 0
+    },
+    {
+      "fileName": "mislc0.png",
+      "width": 80,
+      "height": 86,
+      "x": 560,
+      "y": 314
+    },
+    {
+      "fileName": "misld0.png",
+      "width": 80,
+      "height": 83,
+      "x": 464,
+      "y": 211
+    },
+    {
+      "fileName": "misle0.png",
+      "width": 80,
+      "height": 87,
+      "x": 560,
+      "y": 227
+    },
+    {
+      "fileName": "mislf0.png",
+      "width": 80,
+      "height": 84,
+      "x": 560,
+      "y": 400
+    },
+    {
+      "fileName": "pinsa0.png",
+      "width": 48,
+      "height": 34,
+      "x": 48,
+      "y": 880
+    },
+    {
+      "fileName": "pinsb0.png",
+      "width": 48,
+      "height": 34,
+      "x": 96,
+      "y": 880
+    },
+    {
+      "fileName": "pinsc0.png",
+      "width": 48,
+      "height": 34,
+      "x": 144,
+      "y": 880
+    },
+    {
+      "fileName": "pinsd0.png",
+      "width": 48,
+      "height": 34,
+      "x": 192,
+      "y": 880
+    },
+    {
+      "fileName": "pinva0.png",
+      "width": 48,
+      "height": 34,
+      "x": 240,
+      "y": 880
+    },
+    {
+      "fileName": "pinvb0.png",
+      "width": 48,
+      "height": 34,
+      "x": 288,
+      "y": 880
+    },
+    {
+      "fileName": "pinvc0.png",
+      "width": 48,
+      "height": 34,
+      "x": 336,
+      "y": 880
+    },
+    {
+      "fileName": "pinvd0.png",
+      "width": 48,
+      "height": 34,
+      "x": 384,
+      "y": 880
+    },
+    {
+      "fileName": "pisga0.png",
+      "width": 56,
+      "height": 87,
+      "x": 672,
+      "y": 97
+    },
+    {
+      "fileName": "pisgb0.png",
+      "width": 56,
+      "height": 97,
+      "x": 672,
+      "y": 0
+    },
+    {
+      "fileName": "pisgc0.png",
+      "width": 64,
+      "height": 96,
+      "x": 64,
+      "y": 522
+    },
+    {
+      "fileName": "pisgd0.png",
+      "width": 24,
+      "height": 30,
+      "x": 648,
+      "y": 189
+    },
+    {
+      "fileName": "plasa0.png",
+      "width": 128,
+      "height": 83,
+      "x": 320,
+      "y": 176
+    },
+    {
+      "fileName": "plasb0.png",
+      "width": 16,
+      "height": 51,
+      "x": 952,
+      "y": 773
+    },
+    {
+      "fileName": "plasc0.png",
+      "width": 16,
+      "height": 51,
+      "x": 904,
+      "y": 366
+    },
+    {
+      "fileName": "plasd0.png",
+      "width": 16,
+      "height": 51,
+      "x": 888,
+      "y": 672
+    },
+    {
+      "fileName": "plase0.png",
+      "width": 128,
+      "height": 83,
+      "x": 0,
+      "y": 308
+    },
+    {
+      "fileName": "plsma0.png",
+      "width": 80,
+      "height": 19,
+      "x": 416,
+      "y": 580
+    },
+    {
+      "fileName": "plssa0.png",
+      "width": 32,
+      "height": 22,
+      "x": 160,
+      "y": 934
+    },
+    {
+      "fileName": "plssb0.png",
+      "width": 32,
+      "height": 22,
+      "x": 192,
+      "y": 934
+    },
+    {
+      "fileName": "plssc0.png",
+      "width": 64,
+      "height": 46,
+      "x": 704,
+      "y": 694
+    },
+    {
+      "fileName": "plssd0.png",
+      "width": 64,
+      "height": 50,
+      "x": 728,
+      "y": 530
+    },
+    {
+      "fileName": "plsse0.png",
+      "width": 48,
+      "height": 48,
+      "x": 840,
+      "y": 0
+    },
+    {
+      "fileName": "plssf0.png",
+      "width": 48,
+      "height": 33,
+      "x": 816,
+      "y": 880
+    },
+    {
+      "fileName": "plssg0.png",
+      "width": 32,
+      "height": 24,
+      "x": 888,
+      "y": 782
+    },
+    {
+      "fileName": "plssh0.png",
+      "width": 32,
+      "height": 16,
+      "x": 968,
+      "y": 49
+    },
+    {
+      "fileName": "pmapa0.png",
+      "width": 32,
+      "height": 26,
+      "x": 888,
+      "y": 568
+    },
+    {
+      "fileName": "pmapb0.png",
+      "width": 32,
+      "height": 26,
+      "x": 888,
+      "y": 594
+    },
+    {
+      "fileName": "pmapc0.png",
+      "width": 32,
+      "height": 26,
+      "x": 888,
+      "y": 620
+    },
+    {
+      "fileName": "pmapd0.png",
+      "width": 32,
+      "height": 26,
+      "x": 888,
+      "y": 646
+    },
+    {
+      "fileName": "pstra0.png",
+      "width": 32,
+      "height": 25,
+      "x": 888,
+      "y": 757
+    },
+    {
+      "fileName": "puf2a0.png",
+      "width": 16,
+      "height": 9,
+      "x": 984,
+      "y": 466
+    },
+    {
+      "fileName": "puf2b0.png",
+      "width": 16,
+      "height": 14,
+      "x": 984,
+      "y": 402
+    },
+    {
+      "fileName": "puf2c0.png",
+      "width": 16,
+      "height": 16,
+      "x": 984,
+      "y": 370
+    },
+    {
+      "fileName": "puf2d0.png",
+      "width": 32,
+      "height": 19,
+      "x": 544,
+      "y": 934
+    },
+    {
+      "fileName": "puf2e0.png",
+      "width": 32,
+      "height": 21,
+      "x": 320,
+      "y": 934
+    },
+    {
+      "fileName": "puf3a0.png",
+      "width": 16,
+      "height": 9,
+      "x": 968,
+      "y": 476
+    },
+    {
+      "fileName": "puf3b0.png",
+      "width": 16,
+      "height": 14,
+      "x": 968,
+      "y": 417
+    },
+    {
+      "fileName": "puf3c0.png",
+      "width": 16,
+      "height": 16,
+      "x": 968,
+      "y": 386
+    },
+    {
+      "fileName": "puf3d0.png",
+      "width": 32,
+      "height": 19,
+      "x": 576,
+      "y": 934
+    },
+    {
+      "fileName": "puf3e0.png",
+      "width": 32,
+      "height": 21,
+      "x": 352,
+      "y": 934
+    },
+    {
+      "fileName": "puffa0.png",
+      "width": 16,
+      "height": 3,
+      "x": 984,
+      "y": 492
+    },
+    {
+      "fileName": "puffb0.png",
+      "width": 16,
+      "height": 5,
+      "x": 984,
+      "y": 179
+    },
+    {
+      "fileName": "puffc0.png",
+      "width": 16,
+      "height": 12,
+      "x": 984,
+      "y": 443
+    },
+    {
+      "fileName": "puffd0.png",
+      "width": 16,
+      "height": 15,
+      "x": 968,
+      "y": 402
+    },
+    {
+      "fileName": "puffe0.png",
+      "width": 16,
+      "height": 19,
+      "x": 968,
+      "y": 299
+    },
+    {
+      "fileName": "pufff0.png",
+      "width": 32,
+      "height": 20,
+      "x": 480,
+      "y": 934
+    },
+    {
+      "fileName": "punga0.png",
+      "width": 88,
+      "height": 43,
+      "x": 360,
+      "y": 454
+    },
+    {
+      "fileName": "pungb0.png",
+      "width": 88,
+      "height": 42,
+      "x": 448,
+      "y": 454
+    },
+    {
+      "fileName": "pungc0.png",
+      "width": 120,
+      "height": 53,
+      "x": 240,
+      "y": 454
+    },
+    {
+      "fileName": "pungd0.png",
+      "width": 120,
+      "height": 61,
+      "x": 136,
+      "y": 391
+    },
+    {
+      "fileName": "pvisa0.png",
+      "width": 32,
+      "height": 12,
+      "x": 968,
+      "y": 196
+    },
+    {
+      "fileName": "pvisb0.png",
+      "width": 32,
+      "height": 12,
+      "x": 968,
+      "y": 208
+    },
+    {
+      "fileName": "rbala1.png",
+      "width": 32,
+      "height": 24,
+      "x": 888,
+      "y": 806
+    },
+    {
+      "fileName": "rbala2a8.png",
+      "width": 48,
+      "height": 20,
+      "x": 920,
+      "y": 884
+    },
+    {
+      "fileName": "rbala3a7.png",
+      "width": 48,
+      "height": 20,
+      "x": 0,
+      "y": 914
+    },
+    {
+      "fileName": "rbala4a6.png",
+      "width": 48,
+      "height": 26,
+      "x": 920,
+      "y": 368
+    },
+    {
+      "fileName": "rbala5.png",
+      "width": 48,
+      "height": 32,
+      "x": 704,
+      "y": 743
+    },
+    {
+      "fileName": "rbalb1.png",
+      "width": 32,
+      "height": 23,
+      "x": 640,
+      "y": 372
+    },
+    {
+      "fileName": "rbalb2b8.png",
+      "width": 48,
+      "height": 20,
+      "x": 48,
+      "y": 914
+    },
+    {
+      "fileName": "rbalb3b7.png",
+      "width": 48,
+      "height": 20,
+      "x": 96,
+      "y": 914
+    },
+    {
+      "fileName": "rbalb4b6.png",
+      "width": 48,
+      "height": 25,
+      "x": 920,
+      "y": 420
+    },
+    {
+      "fileName": "rbalb5.png",
+      "width": 32,
+      "height": 33,
+      "x": 920,
+      "y": 643
+    },
+    {
+      "fileName": "rbalc0.png",
+      "width": 64,
+      "height": 55,
+      "x": 728,
+      "y": 285
+    },
+    {
+      "fileName": "rbald0.png",
+      "width": 64,
+      "height": 46,
+      "x": 0,
+      "y": 743
+    },
+    {
+      "fileName": "rbale0.png",
+      "width": 64,
+      "height": 48,
+      "x": 448,
+      "y": 694
+    },
+    {
+      "fileName": "rbalf0.png",
+      "width": 48,
+      "height": 49,
+      "x": 672,
+      "y": 789
+    },
+    {
+      "fileName": "rbalg0.png",
+      "width": 64,
+      "height": 48,
+      "x": 512,
+      "y": 694
+    },
+    {
+      "fileName": "rbalh0.png",
+      "width": 64,
+      "height": 49,
+      "x": 128,
+      "y": 694
+    },
+    {
+      "fileName": "rckta0.png",
+      "width": 16,
+      "height": 32,
+      "x": 984,
+      "y": 17
+    },
+    {
+      "fileName": "rflma0.png",
+      "width": 16,
+      "height": 35,
+      "x": 544,
+      "y": 247
+    },
+    {
+      "fileName": "rflmb0.png",
+      "width": 16,
+      "height": 36,
+      "x": 544,
+      "y": 103
+    },
+    {
+      "fileName": "rflmc0.png",
+      "width": 16,
+      "height": 36,
+      "x": 544,
+      "y": 139
+    },
+    {
+      "fileName": "rflmd0.png",
+      "width": 16,
+      "height": 35,
+      "x": 544,
+      "y": 294
+    },
+    {
+      "fileName": "rflme0.png",
+      "width": 16,
+      "height": 32,
+      "x": 968,
+      "y": 65
+    },
+    {
+      "fileName": "rkeya0.png",
+      "width": 16,
+      "height": 18,
+      "x": 968,
+      "y": 318
+    },
+    {
+      "fileName": "rocka0.png",
+      "width": 80,
+      "height": 79,
+      "x": 464,
+      "y": 294
+    },
+    {
+      "fileName": "rockb0.png",
+      "width": 88,
+      "height": 83,
+      "x": 560,
+      "y": 144
+    },
+    {
+      "fileName": "rockc0.png",
+      "width": 88,
+      "height": 45,
+      "x": 392,
+      "y": 391
+    },
+    {
+      "fileName": "rockd0.png",
+      "width": 96,
+      "height": 56,
+      "x": 368,
+      "y": 308
+    },
+    {
+      "fileName": "rocke0.png",
+      "width": 88,
+      "height": 58,
+      "x": 256,
+      "y": 522
+    },
+    {
+      "fileName": "rockf0.png",
+      "width": 80,
+      "height": 47,
+      "x": 344,
+      "y": 522
+    },
+    {
+      "fileName": "rskua0.png",
+      "width": 16,
+      "height": 28,
+      "x": 984,
+      "y": 128
+    },
+    {
+      "fileName": "sawga0.png",
+      "width": 120,
+      "height": 82,
+      "x": 128,
+      "y": 308
+    },
+    {
+      "fileName": "sawgb0.png",
+      "width": 120,
+      "height": 80,
+      "x": 248,
+      "y": 308
+    },
+    {
+      "fileName": "sawgc0.png",
+      "width": 120,
+      "height": 68,
+      "x": 0,
+      "y": 454
+    },
+    {
+      "fileName": "sawgd0.png",
+      "width": 120,
+      "height": 68,
+      "x": 120,
+      "y": 454
+    },
+    {
+      "fileName": "sboxa0.png",
+      "width": 48,
+      "height": 13,
+      "x": 320,
+      "y": 507
+    },
+    {
+      "fileName": "sgn2a0.png",
+      "width": 80,
+      "height": 14,
+      "x": 240,
+      "y": 507
+    },
+    {
+      "fileName": "shela0.png",
+      "width": 16,
+      "height": 7,
+      "x": 968,
+      "y": 485
+    },
+    {
+      "fileName": "shota0.png",
+      "width": 48,
+      "height": 11,
+      "x": 256,
+      "y": 441
+    },
+    {
+      "fileName": "sht1a0.png",
+      "width": 56,
+      "height": 73,
+      "x": 672,
+      "y": 437
+    },
+    {
+      "fileName": "sht1b0.png",
+      "width": 56,
+      "height": 77,
+      "x": 672,
+      "y": 285
+    },
+    {
+      "fileName": "sht1c0.png",
+      "width": 56,
+      "height": 75,
+      "x": 672,
+      "y": 362
+    },
+    {
+      "fileName": "sht1d0.png",
+      "width": 24,
+      "height": 34,
+      "x": 888,
+      "y": 723
+    },
+    {
+      "fileName": "sht2a0.png",
+      "width": 56,
+      "height": 63,
+      "x": 728,
+      "y": 57
+    },
+    {
+      "fileName": "sht2b0.png",
+      "width": 64,
+      "height": 61,
+      "x": 256,
+      "y": 622
+    },
+    {
+      "fileName": "sht2c0.png",
+      "width": 64,
+      "height": 62,
+      "x": 192,
+      "y": 622
+    },
+    {
+      "fileName": "sht2d0.png",
+      "width": 40,
+      "height": 32,
+      "x": 920,
+      "y": 336
+    },
+    {
+      "fileName": "soula0.png",
+      "width": 48,
+      "height": 34,
+      "x": 432,
+      "y": 880
+    },
+    {
+      "fileName": "soulb0.png",
+      "width": 48,
+      "height": 34,
+      "x": 480,
+      "y": 880
+    },
+    {
+      "fileName": "soulc0.png",
+      "width": 48,
+      "height": 34,
+      "x": 528,
+      "y": 880
+    },
+    {
+      "fileName": "sould0.png",
+      "width": 48,
+      "height": 34,
+      "x": 576,
+      "y": 880
+    },
+    {
+      "fileName": "stima0.png",
+      "width": 16,
+      "height": 22,
+      "x": 984,
+      "y": 243
+    },
+    {
+      "fileName": "suita0.png",
+      "width": 32,
+      "height": 22,
+      "x": 224,
+      "y": 934
+    },
+    {
+      "fileName": "suitb0.png",
+      "width": 32,
+      "height": 22,
+      "x": 256,
+      "y": 934
+    },
+    {
+      "fileName": "tfoga0.png",
+      "width": 80,
+      "height": 108,
+      "x": 464,
+      "y": 103
+    },
+    {
+      "fileName": "tfogb0.png",
+      "width": 64,
+      "height": 100,
+      "x": 0,
+      "y": 522
+    },
+    {
+      "fileName": "tfogc0.png",
+      "width": 64,
+      "height": 86,
+      "x": 192,
+      "y": 522
+    },
+    {
+      "fileName": "tfogd0.png",
+      "width": 64,
+      "height": 64,
+      "x": 128,
+      "y": 622
+    },
+    {
+      "fileName": "tfoge0.png",
+      "width": 48,
+      "height": 50,
+      "x": 480,
+      "y": 789
+    },
+    {
+      "fileName": "tfogf0.png",
+      "width": 32,
+      "height": 34,
+      "x": 920,
+      "y": 576
+    },
+    {
+      "fileName": "tfogg0.png",
+      "width": 32,
+      "height": 21,
+      "x": 384,
+      "y": 934
+    },
+    {
+      "fileName": "tfogh0.png",
+      "width": 16,
+      "height": 17,
+      "x": 968,
+      "y": 353
+    },
+    {
+      "fileName": "trcra1.png",
+      "width": 32,
+      "height": 24,
+      "x": 888,
+      "y": 830
+    },
+    {
+      "fileName": "trcra2a8.png",
+      "width": 48,
+      "height": 20,
+      "x": 144,
+      "y": 914
+    },
+    {
+      "fileName": "trcra3a7.png",
+      "width": 48,
+      "height": 20,
+      "x": 192,
+      "y": 914
+    },
+    {
+      "fileName": "trcra4a6.png",
+      "width": 48,
+      "height": 26,
+      "x": 920,
+      "y": 394
+    },
+    {
+      "fileName": "trcra5.png",
+      "width": 48,
+      "height": 32,
+      "x": 864,
+      "y": 880
+    },
+    {
+      "fileName": "trcrb1.png",
+      "width": 32,
+      "height": 23,
+      "x": 640,
+      "y": 458
+    },
+    {
+      "fileName": "trcrb2b8.png",
+      "width": 48,
+      "height": 20,
+      "x": 240,
+      "y": 914
+    },
+    {
+      "fileName": "trcrb3b7.png",
+      "width": 48,
+      "height": 20,
+      "x": 288,
+      "y": 914
+    },
+    {
+      "fileName": "trcrb5.png",
+      "width": 32,
+      "height": 33,
+      "x": 920,
+      "y": 676
+    },
+    {
+      "fileName": "trcrb4b6.png",
+      "width": 48,
+      "height": 25,
+      "x": 920,
+      "y": 445
+    },
+    {
+      "fileName": "trcrc0.png",
+      "width": 48,
+      "height": 49,
+      "x": 720,
+      "y": 789
+    },
+    {
+      "fileName": "trcrd0.png",
+      "width": 64,
+      "height": 44,
+      "x": 64,
+      "y": 743
+    },
+    {
+      "fileName": "trcre0.png",
+      "width": 48,
+      "height": 44,
+      "x": 840,
+      "y": 278
+    },
+    {
+      "fileName": "trcrf0.png",
+      "width": 48,
+      "height": 44,
+      "x": 840,
+      "y": 322
+    },
+    {
+      "fileName": "trcrg0.png",
+      "width": 48,
+      "height": 38,
+      "x": 432,
+      "y": 840
+    },
+    {
+      "fileName": "trcrh0.png",
+      "width": 48,
+      "height": 35,
+      "x": 576,
+      "y": 840
+    },
+    {
+      "fileName": "trcri0.png",
+      "width": 48,
+      "height": 34,
+      "x": 624,
+      "y": 880
+    },
+    {
+      "fileName": "tre1a0.png",
+      "width": 64,
+      "height": 87,
+      "x": 128,
+      "y": 522
+    },
+    {
+      "fileName": "tre2a0.png",
+      "width": 48,
+      "height": 67,
+      "x": 728,
+      "y": 463
+    },
+    {
+      "fileName": "tre3a0.png",
+      "width": 48,
+      "height": 47,
+      "x": 840,
+      "y": 95
+    },
+    {
+      "fileName": "yflma0.png",
+      "width": 16,
+      "height": 35,
+      "x": 544,
+      "y": 329
+    },
+    {
+      "fileName": "yflmb0.png",
+      "width": 16,
+      "height": 36,
+      "x": 544,
+      "y": 175
+    },
+    {
+      "fileName": "yflmc0.png",
+      "width": 16,
+      "height": 36,
+      "x": 544,
+      "y": 211
+    },
+    {
+      "fileName": "yflmd0.png",
+      "width": 16,
+      "height": 35,
+      "x": 448,
+      "y": 86
+    },
+    {
+      "fileName": "yflme0.png",
+      "width": 16,
+      "height": 32,
+      "x": 984,
+      "y": 65
+    },
+    {
+      "fileName": "ykeya0.png",
+      "width": 16,
+      "height": 18,
+      "x": 984,
+      "y": 318
+    },
+    {
+      "fileName": "yskua0.png",
+      "width": 16,
+      "height": 28,
+      "x": 968,
+      "y": 156
+    }
+  ],
+  "packMode": "bin",
+  "padding": 0,
+  "backgroundColor": "rgba(0, 0, 0, 0)",
+  "spriteSheetWidth": 1000,
+  "spriteSheetHeight": 956
+}

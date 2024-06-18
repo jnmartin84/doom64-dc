@@ -1,0 +1,1150 @@
+{
+  "sprites": [
+    {
+      "fileName": "trooa1.png",
+      "width": 48,
+      "height": 91,
+      "x": 726,
+      "y": 192
+    },
+    {
+      "fileName": "trooa2a8.png",
+      "width": 44,
+      "height": 91,
+      "x": 831,
+      "y": 281
+    },
+    {
+      "fileName": "trooa3a7.png",
+      "width": 43,
+      "height": 87,
+      "x": 878,
+      "y": 0
+    },
+    {
+      "fileName": "trooa4a6.png",
+      "width": 39,
+      "height": 85,
+      "x": 921,
+      "y": 684
+    },
+    {
+      "fileName": "trooa5.png",
+      "width": 44,
+      "height": 85,
+      "x": 0,
+      "y": 819
+    },
+    {
+      "fileName": "troob1.png",
+      "width": 45,
+      "height": 86,
+      "x": 831,
+      "y": 547
+    },
+    {
+      "fileName": "troob4b6.png",
+      "width": 52,
+      "height": 82,
+      "x": 405,
+      "y": 559
+    },
+    {
+      "fileName": "troob2b8.png",
+      "width": 55,
+      "height": 88,
+      "x": 0,
+      "y": 646
+    },
+    {
+      "fileName": "trooc1.png",
+      "width": 45,
+      "height": 90,
+      "x": 831,
+      "y": 191
+    },
+    {
+      "fileName": "troob3b7.png",
+      "width": 64,
+      "height": 85,
+      "x": 130,
+      "y": 471
+    },
+    {
+      "fileName": "troob5.png",
+      "width": 39,
+      "height": 83,
+      "x": 878,
+      "y": 412
+    },
+    {
+      "fileName": "trooc2c8.png",
+      "width": 39,
+      "height": 91,
+      "x": 921,
+      "y": 168
+    },
+    {
+      "fileName": "trooc3c7.png",
+      "width": 43,
+      "height": 90,
+      "x": 831,
+      "y": 633
+    },
+    {
+      "fileName": "trooc4c6.png",
+      "width": 44,
+      "height": 88,
+      "x": 831,
+      "y": 459
+    },
+    {
+      "fileName": "trooc5.png",
+      "width": 44,
+      "height": 86,
+      "x": 831,
+      "y": 723
+    },
+    {
+      "fileName": "trood1.png",
+      "width": 45,
+      "height": 87,
+      "x": 831,
+      "y": 372
+    },
+    {
+      "fileName": "trood2d8.png",
+      "width": 53,
+      "height": 86,
+      "x": 776,
+      "y": 543
+    },
+    {
+      "fileName": "trood3d7.png",
+      "width": 68,
+      "height": 81,
+      "x": 271,
+      "y": 290
+    },
+    {
+      "fileName": "trood4d6.png",
+      "width": 49,
+      "height": 86,
+      "x": 726,
+      "y": 455
+    },
+    {
+      "fileName": "trood5.png",
+      "width": 40,
+      "height": 83,
+      "x": 921,
+      "y": 601
+    },
+    {
+      "fileName": "trooe1.png",
+      "width": 57,
+      "height": 84,
+      "x": 55,
+      "y": 646
+    },
+    {
+      "fileName": "trooe2e8.png",
+      "width": 70,
+      "height": 82,
+      "x": 143,
+      "y": 387
+    },
+    {
+      "fileName": "trooe4e6.png",
+      "width": 42,
+      "height": 86,
+      "x": 921,
+      "y": 82
+    },
+    {
+      "fileName": "trooe3e7.png",
+      "width": 71,
+      "height": 84,
+      "x": 0,
+      "y": 387
+    },
+    {
+      "fileName": "trooe5.png",
+      "width": 65,
+      "height": 87,
+      "x": 65,
+      "y": 471
+    },
+    {
+      "fileName": "troof2f8.png",
+      "width": 56,
+      "height": 87,
+      "x": 613,
+      "y": 468
+    },
+    {
+      "fileName": "troof1.png",
+      "width": 67,
+      "height": 91,
+      "x": 63,
+      "y": 290
+    },
+    {
+      "fileName": "troof3f7.png",
+      "width": 49,
+      "height": 87,
+      "x": 726,
+      "y": 283
+    },
+    {
+      "fileName": "troof4f6.png",
+      "width": 60,
+      "height": 87,
+      "x": 488,
+      "y": 384
+    },
+    {
+      "fileName": "troof5.png",
+      "width": 63,
+      "height": 86,
+      "x": 550,
+      "y": 381
+    },
+    {
+      "fileName": "troog1.png",
+      "width": 39,
+      "height": 87,
+      "x": 921,
+      "y": 259
+    },
+    {
+      "fileName": "troog2g8.png",
+      "width": 72,
+      "height": 82,
+      "x": 71,
+      "y": 387
+    },
+    {
+      "fileName": "troog3g7.png",
+      "width": 74,
+      "height": 81,
+      "x": 197,
+      "y": 290
+    },
+    {
+      "fileName": "troog4g6.png",
+      "width": 45,
+      "height": 82,
+      "x": 921,
+      "y": 0
+    },
+    {
+      "fileName": "troog5.png",
+      "width": 47,
+      "height": 79,
+      "x": 44,
+      "y": 819
+    },
+    {
+      "fileName": "trooh1.png",
+      "width": 57,
+      "height": 92,
+      "x": 613,
+      "y": 376
+    },
+    {
+      "fileName": "trooh3h7.png",
+      "width": 51,
+      "height": 92,
+      "x": 776,
+      "y": 271
+    },
+    {
+      "fileName": "trooh2h8.png",
+      "width": 53,
+      "height": 90,
+      "x": 776,
+      "y": 87
+    },
+    {
+      "fileName": "trooh5.png",
+      "width": 54,
+      "height": 92,
+      "x": 670,
+      "y": 391
+    },
+    {
+      "fileName": "trooi1.png",
+      "width": 50,
+      "height": 85,
+      "x": 726,
+      "y": 370
+    },
+    {
+      "fileName": "trooh4h6.png",
+      "width": 50,
+      "height": 94,
+      "x": 776,
+      "y": 177
+    },
+    {
+      "fileName": "trooi2i8.png",
+      "width": 61,
+      "height": 83,
+      "x": 60,
+      "y": 559
+    },
+    {
+      "fileName": "trooi3i7.png",
+      "width": 60,
+      "height": 87,
+      "x": 0,
+      "y": 559
+    },
+    {
+      "fileName": "trooi4i6.png",
+      "width": 39,
+      "height": 87,
+      "x": 921,
+      "y": 346
+    },
+    {
+      "fileName": "trooi5.png",
+      "width": 52,
+      "height": 87,
+      "x": 776,
+      "y": 629
+    },
+    {
+      "fileName": "trooj1.png",
+      "width": 55,
+      "height": 87,
+      "x": 776,
+      "y": 0
+    },
+    {
+      "fileName": "trooj2j8.png",
+      "width": 60,
+      "height": 82,
+      "x": 121,
+      "y": 559
+    },
+    {
+      "fileName": "trooj3j7.png",
+      "width": 56,
+      "height": 85,
+      "x": 0,
+      "y": 734
+    },
+    {
+      "fileName": "trooj4j6.png",
+      "width": 47,
+      "height": 88,
+      "x": 831,
+      "y": 0
+    },
+    {
+      "fileName": "trooj5.png",
+      "width": 50,
+      "height": 82,
+      "x": 168,
+      "y": 646
+    },
+    {
+      "fileName": "trook1.png",
+      "width": 40,
+      "height": 82,
+      "x": 921,
+      "y": 769
+    },
+    {
+      "fileName": "trook2k8.png",
+      "width": 67,
+      "height": 77,
+      "x": 279,
+      "y": 387
+    },
+    {
+      "fileName": "trook4k6.png",
+      "width": 51,
+      "height": 79,
+      "x": 218,
+      "y": 646
+    },
+    {
+      "fileName": "trook3k7.png",
+      "width": 66,
+      "height": 79,
+      "x": 213,
+      "y": 387
+    },
+    {
+      "fileName": "trook5.png",
+      "width": 39,
+      "height": 76,
+      "x": 171,
+      "y": 819
+    },
+    {
+      "fileName": "trool0.png",
+      "width": 59,
+      "height": 92,
+      "x": 427,
+      "y": 203
+    },
+    {
+      "fileName": "troom0.png",
+      "width": 55,
+      "height": 70,
+      "x": 670,
+      "y": 575
+    },
+    {
+      "fileName": "trooo0.png",
+      "width": 56,
+      "height": 56,
+      "x": 510,
+      "y": 734
+    },
+    {
+      "fileName": "troon0.png",
+      "width": 57,
+      "height": 70,
+      "x": 269,
+      "y": 646
+    },
+    {
+      "fileName": "troop0.png",
+      "width": 52,
+      "height": 36,
+      "x": 620,
+      "y": 734
+    },
+    {
+      "fileName": "trooq0.png",
+      "width": 63,
+      "height": 92,
+      "x": 550,
+      "y": 0
+    },
+    {
+      "fileName": "troos0.png",
+      "width": 84,
+      "height": 91,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "fileName": "troor0.png",
+      "width": 70,
+      "height": 91,
+      "x": 67,
+      "y": 194
+    },
+    {
+      "fileName": "troot0.png",
+      "width": 84,
+      "height": 74,
+      "x": 137,
+      "y": 194
+    },
+    {
+      "fileName": "troou0.png",
+      "width": 78,
+      "height": 69,
+      "x": 339,
+      "y": 290
+    },
+    {
+      "fileName": "troow0.png",
+      "width": 66,
+      "height": 34,
+      "x": 574,
+      "y": 646
+    },
+    {
+      "fileName": "troox0.png",
+      "width": 66,
+      "height": 21,
+      "x": 736,
+      "y": 734
+    },
+    {
+      "fileName": "troov0.png",
+      "width": 76,
+      "height": 48,
+      "x": 577,
+      "y": 559
+    },
+    {
+      "fileName": "bossa1.png",
+      "width": 61,
+      "height": 101,
+      "x": 294,
+      "y": 97
+    },
+    {
+      "fileName": "bossa3a7.png",
+      "width": 40,
+      "height": 103,
+      "x": 831,
+      "y": 88
+    },
+    {
+      "fileName": "bossa2a8.png",
+      "width": 53,
+      "height": 103,
+      "x": 427,
+      "y": 100
+    },
+    {
+      "fileName": "bossa4a6.png",
+      "width": 50,
+      "height": 97,
+      "x": 726,
+      "y": 0
+    },
+    {
+      "fileName": "bossa5.png",
+      "width": 57,
+      "height": 93,
+      "x": 613,
+      "y": 95
+    },
+    {
+      "fileName": "bossb1.png",
+      "width": 56,
+      "height": 94,
+      "x": 613,
+      "y": 188
+    },
+    {
+      "fileName": "bossb2b8.png",
+      "width": 61,
+      "height": 100,
+      "x": 427,
+      "y": 0
+    },
+    {
+      "fileName": "bossb3b7.png",
+      "width": 63,
+      "height": 97,
+      "x": 0,
+      "y": 290
+    },
+    {
+      "fileName": "bossb4b6.png",
+      "width": 55,
+      "height": 93,
+      "x": 670,
+      "y": 298
+    },
+    {
+      "fileName": "bossb5.png",
+      "width": 59,
+      "height": 90,
+      "x": 427,
+      "y": 295
+    },
+    {
+      "fileName": "bossc1.png",
+      "width": 56,
+      "height": 99,
+      "x": 488,
+      "y": 190
+    },
+    {
+      "fileName": "bossc2c8.png",
+      "width": 56,
+      "height": 103,
+      "x": 550,
+      "y": 92
+    },
+    {
+      "fileName": "bossc3c7.png",
+      "width": 42,
+      "height": 100,
+      "x": 726,
+      "y": 541
+    },
+    {
+      "fileName": "bossc4c6.png",
+      "width": 47,
+      "height": 97,
+      "x": 776,
+      "y": 446
+    },
+    {
+      "fileName": "bossc5.png",
+      "width": 56,
+      "height": 94,
+      "x": 613,
+      "y": 282
+    },
+    {
+      "fileName": "bossd1.png",
+      "width": 53,
+      "height": 97,
+      "x": 670,
+      "y": 92
+    },
+    {
+      "fileName": "bossd2d8.png",
+      "width": 63,
+      "height": 99,
+      "x": 360,
+      "y": 95
+    },
+    {
+      "fileName": "bossd3d7.png",
+      "width": 67,
+      "height": 96,
+      "x": 0,
+      "y": 194
+    },
+    {
+      "fileName": "bossd4d6.png",
+      "width": 53,
+      "height": 92,
+      "x": 670,
+      "y": 483
+    },
+    {
+      "fileName": "bossd5.png",
+      "width": 56,
+      "height": 92,
+      "x": 670,
+      "y": 0
+    },
+    {
+      "fileName": "bosse1.png",
+      "width": 67,
+      "height": 95,
+      "x": 360,
+      "y": 0
+    },
+    {
+      "fileName": "bosse2e8.png",
+      "width": 75,
+      "height": 99,
+      "x": 84,
+      "y": 0
+    },
+    {
+      "fileName": "bosse3e7.png",
+      "width": 73,
+      "height": 103,
+      "x": 0,
+      "y": 91
+    },
+    {
+      "fileName": "bosse4e6.png",
+      "width": 47,
+      "height": 109,
+      "x": 670,
+      "y": 189
+    },
+    {
+      "fileName": "bosse5.png",
+      "width": 64,
+      "height": 110,
+      "x": 159,
+      "y": 0
+    },
+    {
+      "fileName": "bossf1.png",
+      "width": 71,
+      "height": 97,
+      "x": 223,
+      "y": 0
+    },
+    {
+      "fileName": "bossf3f7.png",
+      "width": 62,
+      "height": 96,
+      "x": 488,
+      "y": 0
+    },
+    {
+      "fileName": "bossf2f8.png",
+      "width": 65,
+      "height": 94,
+      "x": 360,
+      "y": 194
+    },
+    {
+      "fileName": "bossf4f6.png",
+      "width": 57,
+      "height": 95,
+      "x": 613,
+      "y": 0
+    },
+    {
+      "fileName": "bossf5.png",
+      "width": 67,
+      "height": 90,
+      "x": 130,
+      "y": 290
+    },
+    {
+      "fileName": "bossg1.png",
+      "width": 47,
+      "height": 95,
+      "x": 726,
+      "y": 97
+    },
+    {
+      "fileName": "bossg2g8.png",
+      "width": 72,
+      "height": 92,
+      "x": 84,
+      "y": 99
+    },
+    {
+      "fileName": "bossg4g6.png",
+      "width": 65,
+      "height": 88,
+      "x": 0,
+      "y": 471
+    },
+    {
+      "fileName": "bossg5.png",
+      "width": 55,
+      "height": 83,
+      "x": 776,
+      "y": 363
+    },
+    {
+      "fileName": "bossg3g7.png",
+      "width": 71,
+      "height": 92,
+      "x": 223,
+      "y": 97
+    },
+    {
+      "fileName": "bossh1.png",
+      "width": 60,
+      "height": 94,
+      "x": 488,
+      "y": 96
+    },
+    {
+      "fileName": "bossh3h7.png",
+      "width": 58,
+      "height": 95,
+      "x": 488,
+      "y": 289
+    },
+    {
+      "fileName": "bossh4h6.png",
+      "width": 66,
+      "height": 97,
+      "x": 294,
+      "y": 0
+    },
+    {
+      "fileName": "bossh2h8.png",
+      "width": 60,
+      "height": 95,
+      "x": 550,
+      "y": 286
+    },
+    {
+      "fileName": "bossh5.png",
+      "width": 63,
+      "height": 91,
+      "x": 550,
+      "y": 195
+    },
+    {
+      "fileName": "bossi0.png",
+      "width": 65,
+      "height": 91,
+      "x": 294,
+      "y": 198
+    },
+    {
+      "fileName": "bossm0.png",
+      "width": 54,
+      "height": 48,
+      "x": 566,
+      "y": 734
+    },
+    {
+      "fileName": "bossk0.png",
+      "width": 58,
+      "height": 74,
+      "x": 221,
+      "y": 194
+    },
+    {
+      "fileName": "bossj0.png",
+      "width": 64,
+      "height": 82,
+      "x": 159,
+      "y": 110
+    },
+    {
+      "fileName": "bossn0.png",
+      "width": 58,
+      "height": 34,
+      "x": 640,
+      "y": 646
+    },
+    {
+      "fileName": "bossl0.png",
+      "width": 54,
+      "height": 61,
+      "x": 456,
+      "y": 734
+    },
+    {
+      "fileName": "possa1.png",
+      "width": 40,
+      "height": 80,
+      "x": 878,
+      "y": 495
+    },
+    {
+      "fileName": "possa2a8.png",
+      "width": 56,
+      "height": 82,
+      "x": 181,
+      "y": 559
+    },
+    {
+      "fileName": "possa3a7.png",
+      "width": 64,
+      "height": 81,
+      "x": 194,
+      "y": 471
+    },
+    {
+      "fileName": "possa4a6.png",
+      "width": 48,
+      "height": 80,
+      "x": 216,
+      "y": 734
+    },
+    {
+      "fileName": "possa5.png",
+      "width": 40,
+      "height": 79,
+      "x": 878,
+      "y": 575
+    },
+    {
+      "fileName": "possb2b8.png",
+      "width": 56,
+      "height": 85,
+      "x": 56,
+      "y": 734
+    },
+    {
+      "fileName": "possb1.png",
+      "width": 40,
+      "height": 82,
+      "x": 878,
+      "y": 87
+    },
+    {
+      "fileName": "possb5.png",
+      "width": 40,
+      "height": 81,
+      "x": 878,
+      "y": 169
+    },
+    {
+      "fileName": "possb3b7.png",
+      "width": 56,
+      "height": 82,
+      "x": 237,
+      "y": 559
+    },
+    {
+      "fileName": "possc1.png",
+      "width": 40,
+      "height": 79,
+      "x": 878,
+      "y": 654
+    },
+    {
+      "fileName": "possb4b6.png",
+      "width": 40,
+      "height": 84,
+      "x": 921,
+      "y": 433
+    },
+    {
+      "fileName": "possc2c8.png",
+      "width": 56,
+      "height": 82,
+      "x": 293,
+      "y": 559
+    },
+    {
+      "fileName": "possc3c7.png",
+      "width": 64,
+      "height": 81,
+      "x": 258,
+      "y": 471
+    },
+    {
+      "fileName": "possc4c6.png",
+      "width": 48,
+      "height": 81,
+      "x": 168,
+      "y": 734
+    },
+    {
+      "fileName": "possc5.png",
+      "width": 40,
+      "height": 77,
+      "x": 91,
+      "y": 819
+    },
+    {
+      "fileName": "possd1.png",
+      "width": 40,
+      "height": 81,
+      "x": 878,
+      "y": 250
+    },
+    {
+      "fileName": "possd2d8.png",
+      "width": 56,
+      "height": 85,
+      "x": 112,
+      "y": 734
+    },
+    {
+      "fileName": "possd3d7.png",
+      "width": 56,
+      "height": 83,
+      "x": 112,
+      "y": 646
+    },
+    {
+      "fileName": "possd4d6.png",
+      "width": 40,
+      "height": 84,
+      "x": 921,
+      "y": 517
+    },
+    {
+      "fileName": "possd5.png",
+      "width": 40,
+      "height": 81,
+      "x": 878,
+      "y": 331
+    },
+    {
+      "fileName": "posse1.png",
+      "width": 40,
+      "height": 77,
+      "x": 131,
+      "y": 819
+    },
+    {
+      "fileName": "posse2e8.png",
+      "width": 56,
+      "height": 78,
+      "x": 442,
+      "y": 471
+    },
+    {
+      "fileName": "posse3e7.png",
+      "width": 64,
+      "height": 75,
+      "x": 410,
+      "y": 387
+    },
+    {
+      "fileName": "posse4e6.png",
+      "width": 40,
+      "height": 74,
+      "x": 210,
+      "y": 819
+    },
+    {
+      "fileName": "posse5.png",
+      "width": 40,
+      "height": 72,
+      "x": 250,
+      "y": 819
+    },
+    {
+      "fileName": "possf1.png",
+      "width": 32,
+      "height": 77,
+      "x": 966,
+      "y": 0
+    },
+    {
+      "fileName": "possf2f8.png",
+      "width": 56,
+      "height": 79,
+      "x": 386,
+      "y": 471
+    },
+    {
+      "fileName": "possf5.png",
+      "width": 32,
+      "height": 74,
+      "x": 966,
+      "y": 77
+    },
+    {
+      "fileName": "possf3f7.png",
+      "width": 64,
+      "height": 76,
+      "x": 346,
+      "y": 387
+    },
+    {
+      "fileName": "possf4f6.png",
+      "width": 48,
+      "height": 75,
+      "x": 312,
+      "y": 734
+    },
+    {
+      "fileName": "possg1.png",
+      "width": 48,
+      "height": 71,
+      "x": 408,
+      "y": 734
+    },
+    {
+      "fileName": "possg2g8.png",
+      "width": 56,
+      "height": 74,
+      "x": 457,
+      "y": 559
+    },
+    {
+      "fileName": "possg3g7.png",
+      "width": 48,
+      "height": 74,
+      "x": 360,
+      "y": 734
+    },
+    {
+      "fileName": "possg4g6.png",
+      "width": 40,
+      "height": 79,
+      "x": 878,
+      "y": 733
+    },
+    {
+      "fileName": "possg5.png",
+      "width": 48,
+      "height": 78,
+      "x": 264,
+      "y": 734
+    },
+    {
+      "fileName": "possh0.png",
+      "width": 56,
+      "height": 76,
+      "x": 554,
+      "y": 471
+    },
+    {
+      "fileName": "possj0.png",
+      "width": 48,
+      "height": 49,
+      "x": 290,
+      "y": 819
+    },
+    {
+      "fileName": "possi0.png",
+      "width": 56,
+      "height": 65,
+      "x": 326,
+      "y": 646
+    },
+    {
+      "fileName": "possl0.png",
+      "width": 48,
+      "height": 27,
+      "x": 338,
+      "y": 838
+    },
+    {
+      "fileName": "possk0.png",
+      "width": 48,
+      "height": 34,
+      "x": 698,
+      "y": 646
+    },
+    {
+      "fileName": "possn0.png",
+      "width": 56,
+      "height": 82,
+      "x": 349,
+      "y": 559
+    },
+    {
+      "fileName": "possp0.png",
+      "width": 64,
+      "height": 64,
+      "x": 513,
+      "y": 559
+    },
+    {
+      "fileName": "possm0.png",
+      "width": 56,
+      "height": 78,
+      "x": 498,
+      "y": 471
+    },
+    {
+      "fileName": "posso0.png",
+      "width": 64,
+      "height": 81,
+      "x": 322,
+      "y": 471
+    },
+    {
+      "fileName": "possr0.png",
+      "width": 64,
+      "height": 46,
+      "x": 446,
+      "y": 646
+    },
+    {
+      "fileName": "possq0.png",
+      "width": 64,
+      "height": 53,
+      "x": 382,
+      "y": 646
+    },
+    {
+      "fileName": "posss0.png",
+      "width": 64,
+      "height": 36,
+      "x": 510,
+      "y": 646
+    },
+    {
+      "fileName": "possu0.png",
+      "width": 72,
+      "height": 19,
+      "x": 338,
+      "y": 819
+    },
+    {
+      "fileName": "posst0.png",
+      "width": 64,
+      "height": 24,
+      "x": 672,
+      "y": 734
+    }
+  ],
+  "packMode": "bin",
+  "padding": 0,
+  "backgroundColor": "rgba(0, 0, 0, 0)",
+  "spriteSheetWidth": 998,
+  "spriteSheetHeight": 904
+}
