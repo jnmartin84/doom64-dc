@@ -1,6 +1,4 @@
 //Renderer phase 3 - World Rendering Routines
-//#include <gl/GL.h>
-//#include <gl/GLU.h>
 #include "doomdef.h"
 #include "r_local.h"
 
@@ -18,7 +16,6 @@ extern void **tsptrs;
 
 extern pvr_poly_hdr_t **headers_for_sprites;
 extern pvr_poly_hdr_t **headers2_for_sprites;
-//extern pvr_poly_hdr_t **headers3_for_sprites;
 
 extern float *all_u;
 extern float *all_v;
@@ -28,9 +25,6 @@ extern float *all_v2;
 extern float *all2_u;
 extern float *all2_v;
 
-//extern float *all3_u;
-//extern float *all3_v;
-
 pvr_vertex_t __attribute__ ((aligned(32))) quad2[4];
 
 pvr_poly_hdr_t hdr;
@@ -38,7 +32,6 @@ pvr_poly_cxt_t cxt;
 
 pvr_poly_hdr_t thdr;
 
-//d64Vertex_t dVTX[4];
 d64Vertex_t *dVTX[4];
 d64Triangle_t dT1, dT2;
 
@@ -591,7 +584,8 @@ void R_WallPrep(seg_t *seg)
 
 	r1=g1=b1=0;
 	r2=g2=b2=0;
-	topcolor=bottomcolor=tmp_upcolor=tmp_lowcolor=0;
+
+	topcolor=tmp_upcolor=bottomcolor=tmp_lowcolor=0;
 
 	li = seg->linedef;
 	side = seg->sidedef;
@@ -599,24 +593,23 @@ void R_WallPrep(seg_t *seg)
 	// [GEC] Prevents errors in textures in T coordinates, but is not applied to switches
     curRowoffset = side->rowoffset & (127 << FRACBITS);
 
-	f_ceilingheight = frontsector->ceilingheight >> 16;
-	f_floorheight = frontsector->floorheight >> 16;
-
 	thingcolor = lights[frontsector->colors[2]].rgba;
 	upcolor = lights[frontsector->colors[3]].rgba;
 	lowcolor = lights[frontsector->colors[4]].rgba;
 
+	// get front side top and bottom
+	f_ceilingheight = frontsector->ceilingheight >> 16;
+	f_floorheight = frontsector->floorheight >> 16;
+
 	if (li->flags & ML_BLENDING) {
-		r1 = (float)((upcolor  >> 24) & 0xff);// * 255 / 300;
-		g1 = (float)((upcolor  >> 16) & 0xff);// * 255 / 300;
-		b1 = (float)((upcolor  >> 8) & 0xff);// * 255 / 300;
-		r2 = (float)((lowcolor >> 24) & 0xff);// * 255 / 300;
-		g2 = (float)((lowcolor >> 16) & 0xff);// * 255 / 300;
-		b2 = (float)((lowcolor >> 8) & 0xff);// * 255 / 300;
-		tmp_upcolor = //((int)r1 << 24) | ((int)g1 << 16) | ((int)b1 << 8) | 0xff;
-		upcolor;
-		tmp_lowcolor = //((int)r2 << 24) | ((int)g2 << 16) | ((int)b2 << 8) | 0xff;
-		lowcolor;
+		r1 = (float)((upcolor  >> 24) & 0xff);
+		g1 = (float)((upcolor  >> 16) & 0xff);
+		b1 = (float)((upcolor  >> 8) & 0xff);
+		r2 = (float)((lowcolor >> 24) & 0xff);
+		g2 = (float)((lowcolor >> 16) & 0xff);
+		b2 = (float)((lowcolor >> 8) & 0xff);
+		tmp_upcolor = upcolor;
+		tmp_lowcolor = lowcolor;
 	} else {
 		topcolor = thingcolor;
 		bottomcolor = thingcolor;
@@ -630,58 +623,75 @@ void R_WallPrep(seg_t *seg)
 		b_floorheight = backsector->floorheight >> 16;
 		b_ceilingheight = backsector->ceilingheight >> 16;
 
-		if ((backsector->ceilingheight < frontsector->ceilingheight) && (backsector->ceilingpic != -1)) {
+		if ((b_ceilingheight < f_ceilingheight) && (backsector->ceilingpic != -1)) {
+			height = f_ceilingheight - b_ceilingheight;
+
 			if (li->flags & ML_DONTPEGTOP) {
-				height = (f_ceilingheight - b_ceilingheight);
 				rowoffs = (curRowoffset >> 16) + height;
 			} else {
-				height = (f_ceilingheight - b_ceilingheight);
 				rowoffs = (height + 127 & -128) + (curRowoffset >> 16);
 			}
 
 			if (li->flags & ML_BLENDING) {
 				if (!(li->flags & ML_BLENDFULLTOP)) {
-#if 1				
-						int inheight = (frontsector->ceilingheight) - (frontsector->floorheight);
-						int sideheight1 = (backsector->floorheight) - (frontsector->floorheight);
-						int sideheight2 = (frontsector->ceilingheight) - (backsector->floorheight);
+					int inheight = f_ceilingheight - f_floorheight;
+					int sideheight1 = b_ceilingheight - f_floorheight;
+					int sideheight2 = f_ceilingheight - b_ceilingheight;
 
-						float  nr1 = r1*((float)sideheight1/(float)inheight);
-						float  ng1 = g1*((float)sideheight1/(float)inheight);
-						float  nb1 = b1*((float)sideheight1/(float)inheight);
-						
-						float   nr2 = r2*((float)sideheight2/(float)inheight);
-						float   ng2 = g2*((float)sideheight2/(float)inheight);
-						float   nb2 = b2*((float)sideheight2/(float)inheight);
+					float scale1 = (float)sideheight1 / (float)inheight;
+					float scale2 = (float)sideheight2 / (float)inheight;
+			
+					float nr1 = r1*scale1;
+					float ng1 = g1*scale1;
+					float nb1 = b1*scale1;
 
-//						tmp_upcolor = 0x000000ff;
-						float rf = ((nr1)+(nr2));
-	//					if (rf > 255) tmp_upcolor |= 0xff000000;//rf = 255;
-						float gf = ((ng1)+(ng2));
-//						if (gf > 255) tmp_upcolor |= 0x00ff0000;//gf = 255;
-						float bf = ((nb1)+(nb2));
-//						if (bf > 255) tmp_upcolor |= 0x0000ff00;//bf = 255;
-#if 1
-//
-if (!(rf < 256 && gf < 256 && bf < 256)) {
-	float scale = 1.0f;
-if (rf >= gf && rf >= bf) {
-	scale = 255.0f / rf;
-} else if (gf >= rf && gf >= bf) {
-	scale = 255.0f / gf;
-} else {
-	scale = 255.0f / bf;
-}
-rf *= scale;
-gf *= scale;
-bf *= scale;
+					float nr2 = r2*scale2;
+					float ng2 = g2*scale2;
+					float nb2 = b2*scale2;
 
-}
-#endif
-						tmp_lowcolor = ((int)rf << 24) | ((int)gf << 16) | ((int)bf << 8) | 0xff;
+					float rf = nr1 + nr2;
+					float gf = ng1 + ng2;
+					float bf = nb1 + nb2;
 
-#endif
-						
+					if (!((rf < 256) && (gf < 256) && (bf < 256))) {
+						float scale;
+
+						if (rf >= gf && rf >= bf) {
+							scale = 255.0f / rf;
+						} else if (gf >= rf && gf >= bf) {
+							scale = 255.0f / gf;
+						} else {
+							scale = 255.0f / bf;
+						}
+
+						rf *= scale;
+						gf *= scale;
+						bf *= scale;
+					}
+
+					tmp_lowcolor = ((int)rf << 24) | ((int)gf << 16) | ((int)bf << 8) | 0xff;
+
+					if (gamemap == 3 && brightness > 100) {
+						float scale = 1.0f - ((float)(brightness-100)/400.0f);
+						int x1 = li->v1->x >> 16;
+						int y1 = li->v1->y >> 16;
+						int x2 = li->v2->x >> 16;
+						int y2 = li->v2->y >> 16;
+
+						if ( ( (x1 == 1040 && y1 == -176) && (x2 == 1008 && y2 == -176) ) ||
+							( (x1 == 1008 && y1 == -464) && (x2 == 1040 && y2 == -464) ) ) {
+							tmp_upcolor = ((int)(r1*scale)<<24) |
+											((int)(g1*scale)<<16) |
+											((int)(b1*scale)<<8) |
+											0xff;
+							tmp_lowcolor = ((int)(rf*scale) << 24) |
+											((int)(gf*scale) << 16) |
+											((int)(bf*scale) << 8) |
+											0xff;
+						} else {
+							tmp_upcolor = upcolor;
+						}
+					}
 				} 
 
 				if (li->flags & ML_INVERSEBLEND) {
@@ -696,13 +706,13 @@ bf *= scale;
 				upcolor = tmp_lowcolor;
 			}
 
-#if 1
 			R_RenderWall(seg, li->flags, textures[side->toptexture],
 						 f_ceilingheight, b_ceilingheight,
 						 rowoffs - height, rowoffs,
 						 topcolor, bottomcolor);
-#endif
+
 			m_top = b_ceilingheight; // clip middle top height
+
 			if ((li->flags & (ML_CHECKFLOORHEIGHT|ML_SWITCHX08)) == ML_SWITCHX08) {
 				if (SWITCHMASK(li->flags) == ML_SWITCHX04) {
 					pic = side->bottomtexture;
@@ -715,8 +725,8 @@ bf *= scale;
 			}
 		}
 
-		if (frontsector->floorheight < backsector->floorheight) {
-			height = (f_ceilingheight - b_floorheight);
+		if (f_floorheight < b_floorheight) {
+			height = f_ceilingheight - b_floorheight;
 
 			if ((li->flags & ML_DONTPEGBOTTOM) == 0) {
 				rowoffs = curRowoffset >> 16;
@@ -726,42 +736,64 @@ bf *= scale;
 
 			if (li->flags & ML_BLENDING) {
 				if (!(li->flags & ML_BLENDFULLBOTTOM)) {
-#if 1				
-						int inheight = (frontsector->ceilingheight ) - (frontsector->floorheight );
-						int sideheight1 = (backsector->floorheight ) - (frontsector->floorheight );
-						int sideheight2 = (frontsector->ceilingheight ) - (backsector->floorheight );
+					int inheight = f_ceilingheight - f_floorheight;
+					int sideheight1 = b_floorheight - f_floorheight;
+					int sideheight2 = f_ceilingheight - b_floorheight;
 
-						 float  nr1 = r1*((float)sideheight1/(float)inheight);
-						 float  ng1 = g1*((float)sideheight1/(float)inheight);
-						 float  nb1 = b1*((float)sideheight1/(float)inheight);
-						
-						 float  nr2 = r2*((float)sideheight2/(float)inheight);
-						 float  ng2 = g2*((float)sideheight2/(float)inheight);
-						 float  nb2 = b2*((float)sideheight2/(float)inheight);
+					float scale1 = (float)sideheight1 / (float)inheight;
+					float scale2 = (float)sideheight2 / (float)inheight;
+			
+					float nr1 = r1*scale1;
+					float ng1 = g1*scale1;
+					float nb1 = b1*scale1;
 
-						float rf = ((nr1)+(nr2));
-						float gf = ((ng1)+(ng2));
-						float bf = ((nb1)+(nb2));
+					float nr2 = r2*scale2;
+					float ng2 = g2*scale2;
+					float nb2 = b2*scale2;
 
-#if 1
-if (!(rf < 256 && gf < 256 && bf < 256)) {
-	float scale = 1.0f;
-if (rf >= gf && rf >= bf) {
-	scale = 255.0f / rf;
-} else if (gf >= rf && gf >= bf) {
-	scale = 255.0f / gf;
-} else {
-	scale = 255.0f / bf;
-}
-rf *= scale;
-gf *= scale;
-bf *= scale;
+					float rf = nr1 + nr2;
+					float gf = ng1 + ng2;
+					float bf = nb1 + nb2;
 
-}
-#endif
-#endif
-						tmp_upcolor = ((int)rf << 24) | ((int)gf << 16) | ((int)bf << 8) | 0xff;
-						
+					if (!((rf < 256) && (gf < 256) && (bf < 256))) {
+						float scale;
+
+						if (rf >= gf && rf >= bf) {
+							scale = 255.0f / rf;
+						} else if (gf >= rf && gf >= bf) {
+							scale = 255.0f / gf;
+						} else {
+							scale = 255.0f / bf;
+						}
+
+						rf *= scale;
+						gf *= scale;
+						bf *= scale;
+					}
+
+					tmp_upcolor = ((int)rf << 24) | ((int)gf << 16) | ((int)bf << 8) | 0xff;
+
+					if (gamemap == 3 && brightness > 100) {
+						float scale = 1.0f - ((float)(brightness-100)/400.0f);
+						int x1 = li->v1->x >> 16;
+						int y1 = li->v1->y >> 16;
+						int x2 = li->v2->x >> 16;
+						int y2 = li->v2->y >> 16;
+
+						if ( ( (x1 == 1040 && y1 == -176) && (x2 == 1008 && y2 == -176) ) ||
+							( (x1 == 1008 && y1 == -464) && (x2 == 1040 && y2 == -464) ) ) {
+							tmp_lowcolor = ((int)(r2*scale)<<24) |
+											((int)(g2*scale)<<16) |
+											((int)(b2*scale)<<8) |
+											0xff;
+							tmp_upcolor = ((int)(rf*scale) << 24) |
+											((int)(gf*scale) << 16) |
+											((int)(bf*scale) << 8) |
+											0xff;
+						} else {
+							tmp_lowcolor = lowcolor;
+						}
+					}
 				}
 
 				topcolor = tmp_upcolor;
@@ -808,12 +840,12 @@ bf *= scale;
 		topcolor = upcolor;
 		bottomcolor = lowcolor;
 	}
-#if 1	
+
 	R_RenderWall(seg, li->flags, textures[side->midtexture],
 				 m_top, m_bottom,
 				 rowoffs - height, rowoffs,
 				 topcolor, bottomcolor);
-#endif
+
 	if ((li->flags & (ML_CHECKFLOORHEIGHT|ML_SWITCHX08)) == (ML_CHECKFLOORHEIGHT|ML_SWITCHX08)) {
 		if (SWITCHMASK(li->flags) == ML_SWITCHX02) {
 			pic = side->toptexture;
