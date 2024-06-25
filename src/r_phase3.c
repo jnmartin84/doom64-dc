@@ -1,6 +1,4 @@
 //Renderer phase 3 - World Rendering Routines
-//#include <gl/GL.h>
-//#include <gl/GLU.h>
 #include "doomdef.h"
 #include "r_local.h"
 
@@ -18,7 +16,6 @@ extern void **tsptrs;
 
 extern pvr_poly_hdr_t **headers_for_sprites;
 extern pvr_poly_hdr_t **headers2_for_sprites;
-//extern pvr_poly_hdr_t **headers3_for_sprites;
 
 extern float *all_u;
 extern float *all_v;
@@ -28,9 +25,6 @@ extern float *all_v2;
 extern float *all2_u;
 extern float *all2_v;
 
-//extern float *all3_u;
-//extern float *all3_v;
-
 pvr_vertex_t __attribute__ ((aligned(32))) quad2[4];
 
 pvr_poly_hdr_t hdr;
@@ -38,7 +32,6 @@ pvr_poly_cxt_t cxt;
 
 pvr_poly_hdr_t thdr;
 
-//d64Vertex_t dVTX[4];
 d64Vertex_t *dVTX[4];
 d64Triangle_t dT1, dT2;
 
@@ -596,7 +589,7 @@ void R_WallPrep(seg_t *seg)
 
 	li = seg->linedef;
 	side = seg->sidedef;
-	
+
 	// [GEC] Prevents errors in textures in T coordinates, but is not applied to switches
     curRowoffset = side->rowoffset & (127 << FRACBITS);
 
