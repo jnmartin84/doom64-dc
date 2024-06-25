@@ -416,7 +416,7 @@ void R_RenderSkyPic(int lump, int yoffset, int callno) // 80025BDC
 			if (j == 0 && r == 0 && g == 0 && b == 0) {
 				bgpal[j] = get_color_argb1555(0,0,0,0);
 			} else {
-#if 1
+#if 0
 //				if (r && g && b) {
 					int hsv = LightGetHSV(r,g,b);
 					int h = (hsv >> 16)&0xff;

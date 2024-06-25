@@ -145,7 +145,7 @@ void P_CachePvrTexture(int i, int tag)
 			} else {
 #if 0
 //				if (r && g && b) {
-					int hsv = LightGetHSV(r,g,b);
+					int hsv = LightGetHSV(r,g,b,255);
 					int h = (hsv >> 16)&0xff;
 					int s = (hsv >> 8)&0xff;
 					int v = hsv &0xff;

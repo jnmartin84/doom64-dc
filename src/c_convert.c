@@ -17,39 +17,7 @@
 
 int LightGetHSV(int r,int g,int b) // 800020BC
 {
-#if 0
-    unsigned char min, max;
-	unsigned char h_, s_, v_;
-
-    min = r < g ? (r < b ? r : b) : (g < b ? g : b);
-    max = r > g ? (r > b ? r : b) : (g > b ? g : b);
-
-	v_ = max;
-    if (v_ == 0)
-    {
-        return 0;
-    }
-	
-	s_ = (255 * (long)(max - min)) / v_;
-	if (s_ == 0)
-	{
-        return v_ & 0x000000FF;
-    }
-
-    if (max == r)
-    {
-        h_ = 0 + 43 * (g - b) / (max - min);
-    }
-	else if (max == g)
-    {
-        h_ = 85 + 43 * (b - r) / (max - min);
-    }
-	else
-    {
-        h_ = 171 + 43 * (r - g) / (max - min);
-    }
-#else
-int h_, s_, v_;
+	int h_, s_, v_;
     int min;
     int max;
     float deltamin;
@@ -144,7 +112,6 @@ int h_, s_, v_;
     s_ = (int)((double)j * (double)255.0);
 
     v_ = (int)((double)deltamin * (double)255.0);	
-#endif
     return (((h_&0xff) << 16) | ((s_&0xff) << 8) | (v_&0xff));// & 0x00FFFFFF);
 }
 

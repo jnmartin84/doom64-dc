@@ -134,7 +134,7 @@ void R_RenderFilter(void);
 
 typedef float   Matrix[4][4];
 
-static inline void guMtxIdentF(Matrix mf) //float mf[4][4])
+static inline void guMtxIdentF(Matrix mf)
 {
 	int i, j;
 	for (i=0; i<4; i++) {
@@ -270,13 +270,15 @@ typedef enum
 /* library replacements */
 /* */
 
-void D_memmove(void *dest, void *src);
 //void D_memset (void *dest, int val, int count);
 //void D_memcpy (void *dest, void *src, int count);
+//void D_strncpy (char *dest, char *src, int maxcount);
+//int D_strncasecmp (char *s1, char *s2, int len);
 #define D_memset memset
 #define D_memcpy memcpy
-void D_strncpy (char *dest, char *src, int maxcount);
-int D_strncasecmp (char *s1, char *s2, int len);
+#define D_strncpy strncpy
+#define D_strncasecmp strncasecmp
+void D_memmove(void *dest, void *src);
 void D_strupr(char *s);
 int D_strlen(char *s);
 

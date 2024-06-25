@@ -139,7 +139,7 @@ void D_memcpy(void *dest, void *src, int count) // 80001ACC
 =
 ====================
 */
-
+#if 0
 void D_strncpy(char *dest, char *src, int maxcount) // 8000lBB0
 {
 	byte	*p1, *p2;
@@ -149,7 +149,7 @@ void D_strncpy(char *dest, char *src, int maxcount) // 8000lBB0
 		if (!(*p1++ = *p2++))
 			return;
 }
-
+#endif
 /*
 ====================
 =
@@ -157,7 +157,7 @@ void D_strncpy(char *dest, char *src, int maxcount) // 8000lBB0
 =
 ====================
 */
-
+#if 0
 int D_strncasecmp(char *s1, char *s2, int len) // 80001BEC
 {
 	while (*s1 && *s2)
@@ -173,7 +173,7 @@ int D_strncasecmp(char *s1, char *s2, int len) // 80001BEC
 		return 1;
 	return 0;
 }
-
+#endif
 /*
 ====================
 =
