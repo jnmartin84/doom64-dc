@@ -292,7 +292,8 @@ d64Vertex_t SkyFireVertex[4] = // 8005B210
 	}
 };
 
-extern d64Vertex_t dVTX[4];
+
+extern d64Vertex_t *dVTX[4];
 extern d64Triangle_t dT1, dT2;
 
 extern float inv255;
@@ -320,48 +321,47 @@ void R_RenderClouds(void) // 80025878
     gDPSetPrimColorD64(GFX1++, 0, (lights[255].rgba >> 8), SkyCloudColor);
 #endif
 
-	memcpy(&dVTX[0], &SkyCloudVertex[0], sizeof(d64Vertex_t));
-	memcpy(&dVTX[1], &SkyCloudVertex[1], sizeof(d64Vertex_t));
-	memcpy(&dVTX[2], &SkyCloudVertex[2], sizeof(d64Vertex_t));
-	memcpy(&dVTX[3], &SkyCloudVertex[3], sizeof(d64Vertex_t));
-			
-	transform_vert(&dVTX[0]);
-	color_vert(&dVTX[0], SkyCloudColor);
-	spec_vert(&dVTX[0], skycloudv0col);
-	transform_vert(&dVTX[1]);
-	color_vert(&dVTX[1], SkyCloudColor);
-	spec_vert(&dVTX[1], skycloudv0col);
-	transform_vert(&dVTX[2]);
-	color_vert(&dVTX[2], SkyCloudColor);
-	spec_vert(&dVTX[2], skycloudv2col);
-	transform_vert(&dVTX[3]);
-	color_vert(&dVTX[3], SkyCloudColor);
-	spec_vert(&dVTX[3], skycloudv2col);
+	dVTX[0] = &(dT1.dVerts[0]);
+	dVTX[1] = &(dT1.dVerts[1]);
+	dVTX[2] = &(dT1.dVerts[2]);
+	dVTX[3] = &(dT2.dVerts[2]);
 
-	dVTX[0].v.u = u0;
-	dVTX[0].v.v = v0;
+	memcpy(dVTX[0], &SkyCloudVertex[0], sizeof(d64Vertex_t));
+	transform_vert(dVTX[0]);
+	color_vert(dVTX[0], SkyCloudColor);
+	spec_vert(dVTX[0], skycloudv0col);
 
-	dVTX[1].v.u = u1;
-	dVTX[1].v.v = v0;
+	memcpy(dVTX[1], &SkyCloudVertex[1], sizeof(d64Vertex_t));
+	transform_vert(dVTX[1]);
+	color_vert(dVTX[1], SkyCloudColor);
+	spec_vert(dVTX[1], skycloudv0col);
 
-	dVTX[2].v.u = u1;
-	dVTX[2].v.v = v1;
+	memcpy(dVTX[2], &SkyCloudVertex[2], sizeof(d64Vertex_t));
+	transform_vert(dVTX[2]);
+	color_vert(dVTX[2], SkyCloudColor);
+	spec_vert(dVTX[2], skycloudv2col);
 
-	dVTX[3].v.u = u0;
-	dVTX[3].v.v = v1;
+	memcpy(dVTX[3], &SkyCloudVertex[3], sizeof(d64Vertex_t));
+	transform_vert(dVTX[3]);
+	color_vert(dVTX[3], SkyCloudColor);
+	spec_vert(dVTX[3], skycloudv2col);
 
-	memcpy(&(dT1.dVerts[0]), &dVTX[0], sizeof(d64Vertex_t));
-	memcpy(&(dT1.dVerts[1]), &dVTX[1], sizeof(d64Vertex_t));
-	memcpy(&(dT1.dVerts[2]), &dVTX[2], sizeof(d64Vertex_t));
+	dVTX[0]->v.u = u0;
+	dVTX[0]->v.v = v0;
 
-	memcpy(&(dT2.dVerts[0]), &dVTX[0], sizeof(d64Vertex_t));
-	memcpy(&(dT2.dVerts[1]), &dVTX[2], sizeof(d64Vertex_t));
-	memcpy(&(dT2.dVerts[2]), &dVTX[3], sizeof(d64Vertex_t));
+	dVTX[1]->v.u = u1;
+	dVTX[1]->v.v = v0;
+
+	dVTX[2]->v.u = u1;
+	dVTX[2]->v.v = v1;
+
+	dVTX[3]->v.u = u0;
+	dVTX[3]->v.v = v1;
+
+	memcpy(&(dT2.dVerts[0]), dVTX[0], sizeof(d64Vertex_t));
+	memcpy(&(dT2.dVerts[1]), dVTX[2], sizeof(d64Vertex_t));
 
 	clip_quad(&dT1, &dT2, &cloudhdr, 0, PVR_LIST_OP_POLY, 1);
-
-//	clip_triangle(&dT1, &cloudhdr, 0, PVR_LIST_OP_POLY, 1);
-//	clip_triangle(&dT2, &cloudhdr, 0, PVR_LIST_OP_POLY, 1);
 }
 
 #define get_color_argb1555(rrr,ggg,bbb,aaa) ((uint16_t)(((aaa&1)<<15) | (((rrr>>3)&0x1f)<<10) | (((ggg>>3)&0x1f)<<5) | ((bbb>>3)&0x1f)))
@@ -528,6 +528,9 @@ void R_RenderFireSky(void) // 80025F68
 		pvr_poly_compile(&pvrfirehdr, &pvrfirecxt);
 	}
 
+	// see all of the horrible geometry cracks
+	//pvr_set_bg_color(1.0f,0.0f,1.0f);
+
 	if (((gamevbls < gametic) && (gametic & 1)) && (!gamepaused)) {
 		buff = SkyFireData[FireSide];
 		D_memcpy(buff, SkyFireData[FireSide ^ 1], (FIRESKY_WIDTH*FIRESKY_HEIGHT));
@@ -631,36 +634,38 @@ void R_RenderFireSky(void) // 80025F68
 	float v0 = 0.0035f;
 	float v1 = 1.0f;
 
-	memcpy(&dVTX[0], &SkyFireVertex[0], sizeof(d64Vertex_t));
-	memcpy(&dVTX[1], &SkyFireVertex[1], sizeof(d64Vertex_t));
-	memcpy(&dVTX[2], &SkyFireVertex[2], sizeof(d64Vertex_t));
-	memcpy(&dVTX[3], &SkyFireVertex[3], sizeof(d64Vertex_t));
+    dVTX[0] = &(dT1.dVerts[0]);
+    dVTX[1] = &(dT1.dVerts[1]);
+    dVTX[2] = &(dT1.dVerts[2]);
+    dVTX[3] = &(dT2.dVerts[2]);
 
-	transform_vert(&dVTX[0]);
-	color_vert(&dVTX[0], FireSkyColor1);
-	transform_vert(&dVTX[1]);
-	color_vert(&dVTX[1], FireSkyColor1);
-	transform_vert(&dVTX[2]);
-	color_vert(&dVTX[2], FireSkyColor2);
-	transform_vert(&dVTX[3]);
-	color_vert(&dVTX[3], FireSkyColor2);
+	memcpy(dVTX[0], &SkyFireVertex[0], sizeof(d64Vertex_t));
+	transform_vert(dVTX[0]);
+	color_vert(dVTX[0], FireSkyColor1);
 
-	dVTX[0].v.u = u0;
-	dVTX[0].v.v = v0;
-	dVTX[1].v.u = u1;
-	dVTX[1].v.v = v0;
-	dVTX[2].v.u = u1;
-	dVTX[2].v.v = v1;
-	dVTX[3].v.u = u0;
-	dVTX[3].v.v = v1;
+	memcpy(dVTX[1], &SkyFireVertex[1], sizeof(d64Vertex_t));
+	transform_vert(dVTX[1]);
+	color_vert(dVTX[1], FireSkyColor1);
 
-	memcpy(&(dT1.dVerts[0]), &dVTX[0], sizeof(d64Vertex_t));
-	memcpy(&(dT1.dVerts[1]), &dVTX[1], sizeof(d64Vertex_t));
-	memcpy(&(dT1.dVerts[2]), &dVTX[2], sizeof(d64Vertex_t));
+	memcpy(dVTX[2], &SkyFireVertex[2], sizeof(d64Vertex_t));
+	transform_vert(dVTX[2]);
+	color_vert(dVTX[2], FireSkyColor2);
 
-	memcpy(&(dT2.dVerts[0]), &dVTX[0], sizeof(d64Vertex_t));
-	memcpy(&(dT2.dVerts[1]), &dVTX[2], sizeof(d64Vertex_t));
-	memcpy(&(dT2.dVerts[2]), &dVTX[3], sizeof(d64Vertex_t));
+	memcpy(dVTX[3], &SkyFireVertex[3], sizeof(d64Vertex_t));
+	transform_vert(dVTX[3]);
+	color_vert(dVTX[3], FireSkyColor2);
+
+	dVTX[0]->v.u = u0;
+	dVTX[0]->v.v = v0;
+	dVTX[1]->v.u = u1;
+	dVTX[1]->v.v = v0;
+	dVTX[2]->v.u = u1;
+	dVTX[2]->v.v = v1;
+	dVTX[3]->v.u = u0;
+	dVTX[3]->v.v = v1;
+
+	memcpy(&(dT2.dVerts[0]), dVTX[0], sizeof(d64Vertex_t));
+	memcpy(&(dT2.dVerts[1]), dVTX[2], sizeof(d64Vertex_t));
 
 	clip_quad(&dT1, &dT2, &pvrfirehdr, 127, PVR_LIST_OP_POLY, 0);
 }

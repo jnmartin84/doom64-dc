@@ -30,7 +30,7 @@ extern int globalcm;
 kthread_t*sys_ticker_thread;
 kthread_attr_t sys_ticker_attr;
 
-u32 vid_side;
+//u32 vid_side;
 u8 gamepad_bit_pattern; // 800A5260 // one bit for each controller
 
 s32 File_Num;   // 800A54D8
@@ -274,9 +274,8 @@ void I_ClearFrame(void) // 8000637C
 
 void I_DrawFrame(void)  // 80006570
 {
-	vid_side ^= 1;
+//	vid_side ^= 1;
 
-	SystemTickerStatus &= ~8;
 	SystemTickerStatus |= 16;
 
 	running++;

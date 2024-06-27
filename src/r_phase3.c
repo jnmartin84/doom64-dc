@@ -1,4 +1,6 @@
 //Renderer phase 3 - World Rendering Routines
+//#include <gl/GL.h>
+//#include <gl/GLU.h>
 #include "doomdef.h"
 #include "r_local.h"
 
@@ -16,6 +18,7 @@ extern void **tsptrs;
 
 extern pvr_poly_hdr_t **headers_for_sprites;
 extern pvr_poly_hdr_t **headers2_for_sprites;
+//extern pvr_poly_hdr_t **headers3_for_sprites;
 
 extern float *all_u;
 extern float *all_v;
@@ -25,6 +28,9 @@ extern float *all_v2;
 extern float *all2_u;
 extern float *all2_v;
 
+//extern float *all3_u;
+//extern float *all3_v;
+
 pvr_vertex_t __attribute__ ((aligned(32))) quad2[4];
 
 pvr_poly_hdr_t hdr;
@@ -32,6 +38,7 @@ pvr_poly_cxt_t cxt;
 
 pvr_poly_hdr_t thdr;
 
+//d64Vertex_t dVTX[4];
 d64Vertex_t *dVTX[4];
 d64Triangle_t dT1, dT2;
 
@@ -39,7 +46,7 @@ const float inv64 = 1.0f / 64.0f;
 const float inv255 = 1.0f / 255.0f;
 const float inv256 = 1.0f / 256.0f;
 const float inv1024 = 1.0f / 1024.0f;
-const float inv65535 = 1.0f / 65535.0f;
+const float inv65535 = 1.0f / 65536.0f;
 
 static inline int vismask(d64Triangle_t *triangle)
 {
@@ -589,7 +596,7 @@ void R_WallPrep(seg_t *seg)
 
 	li = seg->linedef;
 	side = seg->sidedef;
-
+	
 	// [GEC] Prevents errors in textures in T coordinates, but is not applied to switches
     curRowoffset = side->rowoffset & (127 << FRACBITS);
 
@@ -924,10 +931,10 @@ void R_RenderWall(seg_t *seg, int flags, int texture, int topHeight, int bottomH
 		v1 = seg->v1;
 		v2 = seg->v2;
 
-		signed short sx1 = (signed short)(v1->x >> 16);
-		signed short sx2 = (signed short)(v2->x >> 16);
-		signed sy1 = -((signed short)(v1->y >> 16));
-		signed sy2 = -((signed short)(v2->y >> 16));
+		signed short sx1 = (signed short)(v1->x * inv65535);
+		signed short sx2 = (signed short)(v2->x * inv65535);
+		signed sy1 = -((signed short)(v1->y * inv65535));
+		signed sy2 = -((signed short)(v2->y * inv65535));
 
 		float x1 = (float)sx1;
 		float x2 = (float)sx2;
@@ -1033,12 +1040,12 @@ void R_RenderSwitch(seg_t *seg, int texture, int topOffset, int color) // 800276
 	cos = finecosine[seg->angle >> ANGLETOFINESHIFT] << 1;
 	sin = finesine[seg->angle >> ANGLETOFINESHIFT] << 1;
 
-	float x1 = (float)(((x) - (cos << 3) + sin) >> 16);
-	float x2 = (float)(((x) + (cos << 3) + sin) >> 16);
+	float x1 = (float)(((x) - (cos << 3) + sin) * inv65535);
+	float x2 = (float)(((x) + (cos << 3) + sin) * inv65535);
 	float y1 = (float)topOffset;
 	float y2 = y1 - 32.0f;
-	float z1 = (float)(((-y) + (sin << 3) + cos) >> 16);
-	float z2 = (float)(((-y) - (sin << 3) + cos) >> 16);
+	float z1 = (float)(((-y) + (sin << 3) + cos) * inv65535);
+	float z2 = (float)(((-y) - (sin << 3) + cos) * inv65535);
 
 	float tu1 = 0.0f;
 	float tu2 = 32.0f / (float)last_sw;
@@ -1133,9 +1140,9 @@ void R_RenderPlane(leaf_t *leaf, int numverts, int zpos, int texture, int xpos, 
 
 	vrt = lf[0].vertex;
 
-	dVTX[0]->v.x = (float)vrt->x * inv65535;
+	dVTX[0]->v.x = ((float)(vrt->x * inv65535));
 	dVTX[0]->v.y = (float)(zpos);
-	dVTX[0]->v.z = -((float)vrt->y * inv65535);
+	dVTX[0]->v.z = -((float)(vrt->y * inv65535));
 	x = ((vrt->x + xpos) >> 16) & -64;
 	y = ((vrt->y + ypos) >> 16) & -64;
 
@@ -1159,9 +1166,9 @@ void R_RenderPlane(leaf_t *leaf, int numverts, int zpos, int texture, int xpos, 
 
 		vrt1 = lf[1].vertex;
 
-		dVTX[1]->v.x = ((float)vrt1->x * inv65535);
+		dVTX[1]->v.x = ((float)(vrt1->x * inv65535));
 		dVTX[1]->v.y = (float)(zpos);
-		dVTX[1]->v.z = -((float)vrt1->y * inv65535);
+		dVTX[1]->v.z = -((float)(vrt1->y * inv65535));
 
 		stu = (((vrt1->x + xpos) >> FRACBITS) - x);
 		stv = -(((vrt1->y + ypos) >> FRACBITS) - y);
@@ -1173,9 +1180,9 @@ void R_RenderPlane(leaf_t *leaf, int numverts, int zpos, int texture, int xpos, 
 
 		vrt2 = lf[2].vertex;
 
-		dVTX[2]->v.x = ((float)vrt2->x * inv65535);
+		dVTX[2]->v.x = ((float)(vrt2->x * inv65535));
 		dVTX[2]->v.y = (float)(zpos);
-		dVTX[2]->v.z = -((float)vrt2->y * inv65535);
+		dVTX[2]->v.z = -((float)(vrt2->y * inv65535));
 
 		stu = (((vrt2->x + xpos) >> FRACBITS) - x);
 		stv = -(((vrt2->y + ypos) >> FRACBITS) - y);
@@ -1239,10 +1246,9 @@ void R_RenderPlane(leaf_t *leaf, int numverts, int zpos, int texture, int xpos, 
 			stv = -(((vrt1->y + ypos) >> FRACBITS) - y);
 			tu = (float)stu * inv64;
 			tv = (float)stv * inv64;
-
-			dVTX[1]->v.x = ((float)vrt1->x * inv65535);
+			dVTX[1]->v.x = ((float)(vrt1->x * inv65535));
 			dVTX[1]->v.y = (float)(zpos);
-			dVTX[1]->v.z = -((float)vrt1->y * inv65535);
+			dVTX[1]->v.z = -((float)(vrt1->y * inv65535));
 			dVTX[1]->v.u = tu;
 			dVTX[1]->v.v = tv;
 
@@ -1250,9 +1256,9 @@ void R_RenderPlane(leaf_t *leaf, int numverts, int zpos, int texture, int xpos, 
 			stv = -(((vrt2->y + ypos) >> FRACBITS) - y);
 			tu = (float)stu * inv64;
 			tv = (float)stv * inv64;
-			dVTX[2]->v.x = ((float)vrt2->x * inv65535);
+			dVTX[2]->v.x = ((float)(vrt2->x * inv65535));
 			dVTX[2]->v.y = (float)(zpos);
-			dVTX[2]->v.z = -((float)vrt2->y * inv65535);
+			dVTX[2]->v.z = -((float)(vrt2->y * inv65535));
 			dVTX[2]->v.u = tu;
 			dVTX[2]->v.v = tv;
 
@@ -1260,9 +1266,9 @@ void R_RenderPlane(leaf_t *leaf, int numverts, int zpos, int texture, int xpos, 
 			stv = -(((vrt3->y + ypos) >> FRACBITS) - y);
 			tu = (float)stu * inv64;
 			tv = (float)stv * inv64;
-			dVTX[3]->v.x = ((float)vrt3->x * inv65535);
+			dVTX[3]->v.x = ((float)(vrt3->x * inv65535));
 			dVTX[3]->v.y = (float)(zpos);
-			dVTX[3]->v.z = -((float)vrt3->y * inv65535);
+			dVTX[3]->v.z = -((float)(vrt3->y * inv65535));
 			dVTX[3]->v.u = tu;
 			dVTX[3]->v.v = tv;
 
@@ -1433,6 +1439,37 @@ void R_RenderPlane(leaf_t *leaf, int numverts, int zpos, int texture, int xpos, 
 #endif	
 }
 
+pvr_ptr_t pvr_troo[MAX_CACHED_SPRITES];
+pvr_poly_hdr_t hdr_troo[2][MAX_CACHED_SPRITES];
+pvr_poly_cxt_t cxt_troo[2][MAX_CACHED_SPRITES];
+uint8_t __attribute__((aligned(32))) tmptroo[256*256];
+//int donebefore = 0;
+int lump_frame[575] = {-1};
+int used_lumps[575] = {-1};
+int used_lump_idx = 0;
+int del_idx = 0;
+int total_cached_vram = 0;
+
+int last_flush_frame = 0;
+
+static inline uint32_t np2(uint32_t v) {
+v--;
+v |= v >> 1;
+v |= v >> 2;
+v |= v >> 4;
+v |= v >> 8;
+v |= v >> 16;
+v++;
+return v;
+}
+
+char *W_GetNameForNum(int num);
+extern char fnbuf[256];
+
+int vram_low = 0;
+// 2 - 348 decoration and item sprites (non-enemy)
+// 349 - 923 enemy sprites
+// 924 - 965 weapon sprites (non-enemy)
 void R_RenderThings(subsector_t *sub)
 {
 	byte *data;
@@ -1452,9 +1489,41 @@ void R_RenderThings(subsector_t *sub)
 	int ypos;
 	int zpos1, zpos2;
 	int spos;
+int nosprite = 0;
 
 	int external_pal;
+#if 0
+if(!donebefore) {
+	dbgio_printf("initing the lump caching arrays and indices\n");
+	memset(used_lumps, -1, sizeof(int)*575);
+	memset(lump_frame, -1, sizeof(int)*575);
+used_lump_idx = 0;
+del_idx = 0;
+total_cached_vram = 0;
+donebefore = 1;	
+}
+#endif
+#if 0
+if(used_lump_idx) {
+for(int i=0;i<used_lump_idx;i++) {
+pvr_mem_free(pvr_troo[i]);	
+}
+}
+memset(used_lumps, 0, sizeof(int)*used_lump_idx);
+used_lump_idx = 0;
+#endif
+#if 0
 
+if(!pvr_troo) {
+	pvr_troo = pvr_mem_malloc(128*128);
+	pvr_poly_cxt_txr(&cxt_troo, PVR_LIST_TR_POLY, PVR_TXRFMT_PAL8BPP | PVR_TXRFMT_8BPP_PAL(0) | PVR_TXRFMT_TWIDDLED, 128, 128, pvr_troo, PVR_FILTER_BILINEAR);
+
+	cxt_troo.gen.specular = PVR_SPECULAR_ENABLE;
+	cxt_troo.gen.fog_type = PVR_FOG_TABLE;
+	cxt_troo.gen.fog_type2 = PVR_FOG_TABLE;
+	pvr_poly_compile(&hdr_troo, &cxt_troo);
+}
+#endif
 	dVTX[0] = &(dT1.dVerts[0]);
 	dVTX[1] = &(dT1.dVerts[1]);
 	dVTX[2] = &(dT1.dVerts[2]);
@@ -1541,77 +1610,260 @@ void R_RenderThings(subsector_t *sub)
 			}
 
 			ypos = (thing->z >> 16) + SwapShort(((spriteN64_t*)data)->yoffs);
-
 			pvr_poly_hdr_t *theheader;
-			// pull in each side of sprite by one pixel
-			// fix for filtering 'crud' around the edge due to lack of padding
-			if(!flip) {
-				if (external_pal && thing->info->palette) {
-					if (thing->info->palette == 1) {
-						dVTX[0]->v.u = dVTX[3]->v.u = all2_u[lump] + inv1024;
-						dVTX[1]->v.u = dVTX[2]->v.u = all2_u[lump] + (((float)spos - 1.0f)*inv1024);
+			if (((lump >= 2) && (lump <= 348)) || ((lump >= 924) && (lump <= 965))) {
+				nosprite = 0;
+				// pull in each side of sprite by one pixel
+				// fix for filtering 'crud' around the edge due to lack of padding
+				if(!flip) {
+					if (external_pal && thing->info->palette) {
+						if (thing->info->palette == 1) {
+							dVTX[0]->v.u = dVTX[3]->v.u = all2_u[lump] + inv1024;
+							dVTX[1]->v.u = dVTX[2]->v.u = all2_u[lump] + (((float)spos - 1.0f)*inv1024);
+						} else {
+							// player PALPLAY02 , use lump - 100 in headers2
+							dVTX[0]->v.u = dVTX[3]->v.u = all2_u[lump-100] + inv1024;
+							dVTX[1]->v.u = dVTX[2]->v.u = all2_u[lump-100] + (((float)spos - 1.0f)*inv1024);
+						}
 					} else {
-						// player PALPLAY02 , use lump - 100 in headers2
-						dVTX[0]->v.u = dVTX[3]->v.u = all2_u[lump-100] + inv1024;
-						dVTX[1]->v.u = dVTX[2]->v.u = all2_u[lump-100] + (((float)spos - 1.0f)*inv1024);
+						dVTX[0]->v.u = dVTX[3]->v.u = all_u[lump] + inv1024;
+						dVTX[1]->v.u = dVTX[2]->v.u = all_u[lump] + (((float)spos - 1.0f)*inv1024);
 					}
 				} else {
-					dVTX[0]->v.u = dVTX[3]->v.u = all_u[lump] + inv1024;
-					dVTX[1]->v.u = dVTX[2]->v.u = all_u[lump] + (((float)spos - 1.0f)*inv1024);
+					if (external_pal && thing->info->palette) {
+						if (thing->info->palette == 1) {
+							dVTX[1]->v.u = dVTX[2]->v.u = all2_u[lump] + inv1024;
+							dVTX[0]->v.u = dVTX[3]->v.u = all2_u[lump] + (((float)spos - 1.0f)*inv1024);
+						} else {
+							dVTX[1]->v.u = dVTX[2]->v.u = all2_u[lump-100] + inv1024;
+							dVTX[0]->v.u = dVTX[3]->v.u = all2_u[lump-100] + (((float)spos - 1.0f)*inv1024);
+						}
+					} else {
+						dVTX[1]->v.u = dVTX[2]->v.u = all_u[lump] + inv1024;
+						dVTX[0]->v.u = dVTX[3]->v.u = all_u[lump] + (((float)spos - 1.0f)*inv1024);
+					}
+				}
+
+				if (external_pal && thing->info->palette) {
+					if (thing->info->palette == 1) {
+						theheader = headers2_for_sprites[lump];
+						dVTX[0]->v.v = dVTX[1]->v.v = all2_v[lump] + inv1024;
+						dVTX[3]->v.v = dVTX[2]->v.v = all2_v[lump] + (((float)height - 1.0f) *inv1024);
+					} else {
+						theheader = headers2_for_sprites[lump-100];
+						dVTX[0]->v.v = dVTX[1]->v.v = all2_v[lump-100] + inv1024;
+						dVTX[3]->v.v = dVTX[2]->v.v = all2_v[lump-100] + (((float)height - 1.0f) *inv1024);
+					}
+				} else {
+					theheader = headers_for_sprites[lump];
+					dVTX[0]->v.v = dVTX[1]->v.v = all_v[lump] + inv1024;
+					dVTX[3]->v.v = dVTX[2]->v.v = all_v[lump] + (((float)height-1.0f)*inv1024);
 				}
 			} else {
-				if (external_pal && thing->info->palette) {
-					if (thing->info->palette == 1) {
-						dVTX[1]->v.u = dVTX[2]->v.u = all2_u[lump] + inv1024;
-						dVTX[0]->v.u = dVTX[3]->v.u = all2_u[lump] + (((float)spos - 1.0f)*inv1024);
-					} else {
-						dVTX[1]->v.u = dVTX[2]->v.u = all2_u[lump-100] + inv1024;
-						dVTX[0]->v.u = dVTX[3]->v.u = all2_u[lump-100] + (((float)spos - 1.0f)*inv1024);
-					}
+				int lumpoff = lump - 349;
+				int cached_index = -1;
+				int troowid = (width + 7) & ~7;
+				int wp2 = np2(troowid);
+				int hp2 = np2(height);
+
+if(last_flush_frame && ((NextFrameIdx - last_flush_frame) > (2*30)) && (vram_low || (used_lump_idx > (MAX_CACHED_SPRITES * 3 / 4)))) {
+		for (int i=0;i<575;i++) {
+			if (used_lumps[i] != -1) {
+				pvr_mem_free(pvr_troo[used_lumps[i]]);
+			}
+		}
+		memset(used_lumps, -1, sizeof(int)*575);
+		memset(lump_frame, -1, sizeof(int)*575);
+		used_lump_idx = 0;
+		del_idx = 0;
+last_flush_frame = NextFrameIdx;
+vram_low = 0;
+}
+
+
+				if (used_lumps[lumpoff] != -1) {
+					// found an index
+					cached_index = used_lumps[lumpoff];
+					lump_frame[lumpoff] = NextFrameIdx;
+//					dbgio_printf("lump %d already cached at index %d\n", lump, cached_index);
+					goto skip_cached_setup;
+				}
+
+				if (last_flush_frame == 0) last_flush_frame = NextFrameIdx;
+
+
+				if (used_lump_idx < MAX_CACHED_SPRITES) {
+					used_lumps[lumpoff] = used_lump_idx;
+					lump_frame[lumpoff] = NextFrameIdx;
+					cached_index = used_lump_idx;
+					dbgio_printf("caching lump %d at index %d\n", lump, cached_index);
+					used_lump_idx += 1;
 				} else {
-					dVTX[1]->v.u = dVTX[2]->v.u = all_u[lump] + inv1024;
-					dVTX[0]->v.u = dVTX[3]->v.u = all_u[lump] + (((float)spos - 1.0f)*inv1024);
+					nosprite = 1;
+#if 1				
+					// here it gets complicated
+					// find if any of the lumps have the del_idx as their index
+					// if so, set their index to -1
+					//dbgio_printf("all lump cache slots used, find one to evict\n");
+					//"caching lump %d at index %d\n", lump, cached_index);
+
+					// this gets incremented if all possible cache indices are used in a single frame
+					// and nothing can be evicted
+					int passes = 0;
+
+					int start_del_idx = del_idx;
+					int next_del_idx_lump = -1;
+
+					// for every possible enemy sprite lump number
+					for (int i=0;i<575;i++) {
+						if (passes) {
+							nosprite = 1;
+							dbgio_printf("\t\t nothing was evictable");
+							goto bail_evict;
+						}
+
+						// try to help this along by noting if we found the next del idx along the way
+						if (used_lumps[i] == (del_idx + 1)) {
+							dbgio_printf("\t\thaven't found del_idx yet, found next_del_idx though\n");
+							next_del_idx_lump = i;
+						}
+
+						// if this enemy sprite lump number is already cached
+						// and the cache index is our "del idx"
+						// we should attempt to evict this one first
+						if(used_lumps[i] == del_idx) {
+							if (lump_frame[i] == NextFrameIdx) {
+								dbgio_printf("\tlump %d at del_idx is used in this frame -- check more\n", i+349);
+
+								// this can help us skip more passes through the entire lump set
+								if (next_del_idx_lump != -1) {
+									if (lump_frame[next_del_idx_lump] != NextFrameIdx) {
+										dbgio_printf("\t\tevicted %d by way of next_del_idx_lump\n", next_del_idx_lump);
+										del_idx = used_lumps[next_del_idx_lump];
+										pvr_mem_free(pvr_troo[del_idx]);
+										used_lumps[i] = -1;
+										lump_frame[i] = -1;
+										goto done_evicting;
+									}
+								}
+
+								i = 0;
+								del_idx += 1;
+
+								// wrap
+								if (del_idx == MAX_CACHED_SPRITES) {
+									del_idx = 0;
+								}
+
+								// if after increment and/or wrap we are at the starting index, nothing was evictable
+								if (del_idx == start_del_idx) {
+									dbgio_printf("\t\t del_idx wrapped back to start, about to fail things\n");
+									passes = 1;
+								}
+
+								continue;
+							} else {
+								dbgio_printf("\t\tevicted %d from old frame\n", i);
+								pvr_mem_free(pvr_troo[del_idx]);
+								used_lumps[i] = -1;
+								lump_frame[i] = -1;
+								goto done_evicting;
+							}
+						}
+					}
+
+done_evicting:
+					cached_index = del_idx;
+					used_lumps[lumpoff] = cached_index;
+					lump_frame[lumpoff] = NextFrameIdx;
+//					dbgio_printf("caching lump %d at index %d\n", lump, cached_index);
+
+					del_idx += 1;
+					if (del_idx == MAX_CACHED_SPRITES) {
+						del_idx = 0;
+					}
+
+#if 0
+					// try to evict some lumps not recently used
+					int found = 0;
+
+					for (int i=0;i<575;i++) {
+						if (lump_frame[i] < NextFrameIdx) {
+							int oldlumpidx = used_lumps[i];
+							pvr_mem_free(pvr_troo[oldlumpidx]);
+							used_lumps[i] = -1;
+							lump_frame[i] = -1;
+							found += 1;
+							if (found == 8) {
+								break;
+							}
+						}
+					}           // for i [0,575)
+#endif
+#endif
+				}
+bail_evict:
+				if (nosprite) {
+					dbgio_printf("could not cache lump %d\n", lumpoff);
+				} else {
+//				if(!nosprite) {
+					if ((wp2*hp2) > (pvr_mem_available()*4)) {
+						nosprite = 1;
+						lump_frame[lumpoff] = -1;
+						used_lumps[lumpoff] = -1;
+						vram_low = 1;
+						goto bail_pvr_alloc;
+					}
+	
+					pvr_troo[cached_index] = pvr_mem_malloc(wp2*hp2);
+					pvr_poly_cxt_txr(&cxt_troo[0][cached_index], PVR_LIST_TR_POLY, PVR_TXRFMT_PAL8BPP | PVR_TXRFMT_8BPP_PAL(0) | PVR_TXRFMT_TWIDDLED, wp2, hp2, pvr_troo[cached_index], PVR_FILTER_BILINEAR);
+
+					cxt_troo[0][cached_index].gen.specular = PVR_SPECULAR_ENABLE;
+					cxt_troo[0][cached_index].gen.fog_type = PVR_FOG_TABLE;
+					cxt_troo[0][cached_index].gen.fog_type2 = PVR_FOG_TABLE;
+					pvr_poly_compile(&hdr_troo[0][cached_index], &cxt_troo[0][cached_index]);
+
+					void *src = data + sizeof(spriteN64_t);
+					pvr_txr_load(src, pvr_troo[cached_index], wp2*hp2);
+skip_cached_setup:
+
+					if (!flip) {
+						dVTX[0]->v.u = dVTX[3]->v.u = (1.0f / (float)wp2);
+						dVTX[1]->v.u = dVTX[2]->v.u = ((float)troowid / (float)wp2) - (1.0f / (float)wp2);
+					} else {
+						dVTX[1]->v.u = dVTX[2]->v.u = (1.0f / (float)wp2);
+						dVTX[0]->v.u = dVTX[3]->v.u = ((float)troowid / (float)wp2) - (1.0f / (float)wp2);
+					}
+					dVTX[0]->v.v = dVTX[1]->v.v = (1.0f / (float)hp2);
+					dVTX[2]->v.v = dVTX[3]->v.v = ((float)height / (float)hp2) - (1.0f / (float)hp2);
+					theheader = &hdr_troo[0][cached_index];
 				}
 			}
 
-			if (external_pal && thing->info->palette) {
-				if (thing->info->palette == 1) {
-					theheader = headers2_for_sprites[lump];
-					dVTX[0]->v.v = dVTX[1]->v.v = all2_v[lump] + inv1024;
-					dVTX[3]->v.v = dVTX[2]->v.v = all2_v[lump] + (((float)height - 1.0f) *inv1024);
-				} else {
-					theheader = headers2_for_sprites[lump-100];
-					dVTX[0]->v.v = dVTX[1]->v.v = all2_v[lump-100] + inv1024;
-					dVTX[3]->v.v = dVTX[2]->v.v = all2_v[lump-100] + (((float)height - 1.0f) *inv1024);
-				}
-			} else {
-				theheader = headers_for_sprites[lump];
-				dVTX[0]->v.v = dVTX[1]->v.v = all_v[lump] + inv1024;
-				dVTX[3]->v.v = dVTX[2]->v.v = all_v[lump] + (((float)height-1.0f)*inv1024);
+bail_pvr_alloc:
+			if (!nosprite) {
+				dVTX[0]->v.x = dVTX[3]->v.x = xpos1;
+				dVTX[1]->v.x = dVTX[2]->v.x = xpos2;
+				dVTX[0]->v.y = dVTX[1]->v.y = ypos;
+				dVTX[3]->v.y = dVTX[2]->v.y = ypos - height;
+				dVTX[0]->v.z = dVTX[3]->v.z = zpos1;
+				dVTX[1]->v.z = dVTX[2]->v.z = zpos2;
+
+				transform_vert(dVTX[0]);
+				transform_vert(dVTX[1]);
+				transform_vert(dVTX[2]);
+				transform_vert(dVTX[3]);
+
+				color_vert(dVTX[0], color);
+				color_vert(dVTX[1], color);
+				color_vert(dVTX[2], color);
+				color_vert(dVTX[3], color);
+
+				memcpy(&(dT2.dVerts[0]), dVTX[0], sizeof(d64Vertex_t));
+				memcpy(&(dT2.dVerts[1]), dVTX[2], sizeof(d64Vertex_t));
+
+				clip_quad(&dT1, &dT2, theheader, vissprite_p->sector->lightlevel, PVR_LIST_TR_POLY, 0);
 			}
-
-			dVTX[0]->v.x = dVTX[3]->v.x = xpos1;
-			dVTX[1]->v.x = dVTX[2]->v.x = xpos2;
-			dVTX[0]->v.y = dVTX[1]->v.y = ypos;
-			dVTX[3]->v.y = dVTX[2]->v.y = ypos - height;
-			dVTX[0]->v.z = dVTX[3]->v.z = zpos1;
-			dVTX[1]->v.z = dVTX[2]->v.z = zpos2;
-
-			transform_vert(dVTX[0]);
-			transform_vert(dVTX[1]);
-			transform_vert(dVTX[2]);
-			transform_vert(dVTX[3]);
-
-			color_vert(dVTX[0], color);
-			color_vert(dVTX[1], color);
-			color_vert(dVTX[2], color);
-			color_vert(dVTX[3], color);
-
-			memcpy(&(dT2.dVerts[0]), dVTX[0], sizeof(d64Vertex_t));
-			memcpy(&(dT2.dVerts[1]), dVTX[2], sizeof(d64Vertex_t));
-
-			clip_quad(&dT1, &dT2, theheader, vissprite_p->sector->lightlevel, PVR_LIST_TR_POLY, 0);
-
 			vissprite_p = vissprite_p->next;
 		}
 

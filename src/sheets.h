@@ -1390,8 +1390,8 @@ static void setup_sprite_headers() {
 	all_v = (float *)malloc(numsprites*sizeof(float)+1); 
 	all_u2 = (float *)malloc(numsprites*sizeof(float)+1); 
 	all_v2 = (float *)malloc(numsprites*sizeof(float)+1); 
-	all2_u = (float *)malloc(numsprites*sizeof(float)+1); 
-	all2_v = (float *)malloc(numsprites*sizeof(float)+1); 
+//	all2_u = (float *)malloc(numsprites*sizeof(float)+1); 
+//	all2_v = (float *)malloc(numsprites*sizeof(float)+1); 
 //	all3_u = (float *)malloc(numsprites*sizeof(float)+1); 
 //	all3_v = (float *)malloc(numsprites*sizeof(float)+1); 
 
@@ -1403,6 +1403,7 @@ static void setup_sprite_headers() {
 		all_u2[lump] = non_enemy[i][3];
 		all_v2[lump] = non_enemy[i][4];
 	}
+#if 0
 
 	for (int i=0;i<playtrooposs_len; i++) {
 		int lump = (int)playtrooposs[i][0];
@@ -1485,6 +1486,7 @@ static void setup_sprite_headers() {
 			all2_v[lump-4100] = spectre[i][2];
 		}
 	}
+#endif
 }	
 
 

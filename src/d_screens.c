@@ -22,7 +22,7 @@ int D_RunDemo(char *name, skill_t skill, int map) // 8002B2D0
 return 0;
 }
 
-extern int DefaultConfiguration[5][13];
+extern int DefaultConfiguration[6][13];
 int D_TitleMap(void) // 8002B358
 {
   int exit;

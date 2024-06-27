@@ -36,7 +36,7 @@ void D_DoomMain(void) // 800027C0
     ticbuttons[0] = 0;
     oldticbuttons[0] = 0;
 
-	//MiniLoop(F_Start, F_Stop, F_Ticker, F_Drawer);
+//	MiniLoop(F_Start, F_Stop, F_Ticker, F_Drawer);
 
     D_SplashScreen();
 
@@ -144,9 +144,6 @@ uint64_t framecount = 0;
 extern uint8_t __attribute__((aligned(32))) op_buf[VERTBUF_SIZE];
 extern uint8_t __attribute__((aligned(32))) tr_buf[VERTBUF_SIZE];
 
-int dc_fb = 0;
-int dc_next_fb = 1;
-extern mutex_t fb_mutex;
 extern int last_Ltrig;
 extern int last_Rtrig;
 
@@ -229,25 +226,17 @@ last_Rtrig = 255;
 			drawer();
 
 			pvr_scene_finish();
-#if 0
-		mutex_lock(&fb_mutex);
-		dc_fb = !dc_fb;
-		mutex_unlock(&fb_mutex);
-#endif
 			pvr_wait_ready();
-#if 0
-		mutex_lock(&fb_mutex);
-dc_next_fb = !dc_next_fb;
-		mutex_unlock(&fb_mutex);
-#endif
 		}
 		gamevbls = gametic;
 		//thd_pass();
 #if 1
-uint64_t end_time = timer_us_gettime64();
-if(end_time - start_time < 33333)
-		usleep(33333 - (end_time - start_time));
-//			vid_waitvbl();
+//uint64_t end_time = timer_us_gettime64();
+uint64_t sleeptime = timer_us_gettime64() - start_time;
+	if(sleeptime < 33333)
+		usleep(33333 - sleeptime);
+	//		vid_waitvbl();
+
 
 #endif
 framecount += 1;

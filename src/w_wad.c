@@ -148,7 +148,7 @@ void W_Init (void)
 	pvr_txr_load(16 + pnon_enemy, pvr_non_enemy, vqsize - 16);
 	free(pnon_enemy);
 	dbgio_printf("PVR mem free after non_enemy: %lu\n", pvr_mem_available());
-
+#if 0
 	sprintf(fnbuf, "%s/vq/playtrooposs.vq", fnpre);
 	vqsize = fs_load(fnbuf, &pplaytrooposs);
 	pvr_playtrooposs = pvr_mem_malloc(vqsize);	
@@ -218,15 +218,15 @@ void W_Init (void)
 	pvr_txr_load(16 + pspectre, pvr_spectre, vqsize - 16);
 	free(pspectre);
 	dbgio_printf("PVR mem free after spectre: %lu\n", pvr_mem_available());
-
-	fullwad = malloc(6101168);
+#endif
+	fullwad = malloc(6828604);//5997660);//6101168);
 
 	wadfileptr = (wadinfo_t *)Z_Alloc(sizeof(wadinfo_t), PU_STATIC, NULL);
-	sprintf(fnbuf, "%s/doom64.wad", fnpre);
+	sprintf(fnbuf, "%s/pow2.wad", fnpre); // doom64.wad
 	wad_file = fs_open(fnbuf, O_RDONLY);
 
 	dbgio_printf("W_Init: Loading IWAD into RAM...\n");
-	fs_read(wad_file, (void*)fullwad, 6101168);
+	fs_read(wad_file, (void*)fullwad, 6828604);//5997660);//6101168);
 	dbgio_printf("Done.\n");
 	fs_close(wad_file);
 
@@ -237,7 +237,7 @@ void W_Init (void)
 	pvr_sprite_cxt[0].gen.fog_type = PVR_FOG_TABLE;
 	pvr_sprite_cxt[0].gen.fog_type2 = PVR_FOG_TABLE;
 	pvr_poly_compile(&pvr_sprite_hdr[0], &pvr_sprite_cxt[0]);	
-
+#if 0
 	pvr_poly_cxt_txr(&pvr_sprite_cxt[1], PVR_LIST_TR_POLY, PVR_TXRFMT_PAL8BPP | PVR_TXRFMT_8BPP_PAL(0) | PVR_TXRFMT_VQ_ENABLE | PVR_TXRFMT_TWIDDLED, 1024, 1024, pvr_playtrooposs, PVR_FILTER_BILINEAR);
 	pvr_sprite_cxt[1].gen.specular = PVR_SPECULAR_ENABLE;
 	pvr_sprite_cxt[1].gen.fog_type = PVR_FOG_TABLE;
@@ -297,7 +297,7 @@ void W_Init (void)
 	pvr_sprite_cxt[10].gen.fog_type = PVR_FOG_TABLE;
 	pvr_sprite_cxt[10].gen.fog_type2 = PVR_FOG_TABLE;
 	pvr_poly_compile(&pvr_sprite_hdr[10], &pvr_sprite_cxt[10]);	
-
+#endif
 	memcpy((void*)wadfileptr, fullwad + 0, sizeof(wadinfo_t));
 
 	if (D_strncasecmp(wadfileptr->identification, "IWAD", 4))
@@ -314,8 +314,16 @@ void W_Init (void)
 	Z_Free(wadfileptr);
 }
 
+char retname[9];
+
 char *W_GetNameForNum(int num) {
-	return lumpinfo[num].name;
+	memset(retname,0,9);
+    int ln_len = strlen(lumpinfo[num].name);
+    if(ln_len > 8) ln_len = 8;
+    memcpy(retname, lumpinfo[num].name, ln_len);
+	retname[0] &= 0x7f;
+
+	return retname;//lumpinfo[num].name;
 }
 
 /*

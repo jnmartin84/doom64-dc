@@ -16,6 +16,7 @@
 #define s8 int8_t
 
 #include "i_main.h"
+#define MAX_CACHED_SPRITES 256
 
 #define VERTBUF_SIZE (768*1024)
 
@@ -33,6 +34,8 @@
 #define D64_PVR_REPACK_COLOR(color) (((color >> 8) & 0x00ffffff) | (color << 24))
 #define D64_PVR_REPACK_COLOR_ALPHA(color,a) (((color >> 8) & 0x00ffffff) | (a << 24))
 #define D64_PVR_PACK_COLOR(a,r,g,b) ((a << 24) | (r << 16) | (g << 8) | b)
+
+short SwapShort(short dat);
 
 typedef struct {
 	pvr_vertex_t v;

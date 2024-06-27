@@ -887,6 +887,18 @@ void F_Drawer(void) // 800039DC
 	I_DrawFrame();
 }
 extern uint32_t lighted_color(uint32_t c, float lc);
+static inline uint32_t np2(uint32_t v) {
+v--;
+v |= v >> 1;
+v |= v >> 2;
+v |= v >> 4;
+v |= v >> 8;
+v |= v >> 16;
+v++;
+return v;
+}
+
+pvr_ptr_t pvranysprite = 0;
 
 void BufferedDrawSprite(int type, state_t *state, int rotframe, int color, int xpos, int ypos) // 80003D1C
 {
@@ -958,10 +970,43 @@ void BufferedDrawSprite(int type, state_t *state, int rotframe, int color, int x
 	}
 
 	pvr_poly_hdr_t *theheader;
+	pvr_poly_cxt_t cxtanysprite;
+	pvr_poly_hdr_t hdranysprite;
 	float xl;
 	float xh;
 	float u0,v0,u1,v1;
+int wp2 = np2(width);
+int hp2 = np2(height);
+	if (pvranysprite) {
+		pvr_mem_free(pvranysprite);
+	}
+	pvranysprite = pvr_mem_malloc(wp2*hp2);
 
+	pvr_poly_cxt_txr(&cxtanysprite, PVR_LIST_TR_POLY, PVR_TXRFMT_PAL8BPP | PVR_TXRFMT_8BPP_PAL(0) | PVR_TXRFMT_TWIDDLED, wp2, hp2, pvranysprite, PVR_FILTER_BILINEAR);
+
+//	cxt_troo[0][cached_index].gen.specular = PVR_SPECULAR_ENABLE;
+//	cxt_troo[0][cached_index].gen.fog_type = PVR_FOG_TABLE;
+//	cxt_troo[0][cached_index].gen.fog_type2 = PVR_FOG_TABLE;
+	pvr_poly_compile(&hdranysprite, &cxtanysprite);
+	void *src = data + sizeof(spriteN64_t);
+	pvr_txr_load(src, pvranysprite, wp2*hp2);
+
+	if (!flip) {
+		xl = (float)(xpos - xoffs)*2.0f;
+		xh = xl + ((float)width * 2.0f);
+		u0 = (1.0f / (float)wp2);
+		u1 = ((float)width / (float)wp2) - (1.0f / (float)wp2);
+	} else {
+		xh = (float)(xpos - xoffs)*2.0f;
+		xl = xh + ((float)width * 2.0f);
+		u1 = (1.0f / (float)wp2);
+		u0 = ((float)width / (float)wp2) - (1.0f / (float)wp2);
+	}
+	v0 = (1.0f / (float)hp2);
+	v1 = ((float)height / (float)hp2) - (1.0f / (float)hp2);
+theheader = &hdranysprite;	
+
+#if 0
 	if(external_pal && mobjinfo[type].palette) {
 		theheader = headers2_for_sprites[lump];
 		if (!flip) {
@@ -993,7 +1038,7 @@ void BufferedDrawSprite(int type, state_t *state, int rotframe, int color, int x
 		v0 = all_v[lump];
 		v1 = all_v[lump] + ((float)height / 1024.0f);
 	}
-
+#endif
 	float yl = (float)(ypos - yoffs) * 2.0f;
 	float yh = yl + ((float)height * 2.0f);
 
