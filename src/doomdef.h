@@ -35,6 +35,17 @@
 #define D64_PVR_REPACK_COLOR_ALPHA(color,a) (((color >> 8) & 0x00ffffff) | (a << 24))
 #define D64_PVR_PACK_COLOR(a,r,g,b) ((a << 24) | (r << 16) | (g << 8) | b)
 
+#define REAL_SCREEN_WD 640
+//#define REAL_SCREEN_WD 320
+#define SCREEN_WD 320
+
+#define REAL_SCREEN_HT 480
+//#define REAL_SCREEN_HT 240
+#define SCREEN_HT 240
+
+#define RES_RATIO (REAL_SCREEN_WD / SCREEN_WD)
+
+
 short SwapShort(short dat);
 
 typedef struct {
@@ -60,10 +71,15 @@ static inline void perspdiv(d64Vertex_t *v)
 {
 	float invw = 1.0f / v->w;
 	float x = v->v.x * invw;
-	x = (1.0f + x) * 320.0f;
+#if REAL_SCREEN_WD == 640	
+	x = (1.0f + x) * 320.0f;//(REAL_SCREEN_WD / RES_RATIO);
 	float y = v->v.y * invw;
-	y = (1.0f - y) * 240.0f; 
-
+	y = (1.0f - y) * 240.0f;//(REAL_SCREEN_HT / RES_RATIO);
+#else
+	x = (1.0f + x) * 160.0f;
+	float y = v->v.y * invw;
+	y = (1.0f - y) * 120.0f;
+#endif
 	v->v.x = x;
 	v->v.y = y;
 
@@ -272,7 +288,7 @@ typedef enum
 /* */
 /* library replacements */
 /* */
-
+#include <string.h>
 //void D_memset (void *dest, int val, int count);
 //void D_memcpy (void *dest, void *src, int count);
 //void D_strncpy (char *dest, char *src, int maxcount);
@@ -830,6 +846,8 @@ typedef struct {
 
 void	W_Init (void);
 
+char *W_GetNameForNum (int lump);
+
 int     W_CheckNumForName (char *name, int hibit1, int hibit2);
 int		W_GetNumForName (char *name);
 
@@ -838,6 +856,16 @@ void	W_ReadLump (int lump, void *dest, decodetype dectype);
 
 void	*W_CacheLumpNum (int lump, int tag, decodetype dectype);
 void	*W_CacheLumpName (char *name, int tag, decodetype dectype);
+
+int     W_S2_CheckNumForName (char *name, int hibit1, int hibit2);
+int		W_S2_GetNumForName (char *name);
+
+int		W_S2_LumpLength (int lump);
+void	W_S2_ReadLump (int lump, void *dest, decodetype dectype);
+
+void	*W_S2_CacheLumpNum (int lump, int tag, decodetype dectype);
+void	*W_S2_CacheLumpName (char *name, int tag, decodetype dectype);
+
 
 void	W_OpenMapWad(int mapnum);
 void    W_FreeMapLump(void);

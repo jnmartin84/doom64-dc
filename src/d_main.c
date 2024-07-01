@@ -171,8 +171,7 @@ int MiniLoop(void(*start)(void), void(*stop)(),
 
 	while (true)
 	{
-//				snd_stream_poll(doomstrm);
-uint64_t start_time = timer_us_gettime64();
+		uint64_t start_time = timer_us_gettime64();
 		vblsinframe[0] = drawsync1;
 
 		// get buttons for next tic
@@ -184,8 +183,8 @@ uint64_t start_time = timer_us_gettime64();
 		//Read|Write demos
 		if (demorecording || demoplayback) {
 			if (demoplayback) {
-last_Ltrig = 255;
-last_Rtrig = 255;
+				last_Ltrig = 255;
+				last_Rtrig = 255;
 				if (buttons & (ALL_JPAD|ALL_BUTTONS)) {
 					exit = ga_exit;
 					break;
@@ -211,13 +210,13 @@ last_Rtrig = 255;
 			ticsinframe = (ticon >> 1);
 		}
 
-        S_UpdateSounds();
+		S_UpdateSounds();
 
 		if (disabledrawing == false) {
 			exit = ticker();
 			if (exit != ga_nothing)
 				break;
-		
+
 			vid_waitvbl();
 			pvr_scene_begin();
 			pvr_set_vertbuf(PVR_LIST_OP_POLY, op_buf, VERTBUF_SIZE);
@@ -229,20 +228,17 @@ last_Rtrig = 255;
 			pvr_wait_ready();
 		}
 		gamevbls = gametic;
-		//thd_pass();
+
 #if 1
-//uint64_t end_time = timer_us_gettime64();
-uint64_t sleeptime = timer_us_gettime64() - start_time;
-	if(sleeptime < 33333)
-		usleep(33333 - sleeptime);
-	//		vid_waitvbl();
-
-
+		uint64_t end_time = timer_us_gettime64();
+		//uint64_t sleeptime = timer_us_gettime64() - start_time;
+		if((end_time - start_time) < 33333)
+			usleep(33333 - (end_time - start_time));
 #endif
-framecount += 1;
+		framecount += 1;
 	}
 
-	I_GetScreenGrab();
+//	I_GetScreenGrab();
 
 //	if(stop != NULL)
 	if((uintptr_t)stop > 0x80000000) //!= NULL)

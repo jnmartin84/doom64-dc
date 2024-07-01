@@ -2615,7 +2615,7 @@ void M_DrawBackground(int x, int y, int color, char *name, float z, int num) // 
 					g = (rgb>>8)&0xff;
 					b = rgb&0xff;
 //				}
-#endif		
+#endif
 				bgpal[j] = get_color_argb1555(r,g,b,a);
 			}
 		}
@@ -2643,26 +2643,26 @@ void M_DrawBackground(int x, int y, int color, char *name, float z, int num) // 
 
 	pvr_vertex_t *vert = verts;
 
-	vert->x = (float)(x*2.0f);
-	vert->y = (float)((y + bg_last_height[num])*2.0f);
+	vert->x = (float)(x * RES_RATIO);
+	vert->y = (float)((y + bg_last_height[num]) * RES_RATIO);
 	vert->u = u0;
 	vert->v = v1;
 	vert++;
 
-	vert->x = (float)(x*2.0f);
-	vert->y = (float)(y*2.0f);
+	vert->x = (float)(x * RES_RATIO);
+	vert->y = (float)(y * RES_RATIO);
 	vert->u = u0;
 	vert->v = v0;
 	vert++;
 
-	vert->x = (float)((x+bg_last_width[num])*2.0f);
-	vert->y = (float)((y+bg_last_height[num])*2.0f);
+	vert->x = (float)((x+bg_last_width[num]) * RES_RATIO);
+	vert->y = (float)((y+bg_last_height[num]) * RES_RATIO);
 	vert->u = u1;
 	vert->v = v1;
 	vert++;
 
-	vert->x = (float)((x+bg_last_width[num])*2.0f);
-	vert->y = (float)(y*2.0f);
+	vert->x = (float)((x+bg_last_width[num]) * RES_RATIO);
+	vert->y = (float)(y * RES_RATIO);
 	vert->u = u1;
 	vert->v = v0;
 
@@ -2674,7 +2674,6 @@ void M_DrawBackground(int x, int y, int color, char *name, float z, int num) // 
 
 void M_DrawOverlay(int x, int y, int w, int h, int color) // 80009F58
 {
-    I_CheckGFX();
 	pvr_poly_cxt_t cxt;
 	pvr_poly_hdr_t hdr;
 	pvr_vertex_t __attribute__((aligned(32))) verts[3];
@@ -2703,20 +2702,20 @@ void M_DrawOverlay(int x, int y, int w, int h, int color) // 80009F58
 	pvr_list_prim(PVR_LIST_TR_POLY, &hdr, sizeof(pvr_poly_hdr_t));
 	pvr_vertex_t *vert = verts;
 
-	vert->x = (float)(x*2.0f);
-	vert->y = (float)(y*2.0f);
+	vert->x = (float)(x * RES_RATIO);
+	vert->y = (float)(y * RES_RATIO);
 	vert->u = u0;
 	vert->v = v0;
 	vert++;
 
-	vert->x = (float)((x+w)*2.0f);
-	vert->y = (float)(y*2.0f);
+	vert->x = (float)((x+w) * RES_RATIO);
+	vert->y = (float)(y * RES_RATIO);
 	vert->u = u1;
 	vert->v = v0;
 	vert++;
 
-	vert->x = (float)((x+w)*2.0f);
-	vert->y = (float)((y+h)*2.0f);
+	vert->x = (float)((x+w) * RES_RATIO);
+	vert->y = (float)((y+h) * RES_RATIO);
 	vert->u = u1;
 	vert->v = v1;
 	pvr_list_prim(PVR_LIST_TR_POLY, &verts, sizeof(verts));
@@ -2724,20 +2723,20 @@ void M_DrawOverlay(int x, int y, int w, int h, int color) // 80009F58
 	pvr_list_prim(PVR_LIST_TR_POLY, &hdr, sizeof(pvr_poly_hdr_t));
 	vert = verts;
 
-	vert->x = (float)(x*2.0f);
-	vert->y = (float)(y*2.0f);
+	vert->x = (float)(x * RES_RATIO);
+	vert->y = (float)(y * RES_RATIO);
 	vert->u = u0;
 	vert->v = v0;
 	vert++;
 
-	vert->x = (float)((x+w)*2.0f);
-	vert->y = (float)((y+h)*2.0f);
+	vert->x = (float)((x+w) * RES_RATIO);
+	vert->y = (float)((y+h) * RES_RATIO);
 	vert->u = u1;
 	vert->v = v1;
 	vert++;
 
-	vert->x = (float)(x*2.0f);
-	vert->y = (float)((y+h)*2.0f);
+	vert->x = (float)(x * RES_RATIO);
+	vert->y = (float)((y+h) * RES_RATIO);
 	vert->u = u0;
 	vert->v = v1;
 
@@ -2745,8 +2744,6 @@ void M_DrawOverlay(int x, int y, int w, int h, int color) // 80009F58
 
 
     globallump = -1;
-	
-	
 }
 
 int M_ScreenTicker(void) // 8000A0F8

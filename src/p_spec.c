@@ -183,13 +183,11 @@ void P_CachePvrTexture(int i, int tag)
 	free(copy);
 }
 
-extern pvr_ptr_t pvr_troo[MAX_CACHED_SPRITES];
-extern pvr_poly_hdr_t hdr_troo[2][MAX_CACHED_SPRITES];
-extern pvr_poly_cxt_t cxt_troo[2][MAX_CACHED_SPRITES];
-extern uint8_t __attribute__((aligned(32))) tmptroo[256*256];
 int donebefore = 0;
-extern int lump_frame[575];
-extern int used_lumps[575];
+
+extern pvr_ptr_t pvr_troo[MAX_CACHED_SPRITES];
+extern int lump_frame[(575+310)];
+extern int used_lumps[(575+310)];
 extern int used_lump_idx;
 extern int del_idx;
 
@@ -199,20 +197,20 @@ void P_Init (void) // 8001F340
 	sector_t    *sector;
 	side_t      *side;
 
-		dbgio_printf("initing the lump caching arrays and indices\n");
-if (donebefore) {
-		for (int i=0;i<575;i++) {
+	dbgio_printf("initing the lump caching arrays and indices\n");
+	if (donebefore) {
+		for (int i=0;i<(575+310);i++) {
 			if (used_lumps[i] != -1) {
 				pvr_mem_free(pvr_troo[used_lumps[i]]);
 			}
 		}
-}
-		memset(used_lumps, -1, sizeof(int)*575);
-		memset(lump_frame, -1, sizeof(int)*575);
-		used_lump_idx = 0;
-		del_idx = 0;
-		//total_cached_vram = 0;
-donebefore = 1;
+	}
+	memset(used_lumps, 0xff, sizeof(int)*(575+310));
+	memset(lump_frame, 0xff, sizeof(int)*(575+310));
+	used_lump_idx = 0;
+	del_idx = 0;
+	//total_cached_vram = 0;
+	donebefore = 1;
 
 	if (P_Init_calls) {
 		/* clear previously cached pvr textures */

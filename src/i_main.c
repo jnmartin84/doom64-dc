@@ -59,15 +59,20 @@ int VID_MSG_VBI = 0;
 void vblfunc(uint32_t c, void *d)
 {
 //	mutex_lock(&st_mutex);
-	VID_MSG_VBI = 1;
+//	VID_MSG_VBI = 1;
 //	mutex_unlock(&st_mutex);
+	vsync++;
 }
 
 int __attribute__((noreturn)) main(int argc, char **argv)
 {
 	dbgio_dev_select("serial");
 //	dbgio_dev_select("fb");
+#if REAL_SCREEN_WD == 640
 	vid_set_mode(DM_640x480, PM_RGB565);
+#else
+	vid_set_mode(DM_320x240, PM_RGB565);
+#endif
 	pvr_init(&pvr_params);
 
 	mutex_init(&st_mutex, MUTEX_TYPE_NORMAL);
@@ -100,11 +105,12 @@ void *I_SystemTicker(void *arg)
 
 	while(true) {
 		
-		if (VID_MSG_VBI) {
-			vsync++;
+//		if (VID_MSG_VBI) 
+		{
+//			vsync++;
 
 	//		mutex_lock(&st_mutex);
-			VID_MSG_VBI = 0;
+//			VID_MSG_VBI = 0;
 	//		mutex_unlock(&st_mutex);
 		
 			if (side & 1) {
@@ -354,6 +360,7 @@ void I_WIPE_MeltScreen(void)
 	memset(fb, 0, FB_TEX_SIZE);
 
 	save = irq_disable();
+#if REAL_SCREEN_WD == 640
 	for (uint32_t y=0;y<480;y+=2) {
 		for (uint32_t x=0;x<640;x+=2) {
 			// (y/2) * 512 == y << 8 
@@ -361,6 +368,14 @@ void I_WIPE_MeltScreen(void)
 			fb[(y << 8) + (x >> 1)] = vram_s[((y<<9) + (y<<7)) + x];
 		}
 	}
+#else
+	for (uint32_t y=0;y<240;y++) {
+//		memcpy(fb + (y*1024), vram_s + (y*640), 640);
+		for (uint32_t x=0;x<320;x++) {
+			fb[(y << 9) + x] = vram_s[(y<<8) + (y<<6) + x];
+		}
+	}
+#endif
 	irq_restore(save);
 	
 	pvr_txr_load(fb, pvrfb, FB_TEX_SIZE);
@@ -384,8 +399,8 @@ void I_WIPE_MeltScreen(void)
 	v1 = 0.9375f; // 240.0f / 256.0f;
 	x0 = 0.0f;
 	y0 = 0.0f;
-	x1 = 639.0f;
-	y1 = 479.0f;
+	x1 = REAL_SCREEN_WD - 1;//639.0f;
+	y1 = REAL_SCREEN_HT - 1;//479.0f;
 	y0a = y0;
 	y1a = y1;
 
@@ -468,6 +483,7 @@ void I_WIPE_MeltScreen(void)
 		pvr_wait_ready();
 
 		save = irq_disable();
+#if REAL_SCREEN_WD == 640
 		for (uint32_t y=0;y<480;y+=2) {
 			for (uint32_t x=0;x<640;x+=2) {
 				// (y/2) * 512 == y << 8 
@@ -475,12 +491,24 @@ void I_WIPE_MeltScreen(void)
 				fb[(y << 8) + (x >> 1)] = vram_s[((y<<9) + (y<<7)) + x];
 			}
 		}
+#else
+	for (uint32_t y=0;y<240;y++) {
+//		memcpy(fb + (y*1024), vram_s + (y*640), 640);
+		for (uint32_t x=0;x<320;x++) {
+			fb[(y << 9) + x] = vram_s[(y<<8) + (y<<6) + x];
+		}
+	}
+#endif
 		irq_restore(save);
 
 		pvr_txr_load(fb, pvrfb, FB_TEX_SIZE);
+#if REAL_SCREEN_WD == 640
 		y0a += 4.0f;
 		y1a += 4.0f;
-
+#else
+		y0a += 2.0f;
+		y1a += 2.0f;
+#endif
 		usleep(US_ONE_FRAME);
 	}
 	
@@ -519,6 +547,7 @@ void I_WIPE_FadeOutScreen(void) // 80006D34
 	memset(fb, 0, FB_TEX_SIZE);
 
 	save = irq_disable();
+#if REAL_SCREEN_WD == 640
 	for (uint32_t y=0;y<480;y+=2) {
 		for (uint32_t x=0;x<640;x+=2) {
 			// (y/2) * 512 == y << 8 
@@ -526,6 +555,14 @@ void I_WIPE_FadeOutScreen(void) // 80006D34
 			fb[(y << 8) + (x >> 1)] = vram_s[((y<<9) + (y<<7)) + x];
 		}
 	}
+#else
+	for (uint32_t y=0;y<240;y++) {
+//		memcpy(fb + (y*1024), vram_s + (y*640), 640);
+		for (uint32_t x=0;x<320;x++) {
+			fb[(y << 9) + x] = vram_s[(y<<8) + (y<<6) + x];
+		}
+	}
+#endif
 	irq_restore(save);
 	
 	pvr_txr_load(fb, pvrfb, FB_TEX_SIZE);
@@ -548,8 +585,8 @@ void I_WIPE_FadeOutScreen(void) // 80006D34
 	v1 = 0.9375f; // 240.0f / 256.0f;
 	x0 = 0.0f;
 	y0 = 0.0f;
-	x1 = 639.0f;
-	y1 = 479.0f;
+	x1 = REAL_SCREEN_WD - 1;//639.0f;
+	y1 = REAL_SCREEN_HT - 1;//479.0f;
 	for (int vn = 0; vn < 4; vn++) {
 		verts[vn].flags = PVR_CMD_VERTEX;
 		verts[vn].z = 5.0f;

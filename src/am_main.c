@@ -18,7 +18,7 @@ fixed_t am_box[4]; // 80063110
 int am_plycolor;    // 80063120
 int am_plyblink;    // 80063124
 
-#define LINEWIDTH 2.0f
+#define LINEWIDTH (1.0f * RES_RATIO)
 
 extern boolean M_BoxIntersect(fixed_t a[static 4], fixed_t b[static 4]);
 
@@ -569,20 +569,20 @@ void AM_DrawLineThings(fixed_t x, fixed_t y, angle_t angle, int color) {
 
 	dVTX[1]->v.x = (float)(((finecosine[ang] << 5) + x) >> FRACBITS);
 	dVTX[1]->v.y = 0.0f;
-	dVTX[1]->v.z = (float)(-((finesine[ang] << 5) + y) >> FRACBITS);	
+	dVTX[1]->v.z = (float)(-((finesine[ang] << 5) + y) >> FRACBITS);
 
 	ang = (angle + 0x60000000) >> ANGLETOFINESHIFT;
 
 	dVTX[2]->v.x = (float)(((finecosine[ang] << 5) + x) >> FRACBITS);
 	dVTX[2]->v.y = 0.0f;
-	dVTX[2]->v.z = (float)(-((finesine[ang] << 5) + y) >> FRACBITS);	
+	dVTX[2]->v.z = (float)(-((finesine[ang] << 5) + y) >> FRACBITS);
 
 	transform_vert(dVTX[0]);
 	transform_vert(dVTX[1]);
 	transform_vert(dVTX[2]);
 	perspdiv(dVTX[0]);
 	perspdiv(dVTX[1]);
-	perspdiv(dVTX[2]);	
+	perspdiv(dVTX[2]);
 
 	d64Vertex_t *v0,*v1;
 	int lvert = 0;
@@ -590,352 +590,352 @@ void AM_DrawLineThings(fixed_t x, fixed_t y, angle_t angle, int color) {
 
 	pvr_list_prim(PVR_LIST_OP_POLY, &hdr, sizeof(hdr));
 	{
-				int x1,y1,x2,y2;
-				
-				if ((int)(dVTX[0]->v.x) == (int)(dVTX[1]->v.x)) {
-					lvert = 1;
-					if((int)(dVTX[0]->v.y) > (int)(dVTX[1]->v.y)) {
-						v0 = dVTX[1];
-						v1 = dVTX[0];
-					} else {
-						v0 = dVTX[0];
-						v1 = dVTX[1];
-					}
-				} else if ((int)(dVTX[0]->v.y) == (int)(dVTX[1]->v.y)) {
-					lhori = 1;
-					if((int)(dVTX[0]->v.x) < (int)(dVTX[1]->v.x)) {					
-						v0 = dVTX[0];
-						v1 = dVTX[1];
-					} else {
-						v0 = dVTX[1];
-						v1 = dVTX[0];
-					}
-				} else if((int)(dVTX[0]->v.x) < (int)(dVTX[1]->v.x)) {
-						v0 = dVTX[0];
-						v1 = dVTX[1];
-				} else if((int)(dVTX[0]->v.x) > (int)(dVTX[1]->v.x)) {
-						v0 = dVTX[1];
-						v1 = dVTX[0];
-				}
-				
-				x1 = v0->v.x;
-				y1 = v0->v.y;
+		int x1,y1,x2,y2;
 
-				x2 = v1->v.x;
-				y2 = v1->v.y;
-				
-				//https://dcemulation.org/index.php?title=PowerVR_Introduction
-				//thank you bluecrab thank you blackaura
-				if (lhori) {
-					x1 -= (LINEWIDTH*0.5f);
-					x2 -= (LINEWIDTH*0.5f);
-					y1 -= (LINEWIDTH*0.5f);
-					y2 -= (LINEWIDTH*0.5f);
-					
-					vert->x = x1;
-					vert->y = y1 + LINEWIDTH;
-					vert->z = v0->v.z;
-					vert++;
-					
-					vert->x = x1;
-					vert->y = y1;
-					vert->z = v0->v.z;
-					vert++;
-
-					vert->x = x2;
-					vert->y = y2 + LINEWIDTH;
-					vert->z = v1->v.z;
-					vert++;
-
-					vert->x = x2;
-					vert->y = y2;
-					vert->z = v1->v.z;
-					vert++;
-				} else if (lvert) {
-					x1 -= (LINEWIDTH*0.5f);
-					x2 -= (LINEWIDTH*0.5f);
-					y1 -= (LINEWIDTH*0.5f);
-					y2 -= (LINEWIDTH*0.5f);
-
-					vert->x = x2;
-					vert->y = y2;
-					vert->z = v1->v.z;
-					vert++;
-
-					vert->x = x1;
-					vert->y = y1;
-					vert->z = v0->v.z;
-					vert++;
-					
-					vert->x = x2 + LINEWIDTH;
-					vert->y = y2;
-					vert->z = v1->v.z;
-					vert++;
-					
-					vert->x = x1 + LINEWIDTH;
-					vert->y = y1;
-					vert->z = v0->v.z;
-					vert++;
-				} else {
-					// https://devcry.heiho.net/html/2017/20170820-opengl-line-drawing.html
-					float dx = x2 - x1;
-					float dy = y2 - y1;
-
-					float hlw_invmag = frsqrt((dx*dx) + (dy*dy)) * (LINEWIDTH*0.5f);
-					float nx = -dy * hlw_invmag;
-					float ny = dx * hlw_invmag;
-
-					vert->x = x1 + nx;
-					vert->y = y1 + ny;
-					vert->z = v0->v.z;
-					vert++;
-
-					vert->x = x1 - nx;
-					vert->y = y1 - ny;
-					vert->z = v1->v.z;
-					vert++;
-					
-					vert->x = x2 + nx;
-					vert->y = y2 + ny;
-					vert->z = v0->v.z;
-					vert++;
-					
-					vert->x = x2 - nx;
-					vert->y = y2 - ny;
-					vert->z = v1->v.z;
-					vert++;
-				}
+		if ((int)(dVTX[0]->v.x) == (int)(dVTX[1]->v.x)) {
+			lvert = 1;
+			if((int)(dVTX[0]->v.y) > (int)(dVTX[1]->v.y)) {
+				v0 = dVTX[1];
+				v1 = dVTX[0];
+			} else {
+				v0 = dVTX[0];
+				v1 = dVTX[1];
 			}
-			lvert = 0;
-			lhori = 0;
-			{
-				int x1,y1,x2,y2;
-				
-				if ((int)(dVTX[1]->v.x) == (int)(dVTX[2]->v.x)) {
-					lvert = 1;
-					if((int)(dVTX[1]->v.y) > (int)(dVTX[2]->v.y)) {
-						v0 = dVTX[2];
-						v1 = dVTX[1];
-					} else {
-						v0 = dVTX[1];
-						v1 = dVTX[2];
-					}
-				} else if ((int)(dVTX[1]->v.y) == (int)(dVTX[2]->v.y)) {
-					lhori = 1;
-					if((int)(dVTX[1]->v.x) < (int)(dVTX[2]->v.x)) {					
-						v0 = dVTX[1];
-						v1 = dVTX[2];
-					} else {
-						v0 = dVTX[2];
-						v1 = dVTX[1];
-					}
-				} else if((int)(dVTX[1]->v.x) < (int)(dVTX[2]->v.x)) {
-						v0 = dVTX[1];
-						v1 = dVTX[2];
-				} else if((int)(dVTX[1]->v.x) > (int)(dVTX[2]->v.x)) {
-						v0 = dVTX[2];
-						v1 = dVTX[1];
-				}
-				
-				x1 = v0->v.x;
-				y1 = v0->v.y;
-
-				x2 = v1->v.x;
-				y2 = v1->v.y;
-
-				if (lhori) {
-					x1 -= (LINEWIDTH*0.5f);
-					x2 -= (LINEWIDTH*0.5f);
-					y1 -= (LINEWIDTH*0.5f);
-					y2 -= (LINEWIDTH*0.5f);
-					
-					vert->x = x1;
-					vert->y = y1 + LINEWIDTH;
-					vert->z = v0->v.z;
-					vert++;
-					
-					vert->x = x1;
-					vert->y = y1;
-					vert->z = v0->v.z;
-					vert++;
-
-					vert->x = x2;
-					vert->y = y2 + LINEWIDTH;
-					vert->z = v1->v.z;
-					vert++;
-
-					vert->x = x2;
-					vert->y = y2;
-					vert->z = v1->v.z;
-					vert++;
-				} else if (lvert) {
-					x1 -= (LINEWIDTH*0.5f);
-					x2 -= (LINEWIDTH*0.5f);
-					y1 -= (LINEWIDTH*0.5f);
-					y2 -= (LINEWIDTH*0.5f);
-
-					vert->x = x2;
-					vert->y = y2;
-					vert->z = v1->v.z;
-					vert++;
-
-					vert->x = x1;
-					vert->y = y1;
-					vert->z = v0->v.z;
-					vert++;
-					
-					vert->x = x2 + LINEWIDTH;
-					vert->y = y2;
-					vert->z = v1->v.z;
-					vert++;
-					
-					vert->x = x1 + LINEWIDTH;
-					vert->y = y1;
-					vert->z = v0->v.z;
-					vert++;
-				} else {
-					float dx = x2 - x1;
-					float dy = y2 - y1;
-
-					float hlw_invmag = frsqrt((dx*dx) + (dy*dy)) * (LINEWIDTH*0.5f); float nx = -dy * hlw_invmag; float ny = dx * hlw_invmag;
-
-					vert->x = x1 + nx;
-					vert->y = y1 + ny;
-					vert->z = v0->v.z;
-					vert++;
-
-					vert->x = x1 - nx;
-					vert->y = y1 - ny;
-					vert->z = v1->v.z;
-					vert++;
-					
-					vert->x = x2 + nx;
-					vert->y = y2 + ny;
-					vert->z = v0->v.z;
-					vert++;
-					
-					vert->x = x2 - nx;
-					vert->y = y2 - ny;
-					vert->z = v1->v.z;
-					vert++;
-				}
+		} else if ((int)(dVTX[0]->v.y) == (int)(dVTX[1]->v.y)) {
+			lhori = 1;
+			if((int)(dVTX[0]->v.x) < (int)(dVTX[1]->v.x)) {
+				v0 = dVTX[0];
+				v1 = dVTX[1];
+			} else {
+				v0 = dVTX[1];
+				v1 = dVTX[0];
 			}
-			lvert = 0;
-			lhori = 0;
-			{
-				int x1,y1,x2,y2;
-				
-				if ((int)(dVTX[2]->v.x) == (int)(dVTX[0]->v.x)) {
-					lvert = 1;
-					if((int)(dVTX[2]->v.y) > (int)(dVTX[0]->v.y)) {
-						v0 = dVTX[0];
-						v1 = dVTX[2];
-					} else {
-						v0 = dVTX[2];
-						v1 = dVTX[0];
-					}
-				} else if ((int)(dVTX[2]->v.y) == (int)(dVTX[0]->v.y)) {
-					lhori = 1;
-					if((int)(dVTX[2]->v.x) < (int)(dVTX[0]->v.x)) {					
-						v0 = dVTX[2];
-						v1 = dVTX[0];
-					} else {
-						v0 = dVTX[0];
-						v1 = dVTX[2];
-					}
-				} else if((int)(dVTX[2]->v.x) < (int)(dVTX[0]->v.x)) {
-						v0 = dVTX[2];
-						v1 = dVTX[0];
-				} else if((int)(dVTX[2]->v.x) > (int)(dVTX[0]->v.x)) {
-						v0 = dVTX[0];
-						v1 = dVTX[2];
-				}
-				
-				x1 = v0->v.x;
-				y1 = v0->v.y;
+		} else if((int)(dVTX[0]->v.x) < (int)(dVTX[1]->v.x)) {
+			v0 = dVTX[0];
+			v1 = dVTX[1];
+		} else if((int)(dVTX[0]->v.x) > (int)(dVTX[1]->v.x)) {
+			v0 = dVTX[1];
+			v1 = dVTX[0];
+		}
 
-				x2 = v1->v.x;
-				y2 = v1->v.y;
-				
-				pvr_list_prim(PVR_LIST_OP_POLY, &hdr, sizeof(hdr));
-				if (lhori) {
-					x1 -= (LINEWIDTH*0.5f);
-					x2 -= (LINEWIDTH*0.5f);
-					y1 -= (LINEWIDTH*0.5f);
-					y2 -= (LINEWIDTH*0.5f);
-					
-					vert->x = x1;
-					vert->y = y1 + LINEWIDTH;
-					vert->z = v0->v.z;
-					vert++;
-					
-					vert->x = x1;
-					vert->y = y1;
-					vert->z = v0->v.z;
-					vert++;
+		x1 = v0->v.x;
+		y1 = v0->v.y;
 
-					vert->x = x2;
-					vert->y = y2 + LINEWIDTH;
-					vert->z = v1->v.z;
-					vert++;
+		x2 = v1->v.x;
+		y2 = v1->v.y;
 
-					vert->x = x2;
-					vert->y = y2;
-					vert->z = v1->v.z;
-					vert++;
-				} else if (lvert) {
-					x1 -= (LINEWIDTH*0.5f);
-					x2 -= (LINEWIDTH*0.5f);
-					y1 -= (LINEWIDTH*0.5f);
-					y2 -= (LINEWIDTH*0.5f);
+		//https://dcemulation.org/index.php?title=PowerVR_Introduction
+		//thank you bluecrab thank you blackaura
+		if (lhori) {
+			x1 -= (LINEWIDTH*0.5f);
+			x2 -= (LINEWIDTH*0.5f);
+			y1 -= (LINEWIDTH*0.5f);
+			y2 -= (LINEWIDTH*0.5f);
 
-					vert->x = x2;
-					vert->y = y2;
-					vert->z = v1->v.z;
-					vert++;
+			vert->x = x1;
+			vert->y = y1 + LINEWIDTH;
+			vert->z = v0->v.z;
+			vert++;
 
-					vert->x = x1;
-					vert->y = y1;
-					vert->z = v0->v.z;
-					vert++;
-					
-					vert->x = x2 + LINEWIDTH;
-					vert->y = y2;
-					vert->z = v1->v.z;
-					vert++;
-					
-					vert->x = x1 + LINEWIDTH;
-					vert->y = y1;
-					vert->z = v0->v.z;
-					vert++;
-				} else {
-					float dx = x2 - x1;
-					float dy = y2 - y1;
+			vert->x = x1;
+			vert->y = y1;
+			vert->z = v0->v.z;
+			vert++;
 
-					float hlw_invmag = frsqrt((dx*dx) + (dy*dy)) * (LINEWIDTH*0.5f);
-					float nx = -dy * hlw_invmag;
-					float ny = dx * hlw_invmag;
+			vert->x = x2;
+			vert->y = y2 + LINEWIDTH;
+			vert->z = v1->v.z;
+			vert++;
 
-					vert->x = x1 + nx;
-					vert->y = y1 + ny;
-					vert->z = v0->v.z;
-					vert++;
+			vert->x = x2;
+			vert->y = y2;
+			vert->z = v1->v.z;
+			vert++;
+		} else if (lvert) {
+			x1 -= (LINEWIDTH*0.5f);
+			x2 -= (LINEWIDTH*0.5f);
+			y1 -= (LINEWIDTH*0.5f);
+			y2 -= (LINEWIDTH*0.5f);
 
-					vert->x = x1 - nx;
-					vert->y = y1 - ny;
-					vert->z = v1->v.z;
-					vert++;
-					
-					vert->x = x2 + nx;
-					vert->y = y2 + ny;
-					vert->z = v0->v.z;
-					vert++;
-					
-					vert->x = x2 - nx;
-					vert->y = y2 - ny;
-					vert->z = v1->v.z;
-					vert++;
-				}
+			vert->x = x2;
+			vert->y = y2;
+			vert->z = v1->v.z;
+			vert++;
+
+			vert->x = x1;
+			vert->y = y1;
+			vert->z = v0->v.z;
+			vert++;
+
+			vert->x = x2 + LINEWIDTH;
+			vert->y = y2;
+			vert->z = v1->v.z;
+			vert++;
+
+			vert->x = x1 + LINEWIDTH;
+			vert->y = y1;
+			vert->z = v0->v.z;
+			vert++;
+		} else {
+			// https://devcry.heiho.net/html/2017/20170820-opengl-line-drawing.html
+			float dx = x2 - x1;
+			float dy = y2 - y1;
+
+			float hlw_invmag = frsqrt((dx*dx) + (dy*dy)) * (LINEWIDTH*0.5f);
+			float nx = -dy * hlw_invmag;
+			float ny = dx * hlw_invmag;
+
+			vert->x = x1 + nx;
+			vert->y = y1 + ny;
+			vert->z = v0->v.z;
+			vert++;
+
+			vert->x = x1 - nx;
+			vert->y = y1 - ny;
+			vert->z = v1->v.z;
+			vert++;
+
+			vert->x = x2 + nx;
+			vert->y = y2 + ny;
+			vert->z = v0->v.z;
+			vert++;
+
+			vert->x = x2 - nx;
+			vert->y = y2 - ny;
+			vert->z = v1->v.z;
+			vert++;
+		}
+	}
+	lvert = 0;
+	lhori = 0;
+	{
+		int x1,y1,x2,y2;
+
+		if ((int)(dVTX[1]->v.x) == (int)(dVTX[2]->v.x)) {
+			lvert = 1;
+			if((int)(dVTX[1]->v.y) > (int)(dVTX[2]->v.y)) {
+				v0 = dVTX[2];
+				v1 = dVTX[1];
+			} else {
+				v0 = dVTX[1];
+				v1 = dVTX[2];
+			}
+		} else if ((int)(dVTX[1]->v.y) == (int)(dVTX[2]->v.y)) {
+			lhori = 1;
+			if((int)(dVTX[1]->v.x) < (int)(dVTX[2]->v.x)) {
+				v0 = dVTX[1];
+				v1 = dVTX[2];
+			} else {
+				v0 = dVTX[2];
+				v1 = dVTX[1];
+			}
+		} else if((int)(dVTX[1]->v.x) < (int)(dVTX[2]->v.x)) {
+				v0 = dVTX[1];
+				v1 = dVTX[2];
+		} else if((int)(dVTX[1]->v.x) > (int)(dVTX[2]->v.x)) {
+				v0 = dVTX[2];
+				v1 = dVTX[1];
+		}
+
+		x1 = v0->v.x;
+		y1 = v0->v.y;
+
+		x2 = v1->v.x;
+		y2 = v1->v.y;
+
+		if (lhori) {
+			x1 -= (LINEWIDTH*0.5f);
+			x2 -= (LINEWIDTH*0.5f);
+			y1 -= (LINEWIDTH*0.5f);
+			y2 -= (LINEWIDTH*0.5f);
+
+			vert->x = x1;
+			vert->y = y1 + LINEWIDTH;
+			vert->z = v0->v.z;
+			vert++;
+
+			vert->x = x1;
+			vert->y = y1;
+			vert->z = v0->v.z;
+			vert++;
+
+			vert->x = x2;
+			vert->y = y2 + LINEWIDTH;
+			vert->z = v1->v.z;
+			vert++;
+
+			vert->x = x2;
+			vert->y = y2;
+			vert->z = v1->v.z;
+			vert++;
+		} else if (lvert) {
+			x1 -= (LINEWIDTH*0.5f);
+			x2 -= (LINEWIDTH*0.5f);
+			y1 -= (LINEWIDTH*0.5f);
+			y2 -= (LINEWIDTH*0.5f);
+
+			vert->x = x2;
+			vert->y = y2;
+			vert->z = v1->v.z;
+			vert++;
+
+			vert->x = x1;
+			vert->y = y1;
+			vert->z = v0->v.z;
+			vert++;
+
+			vert->x = x2 + LINEWIDTH;
+			vert->y = y2;
+			vert->z = v1->v.z;
+			vert++;
+
+			vert->x = x1 + LINEWIDTH;
+			vert->y = y1;
+			vert->z = v0->v.z;
+			vert++;
+		} else {
+			float dx = x2 - x1;
+			float dy = y2 - y1;
+
+			float hlw_invmag = frsqrt((dx*dx) + (dy*dy)) * (LINEWIDTH*0.5f); float nx = -dy * hlw_invmag; float ny = dx * hlw_invmag;
+
+			vert->x = x1 + nx;
+			vert->y = y1 + ny;
+			vert->z = v0->v.z;
+			vert++;
+
+			vert->x = x1 - nx;
+			vert->y = y1 - ny;
+			vert->z = v1->v.z;
+			vert++;
+
+			vert->x = x2 + nx;
+			vert->y = y2 + ny;
+			vert->z = v0->v.z;
+			vert++;
+
+			vert->x = x2 - nx;
+			vert->y = y2 - ny;
+			vert->z = v1->v.z;
+			vert++;
+		}
+	}
+	lvert = 0;
+	lhori = 0;
+	{
+		int x1,y1,x2,y2;
+
+		if ((int)(dVTX[2]->v.x) == (int)(dVTX[0]->v.x)) {
+			lvert = 1;
+			if((int)(dVTX[2]->v.y) > (int)(dVTX[0]->v.y)) {
+				v0 = dVTX[0];
+				v1 = dVTX[2];
+			} else {
+				v0 = dVTX[2];
+				v1 = dVTX[0];
+			}
+		} else if ((int)(dVTX[2]->v.y) == (int)(dVTX[0]->v.y)) {
+			lhori = 1;
+			if((int)(dVTX[2]->v.x) < (int)(dVTX[0]->v.x)) {
+				v0 = dVTX[2];
+				v1 = dVTX[0];
+			} else {
+				v0 = dVTX[0];
+				v1 = dVTX[2];
+			}
+		} else if((int)(dVTX[2]->v.x) < (int)(dVTX[0]->v.x)) {
+				v0 = dVTX[2];
+				v1 = dVTX[0];
+		} else if((int)(dVTX[2]->v.x) > (int)(dVTX[0]->v.x)) {
+				v0 = dVTX[0];
+				v1 = dVTX[2];
+		}
+
+		x1 = v0->v.x;
+		y1 = v0->v.y;
+
+		x2 = v1->v.x;
+		y2 = v1->v.y;
+
+		pvr_list_prim(PVR_LIST_OP_POLY, &hdr, sizeof(hdr));
+		if (lhori) {
+			x1 -= (LINEWIDTH*0.5f);
+			x2 -= (LINEWIDTH*0.5f);
+			y1 -= (LINEWIDTH*0.5f);
+			y2 -= (LINEWIDTH*0.5f);
+
+			vert->x = x1;
+			vert->y = y1 + LINEWIDTH;
+			vert->z = v0->v.z;
+			vert++;
+
+			vert->x = x1;
+			vert->y = y1;
+			vert->z = v0->v.z;
+			vert++;
+
+			vert->x = x2;
+			vert->y = y2 + LINEWIDTH;
+			vert->z = v1->v.z;
+			vert++;
+
+			vert->x = x2;
+			vert->y = y2;
+			vert->z = v1->v.z;
+			vert++;
+		} else if (lvert) {
+			x1 -= (LINEWIDTH*0.5f);
+			x2 -= (LINEWIDTH*0.5f);
+			y1 -= (LINEWIDTH*0.5f);
+			y2 -= (LINEWIDTH*0.5f);
+
+			vert->x = x2;
+			vert->y = y2;
+			vert->z = v1->v.z;
+			vert++;
+
+			vert->x = x1;
+			vert->y = y1;
+			vert->z = v0->v.z;
+			vert++;
+
+			vert->x = x2 + LINEWIDTH;
+			vert->y = y2;
+			vert->z = v1->v.z;
+			vert++;
+
+			vert->x = x1 + LINEWIDTH;
+			vert->y = y1;
+			vert->z = v0->v.z;
+			vert++;
+		} else {
+			float dx = x2 - x1;
+			float dy = y2 - y1;
+
+			float hlw_invmag = frsqrt((dx*dx) + (dy*dy)) * (LINEWIDTH*0.5f);
+			float nx = -dy * hlw_invmag;
+			float ny = dx * hlw_invmag;
+
+			vert->x = x1 + nx;
+			vert->y = y1 + ny;
+			vert->z = v0->v.z;
+			vert++;
+
+			vert->x = x1 - nx;
+			vert->y = y1 - ny;
+			vert->z = v1->v.z;
+			vert++;
+
+			vert->x = x2 + nx;
+			vert->y = y2 + ny;
+			vert->z = v0->v.z;
+			vert++;
+
+			vert->x = x2 - nx;
+			vert->y = y2 - ny;
+			vert->z = v1->v.z;
+			vert++;
+		}
 	}
 	pvr_list_prim(PVR_LIST_OP_POLY, &verts, sizeof(pvr_vertex_t)*12);
 }
@@ -978,7 +978,7 @@ void AM_DrawLine(player_t *player, fixed_t bbox[static 4])
 				color = COLOR_YELLOW;
 			else if (!(l->flags & ML_TWOSIDED)) /* ONE-SIDED LINE */
 				color = COLOR_RED;
-				
+
 			float x1 = (float)(l->v1->x >> 16);
 			float x2 = (float)(l->v2->x >> 16);
 
@@ -1009,9 +1009,9 @@ void AM_DrawLine(player_t *player, fixed_t bbox[static 4])
 				d64Vertex_t *v0,*v1;
 				int lvert = 0;
 				int lhori = 0;
-				
+
 				int x1,y1,x2,y2;
-				
+
 				if ((int)(dVTX[0]->v.x) == (int)(dVTX[2]->v.x)) {
 					lvert = 1;
 					if((int)(dVTX[0]->v.y) > (int)(dVTX[2]->v.y)) {
@@ -1023,7 +1023,7 @@ void AM_DrawLine(player_t *player, fixed_t bbox[static 4])
 					}
 				} else if ((int)(dVTX[0]->v.y) == (int)(dVTX[2]->v.y)) {
 					lhori = 1;
-					if((int)(dVTX[0]->v.x) < (int)(dVTX[2]->v.x)) {					
+					if((int)(dVTX[0]->v.x) < (int)(dVTX[2]->v.x)) {
 						v0 = dVTX[0];
 						v1 = dVTX[2];
 					} else {
@@ -1037,25 +1037,25 @@ void AM_DrawLine(player_t *player, fixed_t bbox[static 4])
 						v0 = dVTX[2];
 						v1 = dVTX[0];
 				}
-				
+
 				x1 = v0->v.x;
 				y1 = v0->v.y;
 
 				x2 = v1->v.x;
 				y2 = v1->v.y;
-				
+
 				pvr_list_prim(PVR_LIST_OP_POLY, &hdr, sizeof(hdr));
 				if (lhori) {
 					x1 -= (LINEWIDTH*0.5f);
 					x2 -= (LINEWIDTH*0.5f);
 					y1 -= (LINEWIDTH*0.5f);
 					y2 -= (LINEWIDTH*0.5f);
-					
+
 					vert->x = x1;
 					vert->y = y1 + LINEWIDTH;
 					vert->z = v0->v.z;
 					vert++;
-					
+
 					vert->x = x1;
 					vert->y = y1;
 					vert->z = v0->v.z;
@@ -1085,12 +1085,12 @@ void AM_DrawLine(player_t *player, fixed_t bbox[static 4])
 					vert->y = y1;
 					vert->z = v0->v.z;
 					vert++;
-					
+
 					vert->x = x2 + LINEWIDTH;
 					vert->y = y2;
 					vert->z = v1->v.z;
 					vert++;
-					
+
 					vert->x = x1 + LINEWIDTH;
 					vert->y = y1;
 					vert->z = v0->v.z;
@@ -1112,12 +1112,12 @@ void AM_DrawLine(player_t *player, fixed_t bbox[static 4])
 					vert->y = y1 - ny;
 					vert->z = v1->v.z;
 					vert++;
-					
+
 					vert->x = x2 + nx;
 					vert->y = y2 + ny;
 					vert->z = v0->v.z;
 					vert++;
-					
+
 					vert->x = x2 - nx;
 					vert->y = y2 - ny;
 					vert->z = v1->v.z;
@@ -1158,13 +1158,13 @@ void AM_DrawThings(fixed_t x, fixed_t y, angle_t angle, int color) // 80001834
 
 	dVTX[1]->v.x = (float)(((finecosine[ang] << 5) + x) >> FRACBITS);
 	dVTX[1]->v.y = 0.0f;
-	dVTX[1]->v.z = (float)(-((finesine[ang] << 5) + y) >> FRACBITS);	
+	dVTX[1]->v.z = (float)(-((finesine[ang] << 5) + y) >> FRACBITS);
 
 	ang = (angle + 0x60000000) >> ANGLETOFINESHIFT;
 
 	dVTX[2]->v.x = (float)(((finecosine[ang] << 5) + x) >> FRACBITS);
 	dVTX[2]->v.y = 0.0f;
-	dVTX[2]->v.z = (float)(-((finesine[ang] << 5) + y) >> FRACBITS);	
+	dVTX[2]->v.z = (float)(-((finesine[ang] << 5) + y) >> FRACBITS);
 
 	transform_vert(dVTX[0]);
 	transform_vert(dVTX[1]);
@@ -1184,7 +1184,7 @@ void AM_DrawThings(fixed_t x, fixed_t y, angle_t angle, int color) // 80001834
 	vert->y = dVTX[1]->v.y;
 	vert->z = dVTX[1]->v.z + 0.5;
 	vert++;
-					
+
 	vert->x = dVTX[2]->v.x;
 	vert->y = dVTX[2]->v.y;
 	vert->z = dVTX[2]->v.z + 0.5;

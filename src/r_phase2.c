@@ -60,8 +60,6 @@ void R_SetupSky(void) // 80025060
 	if (!pvrcloud) {
 		pvrcloud = pvr_mem_malloc(64*64*2);
 		pvr_poly_cxt_txr(&cloudcxt, PVR_LIST_OP_POLY, PVR_TXRFMT_ARGB1555, 64,64,pvrcloud,PVR_FILTER_BILINEAR);
-		//cloudcxt.txr.uv_flip = PVR_UVFLIP_NONE;
-		//dbgio_printf("loaded tex [%d][%d]\n", i,k);
 		cloudcxt.gen.specular = PVR_SPECULAR_ENABLE;
 		cloudcxt.depth.write = PVR_DEPTHWRITE_DISABLE;
 		pvr_poly_compile(&cloudhdr, &cloudcxt);
@@ -364,7 +362,6 @@ void R_RenderClouds(void) // 80025878
 	clip_quad(&dT1, &dT2, &cloudhdr, 0, PVR_LIST_OP_POLY, 1);
 }
 
-#define get_color_argb1555(rrr,ggg,bbb,aaa) ((uint16_t)(((aaa&1)<<15) | (((rrr>>3)&0x1f)<<10) | (((ggg>>3)&0x1f)<<5) | ((bbb>>3)&0x1f)))
 extern uint16_t bgpal[256];
 extern uint16_t biggest_bg[512*256];
 
@@ -479,25 +476,25 @@ void R_RenderSkyPic(int lump, int yoffset, int callno) // 80025BDC
 	pvr_vertex_t *vert = verts;
 
 	vert->x = (float)0;
-	vert->y = (float)(yl+height)*2.0;
+	vert->y = (float)(yl+height)*(float)RES_RATIO;
 	vert->u = u0;
 	vert->v = v1;
 	vert++;
 
 	vert->x = (float)0;
-	vert->y = (float)yl*2.0;
+	vert->y = (float)yl*(float)RES_RATIO;
 	vert->u = u0;
 	vert->v = v0;
 	vert++;
 
-	vert->x = (float)639;
-	vert->y = (float)(yl+height)*2.0;
+	vert->x = (float)REAL_SCREEN_WD - 1.0f;
+	vert->y = (float)(yl+height)*(float)RES_RATIO;
 	vert->u = u1;
 	vert->v = v1;
 	vert++;
 
-	vert->x = (float)639;
-	vert->y = (float)yl*2.0;
+	vert->x = (float)REAL_SCREEN_WD - 1.0f;
+	vert->y = (float)yl*(float)RES_RATIO;
 	vert->u = u1;
 	vert->v = v0;
 

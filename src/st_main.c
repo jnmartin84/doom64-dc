@@ -295,10 +295,10 @@ void ST_Drawer (void) // 80029DC0
 			int ypos = 218 - HUDmargin;
 			int hw = (42 - 2);
 			int hh = (224 - 218);
-			x1 = xpos * 2.0f;
-			x2 = (xpos + hw) * 2.0f;
-			y1 = ypos * 2.0f;
-			y2 = (ypos + hh) * 2.0f;
+			x1 = xpos * (float)RES_RATIO;
+			x2 = (xpos + hw) * (float)RES_RATIO;
+			y1 = ypos * (float)RES_RATIO;
+			y2 = (ypos + hh) * (float)RES_RATIO;
 			u1 = (float)0.0f * 0.0078125f; // / 128
 			u2 = (float)hw * 0.0078125f; // / 128
 			v1 = (float)0.0f * 0.0625f; // / 16
@@ -343,10 +343,10 @@ void ST_Drawer (void) // 80029DC0
 			int ypos = 218 - HUDmargin;
 			int hw = (316 - 280);
 			int hh = (224 - 218);
-			x1 = xpos*2.0f;
-			x2 = (xpos + hw)*2.0f;
-			y1 = ypos*2.0f;
-			y2 = (ypos + hh)*2.0f;
+			x1 = xpos*(float)RES_RATIO;
+			x2 = (xpos + hw)*(float)RES_RATIO;
+			y1 = ypos*(float)RES_RATIO;
+			y2 = (ypos + hh)*(float)RES_RATIO;
 			u1 = 40.0f * 0.0078125f; // / 128
 			u2 = (float)(40.0f + hw) * 0.0078125f; // / 128
 			v1 = 0.0f * 0.0625f; // / 16
@@ -400,10 +400,10 @@ void ST_Drawer (void) // 80029DC0
 				int ypos = 230 - HUDmargin;
 				int hw = 9;
 				int hh = 10;
-				x1 = (float)xpos * 2.0f;
-				x2 = (float)(xpos + hw) * 2.0f;
-				y1 = (float)ypos * 2.0f;
-				y2 = (float)(ypos + hh) * 2.0f;
+				x1 = (float)xpos * (float)RES_RATIO;
+				x2 = (float)(xpos + hw) * (float)RES_RATIO;
+				y1 = (float)ypos * (float)RES_RATIO;
+				y2 = (float)(ypos + hh) * (float)RES_RATIO;
 				u1 = (float)(ind * 9) * 0.0078125f; // / 128
 				u2 = (float)((float)(ind * 9) + hw) * 0.0078125f; // / 128
 				v1 = 6.0f * 0.0625f; // / 16
@@ -531,10 +531,10 @@ void ST_Message(int x,int y,char *text,int color) // 8002A36C
 
 				s = ((c - '!') & ~32) * ST_FONTWHSIZE;
 
-				x1 = (float)xpos * 2.0f;
-				x2 = (float)(xpos + ST_FONTWHSIZE) * 2.0f;
-				y1 = (float)ypos * 2.0f;
-				y2 = (float)(ypos + ST_FONTWHSIZE) * 2.0f;
+				x1 = (float)xpos * (float)RES_RATIO;
+				x2 = (float)(xpos + ST_FONTWHSIZE) * (float)RES_RATIO;
+				y1 = (float)ypos * (float)RES_RATIO;
+				y2 = (float)(ypos + ST_FONTWHSIZE) * (float)RES_RATIO;
 				u1 = (float)s * 0.00390625f; // / 256
 				u2 = (float)(s + ST_FONTWHSIZE) * 0.00390625f ; // / 256
 				v1 = (float)t * 0.0625f; // / 16
@@ -647,9 +647,9 @@ void ST_DrawString(int x, int y, char *text, int color) // 8002A930
 			index = 14;
 		} else if (c == '%') {
 			index = 11;
-		} /*else if(c >= FIRST_SYMBOL && c <= LAST_SYMBOL) {
+		} else if(c >= FIRST_SYMBOL && c <= LAST_SYMBOL) {
 			index = (c - '0');
-		}*/ else {
+		} else {
 			xpos += 6; /* space */
 			text++;
 			continue;
@@ -847,10 +847,10 @@ void ST_DrawSymbol(int xpos, int ypos, int index, int color) // 8002ADEC
 	}
 	quad2[3].flags = PVR_CMD_VERTEX_EOL;
 
-	x1 *= 2.0f;
-	x2 *= 2.0f;
-	y1 *= 2.0f;
-	y2 *= 2.0f;
+	x1 *= (float)RES_RATIO;
+	x2 *= (float)RES_RATIO;
+	y1 *= (float)RES_RATIO;
+	y2 *= (float)RES_RATIO;
 
 	pvr_vertex_t *vert = quad2;
 	vert->x = x1;

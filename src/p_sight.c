@@ -111,48 +111,47 @@ boolean P_CheckSight(mobj_t *t1, mobj_t *t2) // 8001EBCC
 
 fixed_t PS_SightCrossLine (line_t *line) // 8001EDD8
 {
-	int			s1, s2;
-	int			p1x,p1y,p2x,p2y,p3x,p3y,p4x,p4y,dx,dy,ndx,ndy;
+	int s1, s2;
 
 	// p1, p2 are line endpoints
-	p1x = line->v1->x >> FRACBITS;
-	p1y = line->v1->y >> FRACBITS;
-	p2x = line->v2->x >> FRACBITS;
-	p2y = line->v2->y >> FRACBITS;
+	int p1x = line->v1->x >> FRACBITS;
+	int p1y = line->v1->y >> FRACBITS;
+	int p2x = line->v2->x >> FRACBITS;
+	int p2y = line->v2->y >> FRACBITS;
 
 	// p3, p4 are sight endpoints
-	p3x = t1xs;
-	p3y = t1ys;
-	p4x = t2xs;
-	p4y = t2ys;
+	int p3x = t1xs;
+	int p3y = t1ys;
+	int p4x = t2xs;
+	int p4y = t2ys;
 
-	dx = p2x - p3x;
-	dy = p2y - p3y;
+	int dx = p2x - p3x;
+	int dy = p2y - p3y;
 
-	ndx = p4x - p3x;		// this can be precomputed if worthwhile
-	ndy = p4y - p3y;
+	int ndx = p4x - p3x; // this can be precomputed if worthwhile
+	int ndy = p4y - p3y;
 
-	s1 =  (ndy * dx) <  (dy * ndx);
+	s1 = (ndy * dx) < (dy * ndx);
 
 	dx = p1x - p3x;
 	dy = p1y - p3y;
 
-	s2 =  (ndy * dx) <  (dy * ndx);
+	s2 = (ndy * dx) < (dy * ndx);
 
 	if (s1 == s2)
-		return -1;			// line isn't crossed
+		return -1; // line isn't crossed
 
-	ndx = p1y - p2y;		// vector normal to world line
+	ndx = p1y - p2y; // vector normal to world line
 	ndy = p2x - p1x;
 
-	s1 = ndx*dx + ndy*dy;	// distance projected onto normal
+	s1 = (ndx * dx) + (ndy * dy); // distance projected onto normal
 
 	dx = p4x - p1x;
 	dy = p4y - p1y;
 
-	s2 = ndx*dx + ndy*dy;	// distance projected onto normal
+	s2 = (ndx * dx) + (ndy * dy); // distance projected onto normal
 
-	s2 = FixedDiv(s1,(s1+s2));
+	s2 = FixedDiv(s1, (s1 + s2));
 
 	return s2;
 }
@@ -181,8 +180,7 @@ boolean PS_CrossSubsector(subsector_t *sub) // 8001EF10
 	count = sub->numlines;
 	seg = &segs[sub->firstline];
 
-	for ( ; count ; seg++, count--)
-	{
+	for ( ; count ; seg++, count--) {
 		line = seg->linedef;
 
 		if (line->validcount == validcount)
@@ -220,16 +218,14 @@ boolean PS_CrossSubsector(subsector_t *sub) // 8001EF10
 
 		frac >>= 2;
 
-		if (front->floorheight != back->floorheight)
-		{
-			slope =  (((openbottom - sightzstart)<<6) / frac) << 8;
+		if (front->floorheight != back->floorheight) {
+			slope =  (((openbottom - sightzstart) << 6) / frac) << 8;
 			if (slope > bottomslope)
 				bottomslope = slope;
 		}
 
-		if (front->ceilingheight != back->ceilingheight)
-		{
-			slope = (((opentop - sightzstart)<<6) / frac) << 8;
+		if (front->ceilingheight != back->ceilingheight) {
+			slope = (((opentop - sightzstart) << 6) / frac) << 8;
 			if (slope < topslope)
 				topslope = slope;
 		}
@@ -256,13 +252,11 @@ boolean PS_CrossBSPNode(int bspnum) // 8001F15C
 	int     side1, side2;
 	int     bsp_num;
 	fixed_t dx, dy;
-    fixed_t left, right;
+	fixed_t left, right;
 
-	if (bspnum & NF_SUBSECTOR)
-	{
+	if (bspnum & NF_SUBSECTOR) {
 		bsp_num = (bspnum & ~NF_SUBSECTOR);
-		if (bsp_num >= numsubsectors)
-		{
+		if (bsp_num >= numsubsectors) {
 			I_Error("PS_CrossSubsector: ss %i with numss = %i", bsp_num, numsubsectors);
 		}
 
@@ -272,16 +266,16 @@ boolean PS_CrossBSPNode(int bspnum) // 8001F15C
 	bsp = &nodes[bspnum];
 
 	// decide which side the start point is on
-    side1 = 1;
+	side1 = 1;
 
-    dx = (strace.x - bsp->line.x);
-    dy = (strace.y - bsp->line.y);
+	dx = (strace.x - bsp->line.x);
+	dy = (strace.y - bsp->line.y);
 
-    left  = (bsp->line.dy>>FRACBITS) * (dx>>FRACBITS);
-    right = (dy>>FRACBITS) * (bsp->line.dx>>FRACBITS);
+	left  = (bsp->line.dy>>FRACBITS) * (dx>>FRACBITS);
+	right = (dy>>FRACBITS) * (bsp->line.dx>>FRACBITS);
 
-    if(right < left)
-        side1 = 0;    // front side
+	if(right < left)
+		side1 = 0; // front side
 
 	// cross the starting side
 	if (!PS_CrossBSPNode(bsp->children[side1]))
@@ -290,14 +284,14 @@ boolean PS_CrossBSPNode(int bspnum) // 8001F15C
 	// the partition plane is crossed here
 	side2 = 1;
 
-    dx = (t2x - bsp->line.x);
-    dy = (t2y - bsp->line.y);
+	dx = (t2x - bsp->line.x);
+	dy = (t2y - bsp->line.y);
 
-    left  = (bsp->line.dy>>FRACBITS) * (dx>>FRACBITS);
-    right = (dy>>FRACBITS) * (bsp->line.dx>>FRACBITS);
+	left  = (bsp->line.dy>>FRACBITS) * (dx>>FRACBITS);
+	right = (dy>>FRACBITS) * (bsp->line.dx>>FRACBITS);
 
-    if(right < left)
-        side2 = 0;    // front side
+	if(right < left)
+		side2 = 0;    // front side
 
 	if (side1 == side2)
 		return true; // the line doesn't touch the other side

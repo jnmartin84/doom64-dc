@@ -70,6 +70,8 @@ void R_Init(void) // 800233E0
 	R_InitData();
 
 	guFrustumF(R_ProjectionMatrix, -8.0f, 8.0f, -6.0f, 6.0f, 8.0f, 3808.0f, 1.0f);
+	//7616.0f, 1.0f);//
+	
 
 	guMtxIdentF(R_ModelMatrix);
 	
@@ -211,7 +213,7 @@ void R_RenderPlayerView(void) // 80023448
 		pvr_vertex_t *vert = verts;
 		vert->flags = PVR_CMD_VERTEX;
 		vert->x = 0.0f;
-		vert->y = 479.0f;
+		vert->y = REAL_SCREEN_HT - 1;//479.0f;
 		vert->z = 5.0f;
 		vert->argb = color;
 		vert++;
@@ -224,14 +226,14 @@ void R_RenderPlayerView(void) // 80023448
 		vert++;
 
 		vert->flags = PVR_CMD_VERTEX;
-		vert->x = 639.0f;
-		vert->y = 479.0f;
+		vert->x = REAL_SCREEN_WD - 1;
+		vert->y = REAL_SCREEN_HT - 1;
 		vert->z = 5.0f;
 		vert->argb = color;
 		vert++;
 
 		vert->flags = PVR_CMD_VERTEX_EOL;
-		vert->x = 639.0f;
+		vert->x = REAL_SCREEN_WD - 1;
 		vert->y = 0.0f;
 		vert->z = 5.0f;
 		vert->argb = color;

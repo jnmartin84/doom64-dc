@@ -18,18 +18,12 @@ extern void **tsptrs;
 
 extern pvr_poly_hdr_t **headers_for_sprites;
 extern pvr_poly_hdr_t **headers2_for_sprites;
-//extern pvr_poly_hdr_t **headers3_for_sprites;
 
 extern float *all_u;
 extern float *all_v;
 extern float *all_u2;
 extern float *all_v2;
 
-extern float *all2_u;
-extern float *all2_v;
-
-//extern float *all3_u;
-//extern float *all3_v;
 
 pvr_vertex_t __attribute__ ((aligned(32))) quad2[4];
 
@@ -573,11 +567,13 @@ void R_WallPrep(seg_t *seg)
 	fixed_t b_floorheight;
 	fixed_t m_top;
 	fixed_t m_bottom;
-	fixed_t height;
 	fixed_t rowoffs;
+	unsigned int height2;
+	int height;
+	int frontheight;
+	int sideheight1;
 	short pic;
 
-	unsigned int height2;
 	float r1, g1, b1;
 	float r2, g2, b2;
 	unsigned int thingcolor;
@@ -607,6 +603,7 @@ void R_WallPrep(seg_t *seg)
 	// get front side top and bottom
 	f_ceilingheight = frontsector->ceilingheight >> 16;
 	f_floorheight = frontsector->floorheight >> 16;
+	frontheight = f_ceilingheight - f_floorheight;
 
 	if (li->flags & ML_BLENDING) {
 		r1 = (float)((upcolor  >> 24) & 0xff);
@@ -636,13 +633,13 @@ void R_WallPrep(seg_t *seg)
 			if (li->flags & ML_DONTPEGTOP) {
 				rowoffs = (curRowoffset >> 16) + height;
 			} else {
-				rowoffs = (height + 127 & -128) + (curRowoffset >> 16);
+				rowoffs = ((height + 127) & ~127) + (curRowoffset >> 16);
 			}
 
 			if (li->flags & ML_BLENDING) {
-				if (!(li->flags & ML_BLENDFULLTOP)) {
-					int frontheight = f_ceilingheight - f_floorheight;
-					int sideheight1 = b_ceilingheight - f_floorheight;
+				if (frontheight && !(li->flags & ML_BLENDFULLTOP)) {
+#if 1
+					sideheight1 = b_ceilingheight - f_floorheight;
 
 					float scale1 = (float)sideheight1 / (float)frontheight;
 					float scale2 = (float)height / (float)frontheight;
@@ -698,6 +695,41 @@ void R_WallPrep(seg_t *seg)
 											0xff;
 						}
 					}
+#endif
+#if 0
+                    if (f_floorheight < f_ceilingheight)
+                    {
+                        height2 = ((height << 16) / (f_ceilingheight - f_floorheight));
+                    }
+                    else
+                    {
+                        height2 = 0;
+                    }
+					unsigned int rf = (((unsigned int)r2 * height2) >> 16) + (((unsigned int)r1*(65536 - height2)) >> 16);
+					unsigned int gf = (((unsigned int)g2 * height2) >> 16) + (((unsigned int)g1*(65536 - height2)) >> 16);
+					unsigned int bf = (((unsigned int)b2 * height2) >> 16) + (((unsigned int)b1*(65536 - height2)) >> 16);
+
+#if 0
+					if (!((rf < 256) && (gf < 256) && (bf < 256))) {
+						unsigned int max;
+						if (rf >= gf && rf >= bf) {
+							max = rf;
+						} else if (gf >= rf && gf >= bf) {
+							max = gf;
+						} else {
+							max = bf;
+						}
+
+						rf = (((rf<<16) / max) * 255) >> 16;
+						gf = (((gf<<16) / max) * 255) >> 16;
+						bf = (((bf<<16) / max) * 255) >> 16;
+					}
+#endif
+/*                    tmp_lowcolor = (((((r2 - r1) * height2) >> 16) + r1) << 24) |
+                                   (((((g2 - g1) * height2) >> 16) + g1) << 16) |
+                                   (((((b2 - b1) * height2) >> 16) + b1) << 8)  | 0xff;*/
+					tmp_lowcolor = (rf << 24) | (gf << 16) | (bf << 8) | 0xff;
+#endif
 				} 
 
 				if (li->flags & ML_INVERSEBLEND) {
@@ -741,8 +773,8 @@ void R_WallPrep(seg_t *seg)
 			}
 
 			if (li->flags & ML_BLENDING) {
-				if (!(li->flags & ML_BLENDFULLBOTTOM)) {
-					int frontheight = f_ceilingheight - f_floorheight;
+				if (frontheight && !(li->flags & ML_BLENDFULLBOTTOM)) {
+#if 1
 					int sideheight1 = b_floorheight - f_floorheight;
 
 					float scale1 = (float)sideheight1 / (float)frontheight;
@@ -799,6 +831,43 @@ void R_WallPrep(seg_t *seg)
 											0xff;
 						}
 					}
+#endif
+#if 0
+					if (f_floorheight < f_ceilingheight)
+                    {
+                        height2 = ((height << 16) / (f_ceilingheight - f_floorheight));
+                    }
+                    else
+                    {
+                        height2 = 0;
+                    }
+
+					unsigned int rf = (((unsigned int)r2 * height2) >> 16) + (((unsigned int)r1*(65536 - height2)) >> 16);
+					unsigned int gf = (((unsigned int)g2 * height2) >> 16) + (((unsigned int)g1*(65536 - height2)) >> 16);
+					unsigned int bf = (((unsigned int)b2 * height2) >> 16) + (((unsigned int)b1*(65536 - height2)) >> 16);
+
+#if 0
+					if (!((rf < 256) && (gf < 256) && (bf < 256))) {
+						unsigned int max;
+						if (rf >= gf && rf >= bf) {
+							max = rf;
+						} else if (gf >= rf && gf >= bf) {
+							max = gf;
+						} else {
+							max = bf;
+						}
+
+						rf = (((rf<<16) / max) * 255) >> 16;
+						gf = (((gf<<16) / max) * 255) >> 16;
+						bf = (((bf<<16) / max) * 255) >> 16;
+					}
+#endif 
+
+/*                    tmp_upcolor = (((((r2 - r1) * height2) >> 16) + r1) << 24) |
+                                   (((((g2 - g1) * height2) >> 16) + g1) << 16) |
+                                   (((((b2 - b1) * height2) >> 16) + b1) << 8)  | 0xff;*/
+					tmp_upcolor = (rf << 24) | (gf << 16) | (bf << 8) | 0xff;
+#endif
 				}
 
 				topcolor = tmp_upcolor;
@@ -834,7 +903,7 @@ void R_WallPrep(seg_t *seg)
 	height = m_top - m_bottom;
 
 	if (li->flags & ML_DONTPEGBOTTOM) {
-		rowoffs = (height + 127 & -128) + (curRowoffset >> 16);
+		rowoffs = ((height + 127) & ~127) + (curRowoffset >> 16);
 	} else if (li->flags & ML_DONTPEGTOP) {
 		rowoffs = (curRowoffset >> 16) - m_bottom;
 	} else {
@@ -931,10 +1000,10 @@ void R_RenderWall(seg_t *seg, int flags, int texture, int topHeight, int bottomH
 		v1 = seg->v1;
 		v2 = seg->v2;
 
-		signed short sx1 = (signed short)(v1->x * inv65535);
-		signed short sx2 = (signed short)(v2->x * inv65535);
-		signed sy1 = -((signed short)(v1->y * inv65535));
-		signed sy2 = -((signed short)(v2->y * inv65535));
+		signed short sx1 = (signed short)(v1->x >> 16);
+		signed short sx2 = (signed short)(v2->x >> 16);
+		signed short sy1 = -((signed short)(v1->y >> 16));
+		signed short sy2 = -((signed short)(v2->y >> 16));
 
 		float x1 = (float)sx1;
 		float x2 = (float)sx2;
@@ -1040,12 +1109,12 @@ void R_RenderSwitch(seg_t *seg, int texture, int topOffset, int color) // 800276
 	cos = finecosine[seg->angle >> ANGLETOFINESHIFT] << 1;
 	sin = finesine[seg->angle >> ANGLETOFINESHIFT] << 1;
 
-	float x1 = (float)(((x) - (cos << 3) + sin) * inv65535);
-	float x2 = (float)(((x) + (cos << 3) + sin) * inv65535);
+	float x1 = (float)(((x) - (cos << 3) + sin) >> 16);
+	float x2 = (float)(((x) + (cos << 3) + sin) >> 16);
 	float y1 = (float)topOffset;
 	float y2 = y1 - 32.0f;
-	float z1 = (float)(((-y) + (sin << 3) + cos) * inv65535);
-	float z2 = (float)(((-y) - (sin << 3) + cos) * inv65535);
+	float z1 = (float)(((-y) + (sin << 3) + cos) >> 16);
+	float z2 = (float)(((-y) - (sin << 3) + cos) >> 16);
 
 	float tu1 = 0.0f;
 	float tu2 = 32.0f / (float)last_sw;
@@ -1140,9 +1209,9 @@ void R_RenderPlane(leaf_t *leaf, int numverts, int zpos, int texture, int xpos, 
 
 	vrt = lf[0].vertex;
 
-	dVTX[0]->v.x = ((float)(vrt->x * inv65535));
+	dVTX[0]->v.x = ((float)(vrt->x >> 16));
 	dVTX[0]->v.y = (float)(zpos);
-	dVTX[0]->v.z = -((float)(vrt->y * inv65535));
+	dVTX[0]->v.z = -((float)(vrt->y >> 16));
 	x = ((vrt->x + xpos) >> 16) & -64;
 	y = ((vrt->y + ypos) >> 16) & -64;
 
@@ -1166,9 +1235,9 @@ void R_RenderPlane(leaf_t *leaf, int numverts, int zpos, int texture, int xpos, 
 
 		vrt1 = lf[1].vertex;
 
-		dVTX[1]->v.x = ((float)(vrt1->x * inv65535));
+		dVTX[1]->v.x = ((float)(vrt1->x >> 16));
 		dVTX[1]->v.y = (float)(zpos);
-		dVTX[1]->v.z = -((float)(vrt1->y * inv65535));
+		dVTX[1]->v.z = -((float)(vrt1->y >> 16));
 
 		stu = (((vrt1->x + xpos) >> FRACBITS) - x);
 		stv = -(((vrt1->y + ypos) >> FRACBITS) - y);
@@ -1180,9 +1249,9 @@ void R_RenderPlane(leaf_t *leaf, int numverts, int zpos, int texture, int xpos, 
 
 		vrt2 = lf[2].vertex;
 
-		dVTX[2]->v.x = ((float)(vrt2->x * inv65535));
+		dVTX[2]->v.x = ((float)(vrt2->x >> 16));
 		dVTX[2]->v.y = (float)(zpos);
-		dVTX[2]->v.z = -((float)(vrt2->y * inv65535));
+		dVTX[2]->v.z = -((float)(vrt2->y >> 16));
 
 		stu = (((vrt2->x + xpos) >> FRACBITS) - x);
 		stv = -(((vrt2->y + ypos) >> FRACBITS) - y);
@@ -1246,9 +1315,9 @@ void R_RenderPlane(leaf_t *leaf, int numverts, int zpos, int texture, int xpos, 
 			stv = -(((vrt1->y + ypos) >> FRACBITS) - y);
 			tu = (float)stu * inv64;
 			tv = (float)stv * inv64;
-			dVTX[1]->v.x = ((float)(vrt1->x * inv65535));
+			dVTX[1]->v.x = ((float)(vrt1->x >> 16));
 			dVTX[1]->v.y = (float)(zpos);
-			dVTX[1]->v.z = -((float)(vrt1->y * inv65535));
+			dVTX[1]->v.z = -((float)(vrt1->y >> 16));
 			dVTX[1]->v.u = tu;
 			dVTX[1]->v.v = tv;
 
@@ -1256,9 +1325,9 @@ void R_RenderPlane(leaf_t *leaf, int numverts, int zpos, int texture, int xpos, 
 			stv = -(((vrt2->y + ypos) >> FRACBITS) - y);
 			tu = (float)stu * inv64;
 			tv = (float)stv * inv64;
-			dVTX[2]->v.x = ((float)(vrt2->x * inv65535));
+			dVTX[2]->v.x = ((float)(vrt2->x >> 16));
 			dVTX[2]->v.y = (float)(zpos);
-			dVTX[2]->v.z = -((float)(vrt2->y * inv65535));
+			dVTX[2]->v.z = -((float)(vrt2->y >> 16));
 			dVTX[2]->v.u = tu;
 			dVTX[2]->v.v = tv;
 
@@ -1266,9 +1335,9 @@ void R_RenderPlane(leaf_t *leaf, int numverts, int zpos, int texture, int xpos, 
 			stv = -(((vrt3->y + ypos) >> FRACBITS) - y);
 			tu = (float)stu * inv64;
 			tv = (float)stv * inv64;
-			dVTX[3]->v.x = ((float)(vrt3->x * inv65535));
+			dVTX[3]->v.x = ((float)(vrt3->x >> 16));
 			dVTX[3]->v.y = (float)(zpos);
-			dVTX[3]->v.z = -((float)(vrt3->y * inv65535));
+			dVTX[3]->v.z = -((float)(vrt3->y >> 16));
 			dVTX[3]->v.u = tu;
 			dVTX[3]->v.v = tv;
 
@@ -1440,12 +1509,12 @@ void R_RenderPlane(leaf_t *leaf, int numverts, int zpos, int texture, int xpos, 
 }
 
 pvr_ptr_t pvr_troo[MAX_CACHED_SPRITES];
-pvr_poly_hdr_t hdr_troo[2][MAX_CACHED_SPRITES];
-pvr_poly_cxt_t cxt_troo[2][MAX_CACHED_SPRITES];
+pvr_poly_hdr_t hdr_troo[MAX_CACHED_SPRITES];
+pvr_poly_cxt_t cxt_troo[MAX_CACHED_SPRITES];
 uint8_t __attribute__((aligned(32))) tmptroo[256*256];
 //int donebefore = 0;
-int lump_frame[575] = {-1};
-int used_lumps[575] = {-1};
+int lump_frame[575 + 310] = {-1};
+int used_lumps[575 + 310] = {-1};
 int used_lump_idx = 0;
 int del_idx = 0;
 int total_cached_vram = 0;
@@ -1483,7 +1552,7 @@ void R_RenderThings(subsector_t *sub)
 	int height;
 	int width;
 	int color;
-
+byte *src;
 	fixed_t xx, yy;
 	int xpos1, xpos2;
 	int ypos;
@@ -1495,8 +1564,8 @@ int nosprite = 0;
 #if 0
 if(!donebefore) {
 	dbgio_printf("initing the lump caching arrays and indices\n");
-	memset(used_lumps, -1, sizeof(int)*575);
-	memset(lump_frame, -1, sizeof(int)*575);
+	memset(used_lumps, -1, sizeof(int)*(575+310));
+	memset(lump_frame, -1, sizeof(int)*(575+310));
 used_lump_idx = 0;
 del_idx = 0;
 total_cached_vram = 0;
@@ -1575,7 +1644,7 @@ if(!pvr_troo) {
 			color = (color & 0xffffff00) | thing->alpha;
 
 			data = W_CacheLumpNum(lump, PU_CACHE, dec_jag);
-
+			src = data + sizeof(spriteN64_t);
 			compressed = SwapShort( ((spriteN64_t*)data)->compressed );
 			width = SwapShort( ((spriteN64_t*)data)->width );
 			height = SwapShort( ((spriteN64_t*)data)->height );
@@ -1611,11 +1680,12 @@ if(!pvr_troo) {
 
 			ypos = (thing->z >> 16) + SwapShort(((spriteN64_t*)data)->yoffs);
 			pvr_poly_hdr_t *theheader;
-			if (((lump >= 2) && (lump <= 348)) || ((lump >= 924) && (lump <= 965))) {
+			if ((lump <= 348) || ((lump >= 924) && (lump <= 965))) {
 				nosprite = 0;
 				// pull in each side of sprite by one pixel
 				// fix for filtering 'crud' around the edge due to lack of padding
 				if(!flip) {
+#if 0
 					if (external_pal && thing->info->palette) {
 						if (thing->info->palette == 1) {
 							dVTX[0]->v.u = dVTX[3]->v.u = all2_u[lump] + inv1024;
@@ -1626,10 +1696,14 @@ if(!pvr_troo) {
 							dVTX[1]->v.u = dVTX[2]->v.u = all2_u[lump-100] + (((float)spos - 1.0f)*inv1024);
 						}
 					} else {
+#endif
 						dVTX[0]->v.u = dVTX[3]->v.u = all_u[lump] + inv1024;
 						dVTX[1]->v.u = dVTX[2]->v.u = all_u[lump] + (((float)spos - 1.0f)*inv1024);
+#if 0
 					}
+#endif
 				} else {
+#if 0
 					if (external_pal && thing->info->palette) {
 						if (thing->info->palette == 1) {
 							dVTX[1]->v.u = dVTX[2]->v.u = all2_u[lump] + inv1024;
@@ -1639,11 +1713,15 @@ if(!pvr_troo) {
 							dVTX[0]->v.u = dVTX[3]->v.u = all2_u[lump-100] + (((float)spos - 1.0f)*inv1024);
 						}
 					} else {
+#endif						
 						dVTX[1]->v.u = dVTX[2]->v.u = all_u[lump] + inv1024;
 						dVTX[0]->v.u = dVTX[3]->v.u = all_u[lump] + (((float)spos - 1.0f)*inv1024);
+#if 0
 					}
+#endif
 				}
 
+#if 0
 				if (external_pal && thing->info->palette) {
 					if (thing->info->palette == 1) {
 						theheader = headers2_for_sprites[lump];
@@ -1655,31 +1733,82 @@ if(!pvr_troo) {
 						dVTX[3]->v.v = dVTX[2]->v.v = all2_v[lump-100] + (((float)height - 1.0f) *inv1024);
 					}
 				} else {
+#endif
 					theheader = headers_for_sprites[lump];
 					dVTX[0]->v.v = dVTX[1]->v.v = all_v[lump] + inv1024;
 					dVTX[3]->v.v = dVTX[2]->v.v = all_v[lump] + (((float)height-1.0f)*inv1024);
+#if 0
 				}
+#endif
 			} else {
 				int lumpoff = lump - 349;
 				int cached_index = -1;
 				int troowid = (width + 7) & ~7;
-				int wp2 = np2(troowid);
-				int hp2 = np2(height);
+				uint32_t wp2 = np2((uint32_t)troowid);
+				uint32_t hp2 = np2((uint32_t)height);
 
-if(last_flush_frame && ((NextFrameIdx - last_flush_frame) > (2*30)) && (vram_low || (used_lump_idx > (MAX_CACHED_SPRITES * 3 / 4)))) {
-		for (int i=0;i<575;i++) {
-			if (used_lumps[i] != -1) {
-				pvr_mem_free(pvr_troo[used_lumps[i]]);
-			}
-		}
-		memset(used_lumps, -1, sizeof(int)*575);
-		memset(lump_frame, -1, sizeof(int)*575);
-		used_lump_idx = 0;
-		del_idx = 0;
-last_flush_frame = NextFrameIdx;
-vram_low = 0;
-}
+				if (external_pal && thing->info->palette) {
+					void *newlump;
+					int newlumpnum;
+					char *lumpname = W_GetNameForNum(lump);
+					
+					// troo; [450,
+					if (lumpname[0] == 'T') {
+						lumpname[0] = 'N';
+						lumpname[1] = 'I';
+						lumpname[2] = 'T';
+						lumpname[3] = 'E';
+					}
+					// sarg; [349,394]
+					else if(lumpname[0] == 'S') {
+						lumpname[1] = 'P';
+						lumpname[2] = 'E';
+						lumpname[3] = 'C';
+					}
+					// boss
+					else if(lumpname[0] == 'B') {
+						lumpname[1] = 'A';
+						lumpname[2] = 'R';
+						lumpname[3] = 'O';
+					}
+					// poss; [
+					// play; [398-447]
+					else if (lumpname[0] == 'P') {
+						if (lumpname[1] == 'O') {
+							lumpname[0] = 'Z';
+							lumpname[2] = 'M';
+							lumpname[3] = 'B';
+						} else {
+							if (thing->info->palette == 1) {
+								lumpname[2] = 'Y';
+								lumpname[3] = '1';
+							} else {
+								lumpname[2] = 'Y';
+								lumpname[3] = '2';
+							}
+						}
+					}
 
+					newlumpnum = W_S2_GetNumForName(lumpname);
+					newlump = W_S2_CacheLumpNum(newlumpnum, PU_CACHE, dec_jag);
+					src = newlump + sizeof(spriteN64_t);
+					lumpoff = 574 + newlumpnum;
+				}
+
+				if (vram_low || (last_flush_frame && ((NextFrameIdx - last_flush_frame) > (2*30)) && 
+					(used_lump_idx > (MAX_CACHED_SPRITES * 3 / 4)))) {
+					for (int i=0;i<(575+310);i++) {
+						if (used_lumps[i] != -1) {
+							pvr_mem_free(pvr_troo[used_lumps[i]]);
+						}
+					}
+					memset(used_lumps, 0xff, sizeof(int)*(575+310));
+					memset(lump_frame, 0xff, sizeof(int)*(575+310));
+					used_lump_idx = 0;
+					del_idx = 0;
+					last_flush_frame = NextFrameIdx;
+					vram_low = 0;
+				}
 
 				if (used_lumps[lumpoff] != -1) {
 					// found an index
@@ -1691,12 +1820,15 @@ vram_low = 0;
 
 				if (last_flush_frame == 0) last_flush_frame = NextFrameIdx;
 
-
 				if (used_lump_idx < MAX_CACHED_SPRITES) {
 					used_lumps[lumpoff] = used_lump_idx;
 					lump_frame[lumpoff] = NextFrameIdx;
 					cached_index = used_lump_idx;
-					dbgio_printf("caching lump %d at index %d\n", lump, cached_index);
+					if (lumpoff < 575) {
+						dbgio_printf("caching lump %d at index %d\n", lump, cached_index);
+					} else {
+						dbgio_printf("caching alternate lump %d at index %d\n", lump, cached_index);
+					}
 					used_lump_idx += 1;
 				} else {
 					nosprite = 1;
@@ -1715,7 +1847,7 @@ vram_low = 0;
 					int next_del_idx_lump = -1;
 
 					// for every possible enemy sprite lump number
-					for (int i=0;i<575;i++) {
+					for (int i=0;i<(575+310);i++) {
 						if (passes) {
 							nosprite = 1;
 							dbgio_printf("\t\t nothing was evictable");
@@ -1787,7 +1919,7 @@ done_evicting:
 					// try to evict some lumps not recently used
 					int found = 0;
 
-					for (int i=0;i<575;i++) {
+					for (int i=0;i<(575+310);i++) {
 						if (lump_frame[i] < NextFrameIdx) {
 							int oldlumpidx = used_lumps[i];
 							pvr_mem_free(pvr_troo[oldlumpidx]);
@@ -1816,14 +1948,13 @@ bail_evict:
 					}
 	
 					pvr_troo[cached_index] = pvr_mem_malloc(wp2*hp2);
-					pvr_poly_cxt_txr(&cxt_troo[0][cached_index], PVR_LIST_TR_POLY, PVR_TXRFMT_PAL8BPP | PVR_TXRFMT_8BPP_PAL(0) | PVR_TXRFMT_TWIDDLED, wp2, hp2, pvr_troo[cached_index], PVR_FILTER_BILINEAR);
+					pvr_poly_cxt_txr(&cxt_troo[cached_index], PVR_LIST_TR_POLY, PVR_TXRFMT_PAL8BPP | PVR_TXRFMT_8BPP_PAL(0) | PVR_TXRFMT_TWIDDLED, wp2, hp2, pvr_troo[cached_index], PVR_FILTER_BILINEAR);
 
-					cxt_troo[0][cached_index].gen.specular = PVR_SPECULAR_ENABLE;
-					cxt_troo[0][cached_index].gen.fog_type = PVR_FOG_TABLE;
-					cxt_troo[0][cached_index].gen.fog_type2 = PVR_FOG_TABLE;
-					pvr_poly_compile(&hdr_troo[0][cached_index], &cxt_troo[0][cached_index]);
+					cxt_troo[cached_index].gen.specular = PVR_SPECULAR_ENABLE;
+					cxt_troo[cached_index].gen.fog_type = PVR_FOG_TABLE;
+					cxt_troo[cached_index].gen.fog_type2 = PVR_FOG_TABLE;
+					pvr_poly_compile(&hdr_troo[cached_index], &cxt_troo[cached_index]);
 
-					void *src = data + sizeof(spriteN64_t);
 					pvr_txr_load(src, pvr_troo[cached_index], wp2*hp2);
 skip_cached_setup:
 
@@ -1836,7 +1967,7 @@ skip_cached_setup:
 					}
 					dVTX[0]->v.v = dVTX[1]->v.v = (1.0f / (float)hp2);
 					dVTX[2]->v.v = dVTX[3]->v.v = ((float)height / (float)hp2) - (1.0f / (float)hp2);
-					theheader = &hdr_troo[0][cached_index];
+					theheader = &hdr_troo[cached_index];
 				}
 			}
 
@@ -2067,10 +2198,10 @@ void R_RenderPSprites(void)
 				y += (quakeviewy >> 16);
 			}
 
-			float x1 = (float)x * 2.0f;
-			float y1 = (float)y * 2.0f;
-			float x2 = x1 + ((float)width2 * 2.0f);
-			float y2 = y1 + ((float)height * 2.0f);
+			float x1 = (float)x * RES_RATIO;
+			float y1 = (float)y * RES_RATIO;
+			float x2 = x1 + ((float)width2 * RES_RATIO);
+			float y2 = y1 + ((float)height * RES_RATIO);
 
 			// pull in each side of sprite by one pixel
 			// fix for filtering 'crud' around the edge due to lack of padding

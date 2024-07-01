@@ -300,6 +300,13 @@ void P_Start (void) // 80021C50
 extern int plasma_channel;
 extern int plasma_loop_channel;
 
+extern int lump_frame[(575+310)];
+extern int used_lumps[(575+310)];
+extern int used_lump_idx;
+extern int del_idx;
+extern int donebefore;
+extern pvr_ptr_t pvr_troo[MAX_CACHED_SPRITES];
+
 void P_Stop (int exit) // 80021D58
 {
 	/* [d64] stop plasma buzz */
@@ -326,6 +333,17 @@ void P_Stop (int exit) // 80021D58
 
 	S_ResetSound();
 
+	if (donebefore) {
+		for (int i=0;i<(575+310);i++) {
+			if (used_lumps[i] != -1) {
+				pvr_mem_free(pvr_troo[used_lumps[i]]);
+			}
+		}
+	}
+	memset(used_lumps, 0xff, sizeof(int)*(575+310));
+	memset(lump_frame, 0xff, sizeof(int)*(575+310));
+	used_lump_idx = 0;
+	del_idx = 0;
 
 	if ((demoplayback) && (exit == 8))
 		I_WIPE_FadeOutScreen();
@@ -333,8 +351,6 @@ void P_Stop (int exit) // 80021D58
 		I_WIPE_MeltScreen();
 
 	S_StopAll();
-
-
 }
 
 

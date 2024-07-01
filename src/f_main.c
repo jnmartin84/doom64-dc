@@ -898,10 +898,9 @@ v++;
 return v;
 }
 
-pvr_ptr_t pvranysprite = 0;
-
 void BufferedDrawSprite(int type, state_t *state, int rotframe, int color, int xpos, int ypos) // 80003D1C
 {
+	static pvr_ptr_t pvranysprite = 0;
 	spritedef_t     *sprdef;
 	spriteframe_t   *sprframe;
 	int			    lump;
@@ -969,78 +968,72 @@ void BufferedDrawSprite(int type, state_t *state, int rotframe, int color, int x
 		}
 	}
 
-	pvr_poly_hdr_t *theheader;
 	pvr_poly_cxt_t cxtanysprite;
 	pvr_poly_hdr_t hdranysprite;
 	float xl;
 	float xh;
 	float u0,v0,u1,v1;
-int wp2 = np2(width);
-int hp2 = np2(height);
+	int wp2 = np2(width);
+	int hp2 = np2(height);
+
 	if (pvranysprite) {
 		pvr_mem_free(pvranysprite);
+		pvranysprite = 0;
 	}
+
 	pvranysprite = pvr_mem_malloc(wp2*hp2);
 
 	pvr_poly_cxt_txr(&cxtanysprite, PVR_LIST_TR_POLY, PVR_TXRFMT_PAL8BPP | PVR_TXRFMT_8BPP_PAL(0) | PVR_TXRFMT_TWIDDLED, wp2, hp2, pvranysprite, PVR_FILTER_BILINEAR);
-
-//	cxt_troo[0][cached_index].gen.specular = PVR_SPECULAR_ENABLE;
-//	cxt_troo[0][cached_index].gen.fog_type = PVR_FOG_TABLE;
-//	cxt_troo[0][cached_index].gen.fog_type2 = PVR_FOG_TABLE;
 	pvr_poly_compile(&hdranysprite, &cxtanysprite);
 	void *src = data + sizeof(spriteN64_t);
+
+	if (external_pal && mobjinfo[type].palette) {
+		void *newlump;
+		int newlumpnum;
+		char *lumpname = W_GetNameForNum(lump);
+
+		if (lumpname[0] == 'T') { // troo
+			lumpname[0] = 'N';
+			lumpname[1] = 'I';
+			lumpname[2] = 'T';
+			lumpname[3] = 'E';
+		} else if(lumpname[0] == 'S') { // sarg
+			lumpname[1] = 'P';
+			lumpname[2] = 'E';
+			lumpname[3] = 'C';
+		} else if(lumpname[0] == 'B') { // boss
+			lumpname[1] = 'A';
+			lumpname[2] = 'R';
+			lumpname[3] = 'O';
+		} else if (lumpname[0] == 'P' && lumpname[1] == 'O') { // poss
+			lumpname[0] = 'Z';
+			lumpname[2] = 'M';
+			lumpname[3] = 'B';
+		}
+
+		newlumpnum = W_S2_GetNumForName(lumpname);
+		newlump = W_S2_CacheLumpNum(newlumpnum, PU_CACHE, dec_jag);
+		src = newlump + sizeof(spriteN64_t);
+	}
+
 	pvr_txr_load(src, pvranysprite, wp2*hp2);
 
 	if (!flip) {
-		xl = (float)(xpos - xoffs)*2.0f;
-		xh = xl + ((float)width * 2.0f);
+		xl = (float)(xpos - xoffs) * (float)RES_RATIO;
+		xh = xl + ((float)width * (float)RES_RATIO);
 		u0 = (1.0f / (float)wp2);
 		u1 = ((float)width / (float)wp2) - (1.0f / (float)wp2);
 	} else {
-		xh = (float)(xpos - xoffs)*2.0f;
-		xl = xh + ((float)width * 2.0f);
+		xh = (float)(xpos + xoffs) * (float)RES_RATIO;
+		xl = xh - ((float)width * (float)RES_RATIO);
 		u1 = (1.0f / (float)wp2);
 		u0 = ((float)width / (float)wp2) - (1.0f / (float)wp2);
 	}
 	v0 = (1.0f / (float)hp2);
 	v1 = ((float)height / (float)hp2) - (1.0f / (float)hp2);
-theheader = &hdranysprite;	
 
-#if 0
-	if(external_pal && mobjinfo[type].palette) {
-		theheader = headers2_for_sprites[lump];
-		if (!flip) {
-			xl = (float)(xpos - xoffs)*2.0f;
-			xh = xl + ((float)width * 2.0f);
-			u0 = all2_u[lump];
-			u1 = all2_u[lump] + ((float)width / 1024.0f);
-		} else {
-			xh = (float)(xpos - xoffs)*2.0f;
-			xl = xh + ((float)width * 2.0f);
-			u1 = all2_u[lump];
-			u0 = all2_u[lump] + ((float)width / 1024.0f);
-		}
-		v0 = all2_v[lump];
-		v1 = all2_v[lump] + ((float)height / 1024.0f);
-	} else {
-		theheader = headers_for_sprites[lump];
-		if (!flip) {
-			xl = (float)(xpos - xoffs)*2.0f;
-			xh = xl + ((float)width * 2.0f);
-			u0 = all_u[lump];
-			u1 = all_u[lump] + ((float)width / 1024.0f);
-		} else {
-			xh = (float)(xpos - xoffs)*2.0f;
-			xl = xh + ((float)width * 2.0f);
-			u1 = all_u[lump];
-			u0 = all_u[lump] + ((float)width / 1024.0f);
-		}
-		v0 = all_v[lump];
-		v1 = all_v[lump] + ((float)height / 1024.0f);
-	}
-#endif
-	float yl = (float)(ypos - yoffs) * 2.0f;
-	float yh = yl + ((float)height * 2.0f);
+	float yl = (float)(ypos - yoffs) * (float)RES_RATIO;
+	float yh = yl + ((float)height * (float)RES_RATIO);
 
 	pvr_vertex_t *vert = verts;
 	vert->x = xl;
@@ -1066,7 +1059,7 @@ theheader = &hdranysprite;
 	vert->u = u1;
 	vert->v = v0;
 
-	pvr_list_prim(PVR_LIST_TR_POLY, theheader, sizeof(pvr_poly_hdr_t));
+	pvr_list_prim(PVR_LIST_TR_POLY, &hdranysprite, sizeof(pvr_poly_hdr_t));
 	pvr_list_prim(PVR_LIST_TR_POLY, &verts, sizeof(verts));
 
 	globallump = -1;
