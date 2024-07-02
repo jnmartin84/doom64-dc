@@ -360,12 +360,13 @@ int Display_X = 0;              // 8005A7B0
 int Display_Y = 0;              // 8005A7B4
 boolean enable_messages = true; // 8005A7B8
 int HUDopacity = 255;			// [Immorpher] HUD opacity
-int SfxVolume = 65;             // 8005A7C0
+int SfxVolume = 75;             // 8005A7C0
 int MusVolume = 85;             // 8005A7C4
 int brightness = 100;             // 8005A7C8
 int M_SENSITIVITY = 0;          // 8005A7CC
 boolean FeaturesUnlocked = true; // 8005A7D0
 int MotionBob = 0x100000; // [Immorpher] Motion Bob works in hexadecimal
+int force_filter_flush = 0;
 int VideoFilter = 0; // [GEC & Immorpher] Set 3 point filtering on or off
 boolean antialiasing = false; // [Immorpher] Anti-Aliasing
 boolean interlacing = false; // [Immorpher] Interlacing
@@ -374,7 +375,7 @@ int ColorDither = 0; // [Immorpher] Color dithering options (Off, Square, Bayer,
 int FlashBrightness = 16; // [Immorpher] Strobe brightness adjustment, will need to change to float
 boolean Autorun = true; // [Immorpher] New autorun option!
 boolean runintroduction = true; // [Immorpher] New introduction sequence!
-boolean StoryText = true; // [Immorpher] Skip story cut scenes?
+boolean StoryText = false; // [Immorpher] Skip story cut scenes?
 boolean MapStats = false; // [Immorpher] Enable map statistics for automap?
 int HUDmargin = 20; // [Immorpher] HUD margin options (default 20)
 boolean ColoredHUD = false; // [Immorpher] Colored hud
@@ -742,6 +743,8 @@ extern mapthing_t *spawnlist;   // 800A5D74
 extern int spawncount;          // 800A5D78
 extern int gobalcheats; // [GEC]
 
+extern pvr_poly_cxt_t pvr_sprite_cxt[11];
+extern pvr_poly_hdr_t pvr_sprite_hdr[11];
 
 int M_MenuTicker(void) // 80007E0C
 {
@@ -1696,6 +1699,13 @@ int M_MenuTicker(void) // 80007E0C
 						{
 							VideoFilter = 0;
 						}
+						force_filter_flush = 1;
+						if (!VideoFilter) {
+							pvr_sprite_cxt[0].txr.filter = PVR_FILTER_BILINEAR;
+						} else {
+							pvr_sprite_cxt[0].txr.filter = PVR_FILTER_NONE;
+						}	
+						pvr_poly_compile(&pvr_sprite_hdr[0], &pvr_sprite_cxt[0]);
                         return ga_nothing;
                     }
                     break;

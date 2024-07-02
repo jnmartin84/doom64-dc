@@ -584,6 +584,7 @@ void R_WallPrep(seg_t *seg)
 	unsigned int tmp_upcolor;
 	unsigned int tmp_lowcolor;
 	int curRowoffset;
+	float invfrontheight;
 
 	r1=g1=b1=0;
 	r2=g2=b2=0;
@@ -604,6 +605,7 @@ void R_WallPrep(seg_t *seg)
 	f_ceilingheight = frontsector->ceilingheight >> 16;
 	f_floorheight = frontsector->floorheight >> 16;
 	frontheight = f_ceilingheight - f_floorheight;
+	invfrontheight = 1.0f / (float)frontheight;
 
 	if (li->flags & ML_BLENDING) {
 		r1 = (float)((upcolor  >> 24) & 0xff);
@@ -641,8 +643,8 @@ void R_WallPrep(seg_t *seg)
 #if 1
 					sideheight1 = b_ceilingheight - f_floorheight;
 
-					float scale1 = (float)sideheight1 / (float)frontheight;
-					float scale2 = (float)height / (float)frontheight;
+					float scale1 = (float)sideheight1 * invfrontheight; // / (float)frontheight;
+					float scale2 = (float)height * invfrontheight; // / (float)frontheight;
 			
 					float nr1 = r1*scale1;
 					float ng1 = g1*scale1;
@@ -777,8 +779,8 @@ void R_WallPrep(seg_t *seg)
 #if 1
 					int sideheight1 = b_floorheight - f_floorheight;
 
-					float scale1 = (float)sideheight1 / (float)frontheight;
-					float scale2 = (float)height / (float)frontheight;
+					float scale1 = (float)sideheight1 * invfrontheight; // / (float)frontheight;
+					float scale2 = (float)height * invfrontheight; // / (float)frontheight;
 			
 					float nr1 = r1*scale1;
 					float ng1 = g1*scale1;
@@ -1534,7 +1536,7 @@ return v;
 
 char *W_GetNameForNum(int num);
 extern char fnbuf[256];
-
+extern int force_filter_flush;
 int vram_low = 0;
 // 2 - 348 decoration and item sprites (non-enemy)
 // 349 - 923 enemy sprites
@@ -1795,8 +1797,9 @@ if(!pvr_troo) {
 					lumpoff = 574 + newlumpnum;
 				}
 
-				if (vram_low || (last_flush_frame && ((NextFrameIdx - last_flush_frame) > (2*30)) && 
+				if (force_filter_flush || vram_low || (last_flush_frame && ((NextFrameIdx - last_flush_frame) > (2*30)) && 
 					(used_lump_idx > (MAX_CACHED_SPRITES * 3 / 4)))) {
+					if(force_filter_flush) force_filter_flush = 0;
 					for (int i=0;i<(575+310);i++) {
 						if (used_lumps[i] != -1) {
 							pvr_mem_free(pvr_troo[used_lumps[i]]);
@@ -1948,11 +1951,15 @@ bail_evict:
 					}
 	
 					pvr_troo[cached_index] = pvr_mem_malloc(wp2*hp2);
+
 					pvr_poly_cxt_txr(&cxt_troo[cached_index], PVR_LIST_TR_POLY, PVR_TXRFMT_PAL8BPP | PVR_TXRFMT_8BPP_PAL(0) | PVR_TXRFMT_TWIDDLED, wp2, hp2, pvr_troo[cached_index], PVR_FILTER_BILINEAR);
 
 					cxt_troo[cached_index].gen.specular = PVR_SPECULAR_ENABLE;
 					cxt_troo[cached_index].gen.fog_type = PVR_FOG_TABLE;
 					cxt_troo[cached_index].gen.fog_type2 = PVR_FOG_TABLE;
+					if (VideoFilter) {
+						cxt_troo[cached_index].txr.filter = PVR_FILTER_NONE;
+					}
 					pvr_poly_compile(&hdr_troo[cached_index], &cxt_troo[cached_index]);
 
 					pvr_txr_load(src, pvr_troo[cached_index], wp2*hp2);

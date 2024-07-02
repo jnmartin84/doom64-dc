@@ -984,6 +984,9 @@ void BufferedDrawSprite(int type, state_t *state, int rotframe, int color, int x
 	pvranysprite = pvr_mem_malloc(wp2*hp2);
 
 	pvr_poly_cxt_txr(&cxtanysprite, PVR_LIST_TR_POLY, PVR_TXRFMT_PAL8BPP | PVR_TXRFMT_8BPP_PAL(0) | PVR_TXRFMT_TWIDDLED, wp2, hp2, pvranysprite, PVR_FILTER_BILINEAR);
+	if (VideoFilter) {
+		cxtanysprite.txr.filter = PVR_FILTER_NONE;
+	}
 	pvr_poly_compile(&hdranysprite, &cxtanysprite);
 	void *src = data + sizeof(spriteN64_t);
 

@@ -29,7 +29,6 @@ void	R_AddLine(seg_t *line);
 void    R_AddSprite(subsector_t *sub);
 void    R_RenderBSPNodeNoClip(int bspnum);
 void	R_RenderFilter(void); // [Immorpher] Rendering function to set filter
-
 // [GEC and Immorpher] Set texture render options
 void R_RenderFilter(void)
 {

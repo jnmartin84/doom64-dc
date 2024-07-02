@@ -65,18 +65,201 @@ void *psargfirstcybr, *premcybr;
 void *pbarniteshot, *pspectre, *pwepnshee;
 
 pvr_ptr_t pvr_non_enemy;
-pvr_ptr_t pvr_playtrooposs;
+/*pvr_ptr_t pvr_playtrooposs;
 pvr_ptr_t pvr_skulbosshead;
 pvr_ptr_t pvr_painbsp;
 pvr_ptr_t pvr_fattrect1, pvr_fattrect2, pvr_fattrect3;
 pvr_ptr_t pvr_sargfirstcybr,pvr_remcybr;
-pvr_ptr_t pvr_barniteshot,pvr_spectre,pvr_wepnshee;
+pvr_ptr_t pvr_barniteshot,pvr_spectre,pvr_wepnshee;*/
 pvr_poly_cxt_t pvr_sprite_cxt[11];
 pvr_poly_hdr_t pvr_sprite_hdr[11];
 
 const char *fnpre = "/cd";
 
 char fnbuf[256];
+extern uint8_t __attribute__((aligned(32))) op_buf[VERTBUF_SIZE];
+extern uint8_t __attribute__((aligned(32))) tr_buf[VERTBUF_SIZE];
+
+uint16_t *printtex;//[12*24*20];
+pvr_ptr_t dlstex;
+// LOADING DOOM64 IWAD
+
+void W_DrawLoadScreen(char *what, int current, int total) {
+		pvr_vertex_t __attribute__((aligned(32))) txtverts[4];
+
+		pvr_vertex_t __attribute__((aligned(32))) verts[12];
+		pvr_poly_cxt_t load_cxt;
+		pvr_poly_hdr_t load_hdr;
+		pvr_poly_cxt_t load2_cxt;
+		pvr_poly_hdr_t load2_hdr;
+		printtex = (uint16_t *)malloc(256*32*sizeof(uint16_t));
+		memset(printtex, 0, 256*32*sizeof(uint16_t));
+		dlstex = pvr_mem_malloc(256*32*sizeof(uint16_t));
+
+		pvr_poly_cxt_txr(&load_cxt, PVR_LIST_OP_POLY, PVR_TXRFMT_ARGB1555, 256, 32, dlstex, PVR_FILTER_NONE);
+		load_cxt.blend.src = PVR_BLEND_ONE;
+		load_cxt.blend.dst = PVR_BLEND_ONE;
+		pvr_poly_compile(&load_hdr, &load_cxt);
+
+		pvr_poly_cxt_col(&load2_cxt, PVR_LIST_OP_POLY);
+		load2_cxt.blend.src = PVR_BLEND_ONE;
+		load2_cxt.blend.dst = PVR_BLEND_ONE;
+		pvr_poly_compile(&load2_hdr, &load2_cxt);
+
+		char fullstr[256];
+		sprintf(fullstr, "Loading %s", what);
+		bfont_set_encoding(BFONT_CODE_ISO8859_1);
+		bfont_draw_str_ex(printtex, 256,
+		//vram_s + (((((REAL_SCREEN_HT/2) - 16)-24)*640) + 242), 640, 
+		0xffffffff, 0xff000000, 16, 1, fullstr);
+		pvr_txr_load_ex(printtex, dlstex, 256, 32, PVR_TXRLOAD_16BPP);
+
+		uint32_t color = 0xff404040;
+		uint32_t color2 = 0xff800000;
+		uint32_t color3 = 0xffc00000;
+
+		pvr_vertex_t *vert = txtverts;
+		vert->flags = PVR_CMD_VERTEX;
+		vert->x = 242.0f;
+		vert->y = (((REAL_SCREEN_HT/2) - 16));
+		vert->z = 4.9f;
+		vert->u = 0.0f;
+		vert->v = 24.0f / 32.0f;//1.0f;
+		vert->argb = 0xffffffff;
+		vert++;
+		vert->flags = PVR_CMD_VERTEX;
+		vert->x = 242.0f;
+		vert->y = (((REAL_SCREEN_HT/2) - 16)-24);
+		vert->z = 4.9f;
+		vert->u = 0.0f;
+		vert->v = 0.0f;
+		vert->argb = 0xffffffff;
+		vert++;
+
+		vert->flags = PVR_CMD_VERTEX;
+		vert->x = 242.0f + 256.0f;
+		vert->y = (((REAL_SCREEN_HT/2) - 16));
+		vert->z = 4.9f;
+		vert->u = 1.0f;
+		vert->v = 24.0f / 32.0f;//1.0f;
+		vert->argb = 0xffffffff;
+		vert++;
+
+		vert->flags = PVR_CMD_VERTEX_EOL;
+		vert->x = 242.0f + 256.0f;
+		vert->y = (((REAL_SCREEN_HT/2) - 16)-24);
+		vert->z = 4.9f;
+		vert->u = 1.0f;
+		vert->v = 0.0f;
+		vert->argb = 0xffffffff;
+
+
+		vert = verts;
+		vert->flags = PVR_CMD_VERTEX;
+		vert->x = 240.0f;
+		vert->y = (REAL_SCREEN_HT/2) + 8;
+		vert->z = 5.0f;
+		vert->argb = color;
+		vert++;
+
+		vert->flags = PVR_CMD_VERTEX;
+		vert->x = 240.0f;
+		vert->y = (REAL_SCREEN_HT/2) - 16;
+		vert->z = 5.0f;
+		vert->argb = color;
+		vert++;
+
+		vert->flags = PVR_CMD_VERTEX;
+		vert->x = 480.0f;
+		vert->y = (REAL_SCREEN_HT/2) + 8;
+		vert->z = 5.0f;
+		vert->argb = color;
+		vert++;
+
+		vert->flags = PVR_CMD_VERTEX_EOL;
+		vert->x = 480.0f;
+		vert->y = (REAL_SCREEN_HT/2) - 16;
+		vert->z = 5.0f;
+		vert->argb = color;
+		vert++;
+
+
+// (240 * current / total)
+
+		vert->flags = PVR_CMD_VERTEX;
+		vert->x = 242.0f;
+		vert->y = (REAL_SCREEN_HT/2) + 6;
+		vert->z = 5.1f;
+		vert->argb = color2;
+		vert++;
+
+		vert->flags = PVR_CMD_VERTEX;
+		vert->x = 242.0f;
+		vert->y = (REAL_SCREEN_HT/2) - 14;
+		vert->z = 5.1f;
+		vert->argb = color2;
+		vert++;
+
+		vert->flags = PVR_CMD_VERTEX;
+		vert->x = 242.0f  + (236.0f * (float)current / (float)total);
+		vert->y = (REAL_SCREEN_HT/2) + 6;
+		vert->z = 5.1f;
+		vert->argb = color2;
+		vert++;
+
+		vert->flags = PVR_CMD_VERTEX_EOL;
+		vert->x = 242.0f  + (236.0f * (float)current / (float)total);
+		vert->y = (REAL_SCREEN_HT/2) - 14;
+		vert->z = 5.1f;
+		vert->argb = color2;
+		vert++;
+		
+		
+		vert->flags = PVR_CMD_VERTEX;
+		vert->x = 243.0f;
+		vert->y = (REAL_SCREEN_HT/2) + 5;
+		vert->z = 5.1f;
+		vert->argb = color2;
+		vert++;
+
+		vert->flags = PVR_CMD_VERTEX;
+		vert->x = 243.0f;
+		vert->y = (REAL_SCREEN_HT/2) - 13;
+		vert->z = 5.1f;
+		vert->argb = color2;
+		vert++;
+
+		vert->flags = PVR_CMD_VERTEX;
+		vert->x = 243.0f  + (234.0f * (float)current / (float)total);
+		vert->y = (REAL_SCREEN_HT/2) + 5;
+		vert->z = 5.1f;
+		vert->argb = color2;
+		vert++;
+
+		vert->flags = PVR_CMD_VERTEX_EOL;
+		vert->x = 243.0f  + (234.0f * (float)current / (float)total);
+		vert->y = (REAL_SCREEN_HT/2) - 13;
+		vert->z = 5.1f;
+		vert->argb = color2;
+		
+		
+		vid_waitvbl();
+		pvr_scene_begin();
+		pvr_set_vertbuf(PVR_LIST_OP_POLY, op_buf, VERTBUF_SIZE);
+		pvr_set_vertbuf(PVR_LIST_TR_POLY, tr_buf, VERTBUF_SIZE);
+
+		pvr_list_prim(PVR_LIST_OP_POLY, &load_hdr, sizeof(pvr_poly_hdr_t));
+		pvr_list_prim(PVR_LIST_OP_POLY, &txtverts, sizeof(txtverts));	
+
+		pvr_list_prim(PVR_LIST_OP_POLY, &load2_hdr, sizeof(pvr_poly_hdr_t));
+		pvr_list_prim(PVR_LIST_OP_POLY, &verts, sizeof(verts));	
+
+		pvr_scene_finish();
+		pvr_wait_ready();
+		free(printtex);
+		pvr_mem_free(dlstex);
+}
+
 
 void W_Init (void)
 {
@@ -166,12 +349,35 @@ void W_Init (void)
 	s2_file = fs_open(fnbuf, O_RDONLY);
 
 	dbgio_printf("W_Init: Loading IWAD into RAM...\n");
-	fs_read(wad_file, (void*)fullwad, 6828604);//5997660);//6101168);
+	size_t wad_rem_size = 6828604;
+	size_t wad_read = 0;
+	while(wad_rem_size > (128*1024)) {
+		fs_read(wad_file, (void*)fullwad + wad_read, (128*1024));//5997660);//6101168);
+		wad_read += (128*1024);
+		wad_rem_size -= (128*1024);
+		W_DrawLoadScreen("Doom 64 IWAD", wad_read, 6828604);
+	}
+	fs_read(wad_file, (void*)fullwad + wad_read, wad_rem_size);//5997660);//6101168);
+	wad_read += wad_rem_size;
+	W_DrawLoadScreen("Doom 64 IWAD", wad_read, 6828604);
+
+//	fs_read(wad_file, (void*)fullwad, 6828604);//5997660);//6101168);
 	dbgio_printf("Done.\n");
 	fs_close(wad_file);
 
+	wad_rem_size = 890112;
+	wad_read = 0;
 	dbgio_printf("W_Init: Loading alt sprite PWAD into RAM...\n");
-	fs_read(s2_file, (void*)s2wad, 890112);
+	while(wad_rem_size > (128*1024)) {
+		fs_read(s2_file, (void*)s2wad + wad_read, (128*1024));
+		wad_read += (128*1024);
+		wad_rem_size -= (128*1024);
+		W_DrawLoadScreen("Sprite WAD", wad_read, 890112);
+	}
+	fs_read(s2_file, (void*)s2wad + wad_read, wad_rem_size);
+	wad_read += wad_rem_size;
+	W_DrawLoadScreen("Sprite WAD", wad_read, 890112);
+	//fs_read(s2_file, (void*)s2wad, 890112);
 	dbgio_printf("Done.\n");
 	fs_close(s2_file);
 
