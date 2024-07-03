@@ -602,7 +602,6 @@ void R_WallPrep(seg_t *seg)
 	f_ceilingheight = frontsector->ceilingheight >> 16;
 	f_floorheight = frontsector->floorheight >> 16;
 	frontheight = f_ceilingheight - f_floorheight;
-	invfrontheight = 1.0f / (float)frontheight;
 
 	if (li->flags & ML_BLENDING) {
 		r1 = (float)((upcolor  >> 24) & 0xff);
