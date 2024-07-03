@@ -1,6 +1,4 @@
 //Renderer phase 3 - World Rendering Routines
-//#include <gl/GL.h>
-//#include <gl/GLU.h>
 #include "doomdef.h"
 #include "r_local.h"
 
@@ -584,7 +582,6 @@ void R_WallPrep(seg_t *seg)
 	unsigned int tmp_upcolor;
 	unsigned int tmp_lowcolor;
 	int curRowoffset;
-	float invfrontheight;
 
 	r1=g1=b1=0;
 	r2=g2=b2=0;
@@ -643,8 +640,8 @@ void R_WallPrep(seg_t *seg)
 #if 1
 					sideheight1 = b_ceilingheight - f_floorheight;
 
-					float scale1 = (float)sideheight1 * invfrontheight; // / (float)frontheight;
-					float scale2 = (float)height * invfrontheight; // / (float)frontheight;
+					float scale1 = (float)sideheight1 / (float)frontheight;
+					float scale2 = (float)height / (float)frontheight;
 			
 					float nr1 = r1*scale1;
 					float ng1 = g1*scale1;
@@ -779,8 +776,8 @@ void R_WallPrep(seg_t *seg)
 #if 1
 					int sideheight1 = b_floorheight - f_floorheight;
 
-					float scale1 = (float)sideheight1 * invfrontheight; // / (float)frontheight;
-					float scale2 = (float)height * invfrontheight; // / (float)frontheight;
+					float scale1 = (float)sideheight1 / (float)frontheight;
+					float scale2 = (float)height / (float)frontheight;
 			
 					float nr1 = r1*scale1;
 					float ng1 = g1*scale1;
