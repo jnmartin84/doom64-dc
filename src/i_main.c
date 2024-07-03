@@ -8,6 +8,7 @@
 #include <dc/vblank.h>
 #include <dc/video.h>
 #include <arch/irq.h>
+#include "STFST10.h"
 
 KOS_INIT_FLAGS(INIT_DEFAULT | INIT_MALLOCSTATS);
 
@@ -26,8 +27,24 @@ extern int globalcm;
 //----------
 
 #define SYS_THREAD_ID_TICKER 3
+char vmupic[87]; // 24x29x1bpp
+void make_vmupic(void) {
+	
+	for(int i=0;i<87*8;i+=8) {
+		uint8_t tmpb = 0;
+		tmpb |= (1-header_data[i])<<7;
+		tmpb |= (1-header_data[i+1])<<6;
+		tmpb |= (1-header_data[i+2])<<5;
+		tmpb |= (1-header_data[i+3])<<4;
+		tmpb |= (1-header_data[i+4])<<3;
+		tmpb |= (1-header_data[i+5])<<2;
+		tmpb |= (1-header_data[i+6])<<1;
+		tmpb |= 1-header_data[i+7];
+		vmupic[i>>3] = tmpb;
+	}
+}
 
-kthread_t*sys_ticker_thread;
+kthread_t *sys_ticker_thread;
 kthread_attr_t sys_ticker_attr;
 
 //u32 vid_side;
@@ -74,7 +91,7 @@ int __attribute__((noreturn)) main(int argc, char **argv)
 	vid_set_mode(DM_320x240, PM_RGB565);
 #endif
 	pvr_init(&pvr_params);
-
+make_vmupic();
 	mutex_init(&st_mutex, MUTEX_TYPE_NORMAL);
 	mutex_init(&fb_mutex, MUTEX_TYPE_NORMAL);
 
