@@ -47,52 +47,51 @@ If you cloned with the default name to your home directory, `doom64-dc` would be
 
 Under doom64-dc, you will find the following files and directories
 
-doom64-dc/
--- README.md (you're reading it right now)
--- d64dcprep/
----- gimpscripts/
------- batch-doom64-colorconvert-nodither.scm (GIMP script for recoloring indexed-color images without dithering)
------- batch-doom64-colorconvert.scm (GIMP script for recoloring indexed-color images with dithering)
------- doom64-alt-monster.scm (GIMP script for performing a palette remap on indexed-color images)
------- doom64-tile-crop.scm (GIMP script for resizing and flattening indexed-color images)
------- morph-filename.scm (GIMP script for replacing the extension on a filename)
----- json/
----- monster/
------- tmp/
--------- a (placeholder file for non-empty directory)
----- nonenemy/
------- tmp/
--------- a (placeholder file for non-empty directory)
----- palgpl/
------- doom64monster.gpl  (GIMP format palette for recoloring monster sprites)
------- doom64nonenemy.gpl (GIMP format palette for recoloring nonenemy sprites)
----- palpngs/
------- palbaro.png (indexed color PNG with specific palette needed to remap BOSS to BARO)
------- palnite.png (indexed color PNG with specific palette needed to remap TROO to NITE) 
------- palply1.png (indexed color PNG with specific palette needed to remap green PLAY to red PLAY)
------- palply2.png (indexed color PNG with specific palette needed to remap green PLAY to blue PLAY)
------- palspec.png (indexed color PNG with specific palette needed to remap SARG to SPEC)
------- palzomb.png (indexed color PNG with specific palette needed to remap POSS to Immorpher's "blue" ZOMB)
----- sheets/
------- a (placeholder file for non-empty directory)
----- texconv_doom64dc.patch
----- wadfiles/
------- a (placeholder file for non-empty directory)
----- wadtools/
------- encode.c (compress a file with Doom `jaguar`/`LZSS` compression)
------- fixwad.c (replace monster sprite lumps in `doom64.wad`)
------- makelump.c (create a `spriteN64_t` lump from a raw image file)
------- makewad.c (create a new WAD file with alternate palette monster sprites)
------- twiddle.c (twiddle the graphic data stored in a `spriteN64_t` lump file)
--- selfboot/
----- ogg/
------- lower/ 
--------- *.ogg (all of the music tracks as 44khz mono OGG)
----- sfx/
------- *.wav (all of the game sfx as 22khz ADPCM WAV)
----- vq/ (where the sprite sheet for non enemy sprites ends up)
------- a (placeholder file for non-empty directory)
-
+    doom64-dc/
+    -- README.md (you're reading it right now)
+    -- d64dcprep/
+    ---- gimpscripts/
+    ------ batch-doom64-colorconvert-nodither.scm (GIMP script for recoloring indexed-color images without dithering)
+    ------ batch-doom64-colorconvert.scm (GIMP script for recoloring indexed-color images with dithering)
+    ------ doom64-alt-monster.scm (GIMP script for performing a palette remap on indexed-color images)
+    ------ doom64-tile-crop.scm (GIMP script for resizing and flattening indexed-color images)
+    ------ morph-filename.scm (GIMP script for replacing the extension on a filename)
+    ---- json/
+    ---- monster/
+    ------ tmp/
+    -------- a (placeholder file for non-empty directory)
+    ---- nonenemy/
+    ------ tmp/
+    -------- a (placeholder file for non-empty directory)
+    ---- palgpl/
+    ------ doom64monster.gpl  (GIMP format palette for recoloring monster sprites)
+    ------ doom64nonenemy.gpl (GIMP format palette for recoloring nonenemy sprites)
+    ---- palpngs/
+    ------ palbaro.png (indexed color PNG with specific palette needed to remap BOSS to BARO)
+    ------ palnite.png (indexed color PNG with specific palette needed to remap TROO to NITE) 
+    ------ palply1.png (indexed color PNG with specific palette needed to remap green PLAY to red PLAY)
+    ------ palply2.png (indexed color PNG with specific palette needed to remap green PLAY to blue PLAY)
+    ------ palspec.png (indexed color PNG with specific palette needed to remap SARG to SPEC)
+    ------ palzomb.png (indexed color PNG with specific palette needed to remap POSS to Immorpher's "blue" ZOMB)
+    ---- sheets/
+    ------ a (placeholder file for non-empty directory)
+    ---- texconv_doom64dc.patch
+    ---- wadfiles/
+    ------ a (placeholder file for non-empty directory)
+    ---- wadtools/
+    ------ encode.c (compress a file with Doom `jaguar`/`LZSS` compression)
+    ------ fixwad.c (replace monster sprite lumps in `doom64.wad`)
+    ------ makelump.c (create a `spriteN64_t` lump from a raw image file)
+    ------ makewad.c (create a new WAD file with alternate palette monster sprites)
+    ------ twiddle.c (twiddle the graphic data stored in a `spriteN64_t` lump file)
+    -- selfboot/
+    ---- ogg/
+    ------ lower/ 
+    -------- *.ogg (all of the music tracks as 44khz mono OGG)
+    ---- sfx/
+    ------ *.wav (all of the game sfx as 22khz ADPCM WAV)
+    ---- vq/ (where the sprite sheet for non enemy sprites ends up)
+    ------ a (placeholder file for non-empty directory)
 
 How to generate sprite textures / updated WAD files:
 
