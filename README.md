@@ -1,4 +1,9 @@
-# Doom 64 for Dreamcast build guide
+# Doom 64 for Dreamcast 
+
+# playing guide
+A is attack, b is use, x is weapon backward, y is weapon forward, start is start (bring up menu), d-pad move, l trig strafe left, R trig strafe right, l+R trig together for automap, again for line map, third time back to game
+
+# build guide
 
 **Pre-reqs:**
 
