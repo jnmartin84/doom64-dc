@@ -107,12 +107,8 @@ void P_RunMacros(void) // 8002126C
 
     if(macrothinker)
     {
-        //ST_DebugPrint("macrothinker %x wait", macrothinker);
         return; /* must wait for this thinker to finish */
     }
-
-    //ST_DebugPrint("activemacro->id %d",activemacro->id);
-
 
     /* keep track of the current thinker */
     thinker = thinkercap.prev;
@@ -134,7 +130,6 @@ void P_RunMacros(void) // 8002126C
         {
             if (activemacro->id == 0)
             {
-                //ST_DebugPrint("P_SuspendMacro act->id %d",activemacro->id);
                 P_SuspendMacro();
                 return;
             }

@@ -349,8 +349,9 @@ void W_Init (void)
 	s2_file = fs_open(fnbuf, O_RDONLY);
 
 	dbgio_printf("W_Init: Loading IWAD into RAM...\n");
-	size_t wad_rem_size = 6828604;
+	size_t wad_rem_size = fs_seek(wad_file, 0, SEEK_END); //6827420;//6828604;
 	size_t wad_read = 0;
+	fs_seek(wad_file, 0, SEEK_SET);
 	while(wad_rem_size > (128*1024)) {
 		fs_read(wad_file, (void*)fullwad + wad_read, (128*1024));//5997660);//6101168);
 		wad_read += (128*1024);
@@ -365,9 +366,10 @@ void W_Init (void)
 	dbgio_printf("Done.\n");
 	fs_close(wad_file);
 
-	wad_rem_size = 890112;
-	wad_read = 0;
 	dbgio_printf("W_Init: Loading alt sprite PWAD into RAM...\n");
+	wad_rem_size = fs_seek(s2_file, 0, SEEK_END);//863304;//890112;
+	wad_read = 0;
+	fs_seek(s2_file, 0, SEEK_SET);
 	while(wad_rem_size > (128*1024)) {
 		fs_read(s2_file, (void*)s2wad + wad_read, (128*1024));
 		wad_read += (128*1024);

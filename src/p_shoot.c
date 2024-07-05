@@ -234,7 +234,6 @@ boolean PTR_ShootTraverse(intercept_t* in) // 800177A8
         }
 
         // Spawn bullet puffs.
-        //ST_DebugPrint("P_SpawnPuff line");
         P_SpawnPuff(x, y, z);
 
         shotline = li;
@@ -294,7 +293,6 @@ boolean PTR_ShootTraverse(intercept_t* in) // 800177A8
     // depending on target type.
     if((in->d.thing->flags & MF_NOBLOOD) != 0)
     {
-        //ST_DebugPrint("P_SpawnPuff thing");
         P_SpawnPuff(x, y, z);
     }
     else

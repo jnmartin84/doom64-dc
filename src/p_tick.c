@@ -53,7 +53,7 @@ void P_RemoveThinker (thinker_t *thinker)
 {
 	thinker->function = (think_t)-1;
 
-	if (thinker == macrothinker) { 
+	if (thinker == macrothinker) {
 		// [D64] New lines
 		macrothinker = NULL;
 	}
@@ -185,8 +185,6 @@ int P_Ticker (void)//80021A00
 		ST_Ticker(); // update status bar
 	}
 
-	//ST_DebugPrint("%d",Z_FreeMemory (mainzone));
-
 	//
 	// run player actions
 	//
@@ -219,10 +217,6 @@ extern Matrix __attribute__((aligned(32))) R_ModelMatrix;
 void P_Drawer (void) // 80021AC8
 {
 	I_ClearFrame();
-//gMatrixMode(GL_PROJECTION);
-//gLoadMatrix(R_ProjectionMatrix);
-//gMatrixMode(GL_MODELVIEW);
-//gLoadMatrix(R_ModelMatrix);
 #if 0
 	gMoveWd(GFX1++, G_MW_CLIP, G_MWO_CLIP_RNX, 1);
 	gMoveWd(GFX1++, G_MW_CLIP, G_MWO_CLIP_RNY, 1);
@@ -239,22 +233,16 @@ void P_Drawer (void) // 80021AC8
 	mat_load(&R_ProjectionMatrix);
 	mat_apply(&R_ModelMatrix);
 
-	if (players[0].automapflags & (AF_LINES|AF_SUBSEC))
-	{
+	if (players[0].automapflags & (AF_LINES|AF_SUBSEC)) {
 		AM_Drawer();
-	}
-	else
-	{
+	} else {
 		R_RenderPlayerView();
-		//ST_DebugPrint("x %d || y %d", players[0].mo->x >> 16, players[0].mo->y >> 16);
 
 		if (demoplayback == false)
 			ST_Drawer();
-//sleep(0.1);
 	}
 
-	if (MenuCall)
-	{
+	if (MenuCall) {
 		M_DrawOverlay(0, 0, 320, 240, 96);
 		MenuCall();
 	}

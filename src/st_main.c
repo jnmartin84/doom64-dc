@@ -4,48 +4,7 @@
 #include "st_main.h"
 #include "r_local.h"
 
-#include "face/STFDEAD0.xbm"
-#include "face/STFKILL4.xbm"
-#include "face/STFST12.xbm"
-#include "face/STFTL10.xbm"
-#include "face/STFEVL0.xbm"
-#include "face/STFOUCH0.xbm"
-#include "face/STFST20.xbm"
-#include "face/STFTL20.xbm"
-#include "face/STFEVL1.xbm"
-#include "face/STFOUCH1.xbm"
-#include "face/STFST21.xbm"
-#include "face/STFTL30.xbm"
-#include "face/STFEVL2.xbm"
-#include "face/STFOUCH2.xbm"
-#include "face/STFST22.xbm"
-#include "face/STFTL40.xbm"
-#include "face/STFEVL3.xbm"
-#include "face/STFOUCH3.xbm"
-#include "face/STFST30.xbm"
-#include "face/STFTR00.xbm"
-#include "face/STFEVL4.xbm"
-#include "face/STFOUCH4.xbm"
-#include "face/STFST31.xbm"
-#include "face/STFTR10.xbm"
-#include "face/STFGOD0.xbm"
-#include "face/STFST00.xbm"
-#include "face/STFST32.xbm"
-#include "face/STFTR20.xbm"
-#include "face/STFKILL0.xbm"
-#include "face/STFST01.xbm"
-#include "face/STFST40.xbm"
-#include "face/STFTR30.xbm"
-#include "face/STFKILL1.xbm"
-#include "face/STFST02.xbm"
-#include "face/STFST41.xbm"
-#include "face/STFTR40.xbm"
-#include "face/STFKILL2.xbm"
-#include "face/STFST10.xbm"
-#include "face/STFST42.xbm"
-#include "face/STFKILL3.xbm"
-#include "face/STFST11.xbm"
-#include "face/STFTL00.xbm"
+#include "st_faces.h"
 
 sbflash_t flashCards[6];    // 800A8180
 boolean tryopen[6]; // 800A81E0
@@ -205,36 +164,27 @@ static int	st_facecount = 0;
 // current face index, used by w_faces
 static int	st_faceindex = 0;
 
-char *faces[ST_NUMFACES];
+unsigned char *faces[ST_NUMFACES];
 
 void ST_updateFaceWidget(void);
-unsigned char reverse(unsigned char b) {
-   b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
-   b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
-   b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
-   return b;
-}
 
 unsigned char tmp[6*32];
-void fix_xbm(unsigned char *p) {
-//for(int j=0;j<6*32;j++) {
-//	p[j] = reverse(p[j]);
-//}
-for(int i=31;i>-1;i--) {
-memcpy(&tmp[(31-i)*6], &p[i*6], 6);
-}
-memcpy(p, tmp, 6*32);
-for(int j=0;j<32;j++) {
-	for(int i=0;i<6;i++) {
-		uint8_t tmpb = p[(j*6) + (5 - i)];
-		
-//		tmpb = (tmpb << 4)|((tmpb >> 4)&0xf);
-		
-		tmp[(j*6) + i] = tmpb;
-	}
-}
-memcpy(p, tmp, 6*32);
 
+void fix_xbm(unsigned char *p) {
+	for(int i=31;i>-1;i--) {
+		memcpy(&tmp[(31-i)*6], &p[i*6], 6);
+	}
+
+	memcpy(p, tmp, 6*32);
+
+	for(int j=0;j<32;j++) {
+		for(int i=0;i<6;i++) {
+			uint8_t tmpb = p[(j*6) + (5 - i)];
+			tmp[(j*6) + i] = tmpb;
+		}
+	}
+
+	memcpy(p, tmp, 6*32);
 }
 
 void ST_Init(void) // 80029BA0
@@ -243,11 +193,9 @@ void ST_Init(void) // 80029BA0
 //  sfontlump = (byte *)W_CacheLumpName("SFONT",PU_STATIC,dec_jag);
 //  statuslump = (byte *)W_CacheLumpName("STATUS",PU_STATIC,dec_jag);
 //  sumbolslump = W_GetNumForName("SYMBOLS");
+
     int		i;
-    int		j;
     int		facenum;
-    
-    char	namebuf[9];
   // face states
     facenum = 0;
 	
@@ -311,34 +259,8 @@ void ST_Init(void) // 80029BA0
     faces[facenum++] = STFDEAD0_bits;
 	
 	for(i=0;i<ST_NUMFACES;i++) {
-		/*for(j=0;j<6*32;j++) {
-			faces[i][j] = reverse(faces[i][j]);
-		}*/
 		fix_xbm(faces[i]);
 	}
-	
-#if 0	
-    for (i=0;i<ST_NUMPAINFACES;i++)
-    {
-	for (j=0;j<ST_NUMSTRAIGHTFACES;j++)
-	{
-	    sprintf(namebuf, "STFST%d%d", i, j);
-	    faces[facenum++] = W_CacheLumpName(namebuf, PU_STATIC);
-	}
-	sprintf(namebuf, "STFTR%d0", i);	// turn right
-	faces[facenum++] = W_CacheLumpName(namebuf, PU_STATIC);
-	sprintf(namebuf, "STFTL%d0", i);	// turn left
-	faces[facenum++] = W_CacheLumpName(namebuf, PU_STATIC);
-	sprintf(namebuf, "STFOUCH%d", i);	// ouch!
-	faces[facenum++] = W_CacheLumpName(namebuf, PU_STATIC);
-	sprintf(namebuf, "STFEVL%d", i);	// evil grin ;)
-	faces[facenum++] = W_CacheLumpName(namebuf, PU_STATIC);
-	sprintf(namebuf, "STFKILL%d", i);	// pissed off
-	faces[facenum++] = W_CacheLumpName(namebuf, PU_STATIC);
-    }
-    faces[facenum++] = W_CacheLumpName("STFGOD0", PU_STATIC);
-    faces[facenum++] = W_CacheLumpName("STFDEAD0", PU_STATIC);
-#endif	
 }
 
 // used for evil grin
@@ -1104,52 +1026,29 @@ void ST_DrawSymbol(int xpos, int ypos, int index, int color) // 8002ADEC
 	pvr_list_prim(PVR_LIST_TR_POLY, &quad2, sizeof(quad2));
 }
 
-#include "stdarg.h"
-
-
-void ST_DebugSetPrintPos(int x, int y)
-{
-#if 0
-	debugX = x;
-	debugY = y;
-#endif
-}
-
-void ST_DebugPrint(const char *text, ...)
-{
-#if 0
-	if(debug)
-	{
-		va_list args;
-		va_start (args, text);
-//        D_
-vsprintf (buffer[debugcnt], text, args);
-		va_end (args);
-
-		debugcnt += 1;
-		debugcnt &= 15;
-	}
-
-	//debugY += 8;
-#endif
-}
-
-
 int ST_calcPainOffset(void)
 {
 	player_t *plyr = &players[0];
-    int		health;
-    static int	lastcalc;
-    static int	oldhealth = -1;
-    
-    health = plyr->health > 100 ? 100 : plyr->health;
+	int health;
+	static int lastcalc;
+	static int oldhealth = -1;
 
-    if (health != oldhealth)
-    {
-	lastcalc = ST_FACESTRIDE * (((100 - health) * ST_NUMPAINFACES) / 101);
-	oldhealth = health;
-    }
-    return lastcalc;
+	health = plyr->health > 100 ? 100 : plyr->health;
+
+	if (health != oldhealth) {
+		lastcalc = ST_FACESTRIDE * (((100 - health) * ST_NUMPAINFACES) / 101);
+		oldhealth = health;
+	}
+
+	return lastcalc;
+}
+
+void ST_drawVMUFace(void) {
+	unsigned int vmu;
+	maple_device_t *dev;
+	for(vmu = 0; !!(dev = maple_enum_type(vmu, MAPLE_FUNC_LCD)); vmu++) {
+		vmu_draw_lcd(dev, faces[st_faceindex]);
+	}
 }
 
 //
@@ -1158,201 +1057,151 @@ int ST_calcPainOffset(void)
 // the precedence of expressions is:
 //  dead > evil grin > turned head > straight ahead
 //
-static vmufb_t vmufb;
-void ST_drawVMUFace(void) {
-	unsigned int vmu;
-	maple_device_t *dev;
-	//vmufb_clear(&vmufb);
-	//vmufb_paint_area(&vmufb, 0, 0, 24, 29, vmupic);
-  for(vmu = 0; !!(dev = maple_enum_type(vmu, MAPLE_FUNC_LCD)); vmu++) {
-            //vmufb_present(&vmufb, dev);
-			vmu_draw_lcd(dev, faces[st_faceindex]);
-
-        }
-}
-
 void ST_updateFaceWidget(void)
 {
 	player_t *plyr = &players[0];
 
-    int		i;
-    angle_t	badguyangle;
-    angle_t	diffang;
-    static int	lastattackdown = -1;
-    static int	priority = 0;
-    boolean	doevilgrin;
+	int i;
+	angle_t badguyangle;
+	angle_t diffang;
+	static int lastattackdown = -1;
+	static int priority = 0;
+	boolean doevilgrin;
 
-    if (priority < 10)
-    {
-	// dead
-	if (!plyr->health)
-	{
-	    priority = 9;
-	    st_faceindex = ST_DEADFACE;
-	    st_facecount = 1;
-		ST_drawVMUFace();
-	}
-    }
-
-    if (priority < 9)
-    {
-	if (plyr->bonuscount)
-	{
-	    // picking up bonus
-	    doevilgrin = false;
-
-	    for (i=0;i<NUMWEAPONS;i++)
-	    {
-		if (oldweaponsowned[i] != plyr->weaponowned[i])
-		{
-		    doevilgrin = true;
-		    oldweaponsowned[i] = plyr->weaponowned[i];
+	if (priority < 10) {
+		// dead
+		if (!plyr->health) {
+			priority = 9;
+			st_faceindex = ST_DEADFACE;
+			st_facecount = 1;
+			ST_drawVMUFace();
 		}
-	    }
-	    if (doevilgrin) 
-	    {
-		// evil grin if just picked up weapon
-		priority = 8;
-		st_facecount = ST_EVILGRINCOUNT;
-		st_faceindex = ST_calcPainOffset() + ST_EVILGRINOFFSET;
-		ST_drawVMUFace();
-	    }
 	}
 
-    }
+	if (priority < 9) {
+		if (plyr->bonuscount) {
+			// picking up bonus
+			doevilgrin = false;
+
+			for (i=0;i<NUMWEAPONS;i++) {
+				if (oldweaponsowned[i] != plyr->weaponowned[i]) {
+					doevilgrin = true;
+					oldweaponsowned[i] = plyr->weaponowned[i];
+				}
+			}
+
+			if (doevilgrin) {
+				// evil grin if just picked up weapon
+				priority = 8;
+				st_facecount = ST_EVILGRINCOUNT;
+				st_faceindex = ST_calcPainOffset() + ST_EVILGRINOFFSET;
+				ST_drawVMUFace();
+			}
+		}
+	}
   
-    if (priority < 8)
-    {
-	if (plyr->damagecount
-	    && plyr->attacker
-	    && plyr->attacker != plyr->mo)
-	{
-	    // being attacked
-	    priority = 7;
-	    
-	    if (plyr->health - st_oldhealth > ST_MUCHPAIN)
-	    {
-		st_facecount = ST_TURNCOUNT;
-		st_faceindex = ST_calcPainOffset() + ST_OUCHOFFSET;
-		ST_drawVMUFace();
-	    }
-	    else
-	    {
-		badguyangle = R_PointToAngle2(plyr->mo->x,
-					      plyr->mo->y,
-					      plyr->attacker->x,
-					      plyr->attacker->y);
-		
-		if (badguyangle > plyr->mo->angle)
-		{
-		    // whether right or left
-		    diffang = badguyangle - plyr->mo->angle;
-		    i = diffang > ANG180; 
-		}
-		else
-		{
-		    // whether left or right
-		    diffang = plyr->mo->angle - badguyangle;
-		    i = diffang <= ANG180; 
-		} // confusing, aint it?
+	if (priority < 8) {
+		if (plyr->damagecount && 
+			plyr->attacker && 
+			plyr->attacker != plyr->mo) {
 
-		
-		st_facecount = ST_TURNCOUNT;
-		st_faceindex = ST_calcPainOffset();
-		
-		if (diffang < ANG45)
-		{
-		    // head-on    
-		    st_faceindex += ST_RAMPAGEOFFSET;
-		}
-		else if (i)
-		{
-		    // turn face right
-		    st_faceindex += ST_TURNOFFSET;
-		}
-		else
-		{
-		    // turn face left
-		    st_faceindex += ST_TURNOFFSET+1;
-		}
-		
-		ST_drawVMUFace();
-		
-	    }
-	}
-    }
-  
-    if (priority < 7)
-    {
-	// getting hurt because of your own damn stupidity
-	if (plyr->damagecount)
-	{
-	    if (plyr->health - st_oldhealth > ST_MUCHPAIN)
-	    {
-		priority = 7;
-		st_facecount = ST_TURNCOUNT;
-		st_faceindex = ST_calcPainOffset() + ST_OUCHOFFSET;
-		ST_drawVMUFace();
-	    }
-	    else
-	    {
-		priority = 6;
-		st_facecount = ST_TURNCOUNT;
-		st_faceindex = ST_calcPainOffset() + ST_RAMPAGEOFFSET;
-		ST_drawVMUFace();
-	    }
-
-	}
-
-    }
-  
-    if (priority < 6)
-    {
-	// rapid firing
-	if (plyr->attackdown)
-	{
-	    if (lastattackdown==-1)
-		lastattackdown = ST_RAMPAGEDELAY;
-	    else if (!--lastattackdown)
-	    {
-		priority = 5;
-		st_faceindex = ST_calcPainOffset() + ST_RAMPAGEOFFSET;
-		ST_drawVMUFace();
-		st_facecount = 1;
-		lastattackdown = 1;
-	    }
-	}
-	else
-	    lastattackdown = -1;
-
-    }
-  
-    if (priority < 5)
-    {
-	// invulnerability
-	if ((plyr->cheats & CF_GODMODE)
-	    || plyr->powers[pw_invulnerability])
-	{
-	    priority = 4;
-
-	    st_faceindex = ST_GODFACE;
-		ST_drawVMUFace();
-	    st_facecount = 1;
-
-	}
-
-    }
-
-    // look left or look right if the facecount has timed out
-    if (!st_facecount)
-    {
-	st_faceindex = ST_calcPainOffset() + (st_randomnumber % 3);
-		ST_drawVMUFace();
+			// being attacked
+			priority = 7;
 	
-	st_facecount = ST_STRAIGHTFACECOUNT;
-	priority = 0;
-    }
+			if (plyr->health - st_oldhealth > ST_MUCHPAIN) {
+				st_facecount = ST_TURNCOUNT;
+				st_faceindex = ST_calcPainOffset() + ST_OUCHOFFSET;
+				ST_drawVMUFace();
+			} else {
+				badguyangle = R_PointToAngle2(plyr->mo->x,
+												plyr->mo->y,
+												plyr->attacker->x,
+												plyr->attacker->y);
 
-    st_facecount--;
+				if (badguyangle > plyr->mo->angle) {
+					// whether right or left
+					diffang = badguyangle - plyr->mo->angle;
+					i = diffang > ANG180; 
+				} else {
+					// whether left or right
+					diffang = plyr->mo->angle - badguyangle;
+					i = diffang <= ANG180; 
+				} // confusing, aint it?
 
+				st_facecount = ST_TURNCOUNT;
+				st_faceindex = ST_calcPainOffset();
+
+				if (diffang < ANG45) {
+					// head-on
+					st_faceindex += ST_RAMPAGEOFFSET;
+				} else if (i) {
+					// turn face right
+					st_faceindex += ST_TURNOFFSET;
+				} else {
+					// turn face left
+					st_faceindex += ST_TURNOFFSET+1;
+				}
+
+				ST_drawVMUFace();
+			}
+		}
+	}
+  
+	if (priority < 7) {
+		// getting hurt because of your own damn stupidity
+		if (plyr->damagecount) {
+			if (plyr->health - st_oldhealth > ST_MUCHPAIN) {
+				priority = 7;
+				st_facecount = ST_TURNCOUNT;
+				st_faceindex = ST_calcPainOffset() + ST_OUCHOFFSET;
+				ST_drawVMUFace();
+			} else {
+				priority = 6;
+				st_facecount = ST_TURNCOUNT;
+				st_faceindex = ST_calcPainOffset() + ST_RAMPAGEOFFSET;
+				ST_drawVMUFace();
+			}
+		}
+	}
+  
+	if (priority < 6) {
+		// rapid firing
+		if (plyr->attackdown) {
+			if (lastattackdown == -1) {
+				lastattackdown = ST_RAMPAGEDELAY;
+			} else if (!--lastattackdown) {
+				priority = 5;
+				st_faceindex = ST_calcPainOffset() + ST_RAMPAGEOFFSET;
+				ST_drawVMUFace();
+				st_facecount = 1;
+				lastattackdown = 1;
+			}
+		} else {
+			lastattackdown = -1;
+		}
+	}
+  
+	if (priority < 5) {
+		// invulnerability
+		if ((plyr->cheats & CF_GODMODE) || 
+			plyr->powers[pw_invulnerability]) {
+
+			priority = 4;
+
+			st_faceindex = ST_GODFACE;
+			ST_drawVMUFace();
+			st_facecount = 1;
+		}
+	}
+
+	// look left or look right if the facecount has timed out
+	if (!st_facecount) {
+		st_faceindex = ST_calcPainOffset() + (st_randomnumber % 3);
+		ST_drawVMUFace();
+
+		st_facecount = ST_STRAIGHTFACECOUNT;
+		priority = 0;
+	}
+
+	st_facecount--;
 }

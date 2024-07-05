@@ -519,12 +519,6 @@ void P_CalcHeight (player_t *player) // 80022670
 	angle = (FINEANGLES/40*ticon)&(FINEANGLES-1);
 	bob = FixedMul((player->bob / 2), finesine[angle]);
 
-	//ST_DebugPrint("bob %x",FixedMul((player->bob / 2), finesine(angle)));
-	//ST_DebugPrint("bob2 %x",FixedMul2((player->bob / 2), finesine(angle)));
-
-	//ST_DebugPrint("bobdiv %x",FixedDiv2(0x49003, 0x2));
-	//ST_DebugPrint("bobdiv2 %x",FixedMul3(0x49003, 0x2));
-
 	/* */
 	/* move viewheight */
 	/* */
