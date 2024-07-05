@@ -57,22 +57,10 @@ static byte         *mapfileptr;			//800B2238 psxdoom/doom64
 */
 
 void *pnon_enemy;
-void *pplaytrooposs;
-void *pskulbosshead;
-void *ppainbsp;
-void *pfattrect1, *pfattrect2, *pfattrect3;
-void *psargfirstcybr, *premcybr;
-void *pbarniteshot, *pspectre, *pwepnshee;
 
 pvr_ptr_t pvr_non_enemy;
-/*pvr_ptr_t pvr_playtrooposs;
-pvr_ptr_t pvr_skulbosshead;
-pvr_ptr_t pvr_painbsp;
-pvr_ptr_t pvr_fattrect1, pvr_fattrect2, pvr_fattrect3;
-pvr_ptr_t pvr_sargfirstcybr,pvr_remcybr;
-pvr_ptr_t pvr_barniteshot,pvr_spectre,pvr_wepnshee;*/
-pvr_poly_cxt_t pvr_sprite_cxt[11];
-pvr_poly_hdr_t pvr_sprite_hdr[11];
+pvr_poly_cxt_t pvr_sprite_cxt;
+pvr_poly_hdr_t pvr_sprite_hdr;
 
 const char *fnpre = "/cd";
 
@@ -109,9 +97,7 @@ void W_DrawLoadScreen(char *what, int current, int total) {
 		char fullstr[256];
 		sprintf(fullstr, "Loading %s", what);
 		bfont_set_encoding(BFONT_CODE_ISO8859_1);
-		bfont_draw_str_ex(printtex, 256,
-		//vram_s + (((((REAL_SCREEN_HT/2) - 16)-24)*640) + 242), 640, 
-		0xffffffff, 0xff000000, 16, 1, fullstr);
+		bfont_draw_str_ex(printtex, 256, 0xffffffff, 0xff000000, 16, 1, fullstr);
 		pvr_txr_load_ex(printtex, dlstex, 256, 32, PVR_TXRLOAD_16BPP);
 
 		uint32_t color = 0xff404040;
@@ -214,33 +200,32 @@ void W_DrawLoadScreen(char *what, int current, int total) {
 		vert->argb = color2;
 		vert++;
 		
-		
 		vert->flags = PVR_CMD_VERTEX;
 		vert->x = 243.0f;
 		vert->y = (REAL_SCREEN_HT/2) + 5;
 		vert->z = 5.1f;
-		vert->argb = color2;
+		vert->argb = color3;
 		vert++;
 
 		vert->flags = PVR_CMD_VERTEX;
 		vert->x = 243.0f;
 		vert->y = (REAL_SCREEN_HT/2) - 13;
 		vert->z = 5.1f;
-		vert->argb = color2;
+		vert->argb = color3;
 		vert++;
 
 		vert->flags = PVR_CMD_VERTEX;
 		vert->x = 243.0f  + (234.0f * (float)current / (float)total);
 		vert->y = (REAL_SCREEN_HT/2) + 5;
 		vert->z = 5.1f;
-		vert->argb = color2;
+		vert->argb = color3;
 		vert++;
 
 		vert->flags = PVR_CMD_VERTEX_EOL;
 		vert->x = 243.0f  + (234.0f * (float)current / (float)total);
 		vert->y = (REAL_SCREEN_HT/2) - 13;
 		vert->z = 5.1f;
-		vert->argb = color2;
+		vert->argb = color3;
 		
 		
 		vid_waitvbl();
@@ -337,9 +322,6 @@ void W_Init (void)
 	free(pnon_enemy);
 	dbgio_printf("PVR mem free after non_enemy: %lu\n", pvr_mem_available());
 
-	fullwad = malloc(6828604);//5997660);//6101168);
-	s2wad = malloc(890112);
-
 	wadfileptr = (wadinfo_t *)Z_Alloc(sizeof(wadinfo_t), PU_STATIC, NULL);
 	sprintf(fnbuf, "%s/pow2.wad", fnpre); // doom64.wad
 	wad_file = fs_open(fnbuf, O_RDONLY);
@@ -349,45 +331,47 @@ void W_Init (void)
 	s2_file = fs_open(fnbuf, O_RDONLY);
 
 	dbgio_printf("W_Init: Loading IWAD into RAM...\n");
-	size_t wad_rem_size = fs_seek(wad_file, 0, SEEK_END); //6827420;//6828604;
+	size_t full_wad_size = fs_seek(wad_file, 0, SEEK_END);
+	size_t wad_rem_size = full_wad_size;
+	fullwad = malloc(wad_rem_size);
 	size_t wad_read = 0;
 	fs_seek(wad_file, 0, SEEK_SET);
 	while(wad_rem_size > (128*1024)) {
-		fs_read(wad_file, (void*)fullwad + wad_read, (128*1024));//5997660);//6101168);
+		fs_read(wad_file, (void*)fullwad + wad_read, (128*1024));
 		wad_read += (128*1024);
 		wad_rem_size -= (128*1024);
-		W_DrawLoadScreen("Doom 64 IWAD", wad_read, 6828604);
+		W_DrawLoadScreen("Doom 64 IWAD", wad_read, full_wad_size);
 	}
-	fs_read(wad_file, (void*)fullwad + wad_read, wad_rem_size);//5997660);//6101168);
+	fs_read(wad_file, (void*)fullwad + wad_read, wad_rem_size);
 	wad_read += wad_rem_size;
-	W_DrawLoadScreen("Doom 64 IWAD", wad_read, 6828604);
+	W_DrawLoadScreen("Doom 64 IWAD", wad_read, full_wad_size);
 
-//	fs_read(wad_file, (void*)fullwad, 6828604);//5997660);//6101168);
 	dbgio_printf("Done.\n");
 	fs_close(wad_file);
 
 	dbgio_printf("W_Init: Loading alt sprite PWAD into RAM...\n");
-	wad_rem_size = fs_seek(s2_file, 0, SEEK_END);//863304;//890112;
+	size_t alt_wad_size = fs_seek(s2_file, 0, SEEK_END);
+	wad_rem_size = alt_wad_size;
+	s2wad = malloc(wad_rem_size);
 	wad_read = 0;
 	fs_seek(s2_file, 0, SEEK_SET);
 	while(wad_rem_size > (128*1024)) {
 		fs_read(s2_file, (void*)s2wad + wad_read, (128*1024));
 		wad_read += (128*1024);
 		wad_rem_size -= (128*1024);
-		W_DrawLoadScreen("Sprite WAD", wad_read, 890112);
+		W_DrawLoadScreen("Sprite WAD", wad_read, alt_wad_size);
 	}
 	fs_read(s2_file, (void*)s2wad + wad_read, wad_rem_size);
 	wad_read += wad_rem_size;
-	W_DrawLoadScreen("Sprite WAD", wad_read, 890112);
-	//fs_read(s2_file, (void*)s2wad, 890112);
+	W_DrawLoadScreen("Sprite WAD", wad_read, alt_wad_size);
 	dbgio_printf("Done.\n");
 	fs_close(s2_file);
 
-	pvr_poly_cxt_txr(&pvr_sprite_cxt[0], PVR_LIST_TR_POLY, PVR_TXRFMT_PAL8BPP | PVR_TXRFMT_8BPP_PAL(1) | PVR_TXRFMT_TWIDDLED, 1024, 1024, pvr_non_enemy, PVR_FILTER_BILINEAR);
-	pvr_sprite_cxt[0].gen.specular = PVR_SPECULAR_ENABLE;
-	pvr_sprite_cxt[0].gen.fog_type = PVR_FOG_TABLE;
-	pvr_sprite_cxt[0].gen.fog_type2 = PVR_FOG_TABLE;
-	pvr_poly_compile(&pvr_sprite_hdr[0], &pvr_sprite_cxt[0]);	
+	pvr_poly_cxt_txr(&pvr_sprite_cxt, PVR_LIST_TR_POLY, PVR_TXRFMT_PAL8BPP | PVR_TXRFMT_8BPP_PAL(1) | PVR_TXRFMT_TWIDDLED, 1024, 1024, pvr_non_enemy, PVR_FILTER_BILINEAR);
+	pvr_sprite_cxt.gen.specular = PVR_SPECULAR_ENABLE;
+	pvr_sprite_cxt.gen.fog_type = PVR_FOG_TABLE;
+	pvr_sprite_cxt.gen.fog_type2 = PVR_FOG_TABLE;
+	pvr_poly_compile(&pvr_sprite_hdr, &pvr_sprite_cxt);	
 
 	memcpy((void*)wadfileptr, fullwad + 0, sizeof(wadinfo_t));
 

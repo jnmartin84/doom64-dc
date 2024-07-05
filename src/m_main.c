@@ -743,8 +743,8 @@ extern mapthing_t *spawnlist;   // 800A5D74
 extern int spawncount;          // 800A5D78
 extern int gobalcheats; // [GEC]
 
-extern pvr_poly_cxt_t pvr_sprite_cxt[11];
-extern pvr_poly_hdr_t pvr_sprite_hdr[11];
+extern pvr_poly_cxt_t pvr_sprite_cxt;
+extern pvr_poly_hdr_t pvr_sprite_hdr;
 
 int M_MenuTicker(void) // 80007E0C
 {
@@ -1701,11 +1701,11 @@ int M_MenuTicker(void) // 80007E0C
 						}
 						force_filter_flush = 1;
 						if (!VideoFilter) {
-							pvr_sprite_cxt[0].txr.filter = PVR_FILTER_BILINEAR;
+							pvr_sprite_cxt.txr.filter = PVR_FILTER_BILINEAR;
 						} else {
-							pvr_sprite_cxt[0].txr.filter = PVR_FILTER_NONE;
+							pvr_sprite_cxt.txr.filter = PVR_FILTER_NONE;
 						}	
-						pvr_poly_compile(&pvr_sprite_hdr[0], &pvr_sprite_cxt[0]);
+						pvr_poly_compile(&pvr_sprite_hdr, &pvr_sprite_cxt);
                         return ga_nothing;
                     }
                     break;

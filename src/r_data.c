@@ -261,7 +261,6 @@ void R_InitSymbols(void)
 
 	int width = SwapShort(((gfxN64_t*)data)->width);
 	int height = SwapShort(((gfxN64_t*)data)->height);
-	int raw_size = (width*height);
 
 	symbols16_w = next_pow2(width);
 	symbols16_h = next_pow2(height);
@@ -323,7 +322,7 @@ void R_InitSymbols(void)
 #define _PAD8(x)	x += (8 - ((uint) x & 7)) & 7
 void R_InitTextures(void)
 {
-	int lump, swx, i;
+	int swx, i;
 
 	firsttex = W_GetNumForName("T_START") + 1;
 	lasttex = W_GetNumForName("T_END") - 1;
@@ -358,8 +357,6 @@ void R_InitTextures(void)
 */
 
 pvr_poly_hdr_t **headers_for_sprites;
-pvr_poly_hdr_t **headers2_for_sprites;
-//pvr_poly_hdr_t **headers3_for_sprites;
 
 void R_InitSprites(void) // 80023378
 {
@@ -368,11 +365,7 @@ void R_InitSprites(void) // 80023378
 	numsprites = (lastsprite - firstsprite) + 1;
 	
 	headers_for_sprites = (pvr_poly_hdr_t **)malloc((numsprites+1) * sizeof(pvr_poly_hdr_t*));
-	headers2_for_sprites = (pvr_poly_hdr_t **)malloc((numsprites+1) * sizeof(pvr_poly_hdr_t*));
-	//headers3_for_sprites = (pvr_poly_hdr_t **)malloc((numsprites+1) * sizeof(pvr_poly_hdr_t*));
 	memset(headers_for_sprites, 0, (numsprites+1) * sizeof(pvr_poly_hdr_t*));
-	memset(headers2_for_sprites, 0, (numsprites+1) * sizeof(pvr_poly_hdr_t*));
-	//memset(headers3_for_sprites, 0, (numsprites+1) * sizeof(pvr_poly_hdr_t*));
 
 	setup_sprite_headers();
 }
