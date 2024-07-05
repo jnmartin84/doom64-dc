@@ -52,10 +52,6 @@ u32 SystemTickerStatus = 0;  // 8005a744
 
 int vsinternal = 0;
 
-mutex_t st_mutex;
-mutex_t fb_mutex;
-int VID_MSG_VBI = 0;
-
 void vblfunc(uint32_t c, void *d)
 {
 	vsync++;
