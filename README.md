@@ -39,11 +39,11 @@ Whatever the directory you cloned this github repo to is named and wherever it i
 
 `doom64-dc`
 
+This guide will assume that you cloned it into your home directory. 
+
 If you need to get to the top level of the repo, it will say
 
-    cd doom64-dc
-
-If you cloned with the default name to your home directory, `doom64-dc` would be `~/doom64-dc` for example.
+    cd ~/doom64-dc
 
 Under doom64-dc, you will find the following files and directories
 
@@ -93,6 +93,7 @@ Under doom64-dc, you will find the following files and directories
     ---- vq/ (where the sprite sheet for non enemy sprites ends up)
     ------ a (placeholder file for non-empty directory)
 
+
 How to generate sprite textures / updated WAD files:
 
 A subdirectory exists in the repo to use for placing all the files needed to make a bootable disc image
@@ -111,15 +112,13 @@ The below is the expected md5sum output
 
 dump the original N64 Doom 64 IWAD from the ROM
 
-    dd if=doom64.z64 of=doom64-dc/d64dcprep/wadfiles/doom64.wad bs=1 skip=408848 count=6101168
+    dd if=doom64.z64 of=~/doom64-dc/d64dcprep/wadfiles/doom64.wad bs=1 skip=408848 count=6101168
 
-Run Doom64ex's WADGEN against doom64.z64 to dump DOOM64.WAD.
+Run Doom64ex's WADGEN against `doom64.z64` to dump a PC version of `DOOM64.WAD`.
 
 OR
 
-Use the Steam Doom 64 version of DOOM64.WAD
-
-I'm going to call this the PC wad.
+Use the Steam Doom 64 PC version of DOOM64.WAD
 
 Either way, put the PC wad somewhere else not in the repo directory tree, we don't want to mess things up.
 
@@ -127,22 +126,22 @@ Open the PC wad in SLADE.
 
 From SLADE, select lumps 1 through 346,
 right-click, click on Export
-select the `doom64-dc/d64dcprep/nonenemy` directory and click Save
+select the `~/doom64-dc/d64dcprep/nonenemy` directory and click Save
 
 select lumps 906 through 947
 right-click, click on Export
-select the `doom64-dc/d64dcprep/nonenemy` directory and click Save
+select the `~/doom64-dc/d64dcprep/nonenemy` directory and click Save
 
 next, in SLADE, select lumps 347 through 905 
 right-click, click on Export
-select the `doom64-dc/d64dcprep/monster` directory and click Save
+select the `~/doom64-dc/d64dcprep/monster` directory and click Save
 
-From here until the end of the guide, you can mostly copy/paste these commands as long as you are
-in the directory that *contains* doom64-dc when you start.
+From here until the end of the guide, you can mostly copy/paste these commands as long as you are using the assumed repo clone location
+of `~/doom64-dc`.
 
 In a terminal
 
-    cp doom64-dc/d64dcprep
+    cd ~/doom64-dc/d64dcprep
     cp palgpl/doom64*.gpl ~/.config/GIMP/2.10/palettes
     cp gimpscripts/*.scm ~/.config/GIMP/2.10/scripts
     cp palpngs/*.png monster/tmp
@@ -184,7 +183,7 @@ In a terminal
     
 now that the individual graphics have been reindexed and flattened, it is time to make a spritesheet texture out of the item/decoration sprites
 
-    cd doom64-dc/d64dcprep
+    cd ~/doom64-dc/d64dcprep
     python3 sheeter.py
 
 The output will be a single png file (`nonenemy.png`) in the `doom64-dc/d64dcprep/sheets` subdirectory
@@ -192,7 +191,7 @@ The output will be a single png file (`nonenemy.png`) in the `doom64-dc/d64dcpre
 You now need to clone the `texconv` github repo, apply a patch to it
 and build it.
 
-    cd doom64-dc
+    cd ~/doom64-dc
     git clone https://github.com/tvspelsfreak/texconv.git
     mv texconv_doom64dc.patch texconv
     cd texconv
@@ -202,11 +201,11 @@ and build it.
 
 Next, add the `texconv` directory to your path to make the next steps easier, and run `texconv` to create a .tex format sprite sheet texture.
 
-    export PATH="doom64-dc/texconv:$PATH"
-    cd doom64dc/d64dcprep/sheets
+    export PATH="~/doom64-dc/texconv:$PATH"
+    cd ~/doom64dc/d64dcprep/sheets
     texconv --in non_enemy.png --out non_enemy.tex --format PAL8BPP --nonenemy
     rm *.tex.pal
-    mv *.tex doom64-dc/selfboot/vq
+    mv *.tex ~/doom64-dc/selfboot/vq
 
 Now that the items/weapons/decorations have been handled, it is time to finish preparing the monster graphics.
 Scripts will be run that will be resize the graphics if necessary, write them out as RAW files, further process them into `spriteN64_t` lumps, twiddle the graphic data for the PVR and `jaguar` compress the new graphics lumps for inclusion in the WAD file(s).
@@ -214,7 +213,7 @@ Scripts will be run that will be resize the graphics if necessary, write them ou
 This step is probably the most time-consuming. You can literally paste the whole thing into the terminal and hit enter, it'll take
 an hour to 90 minutes or so depending on your CPU and disk speed.
 
-    cd doom64-dc/d64dcprep/monster
+    cd ~/doom64-dc/d64dcprep/monster
     gimp -i -b '(doom64-tile-crop "SARGA1.png" "doom64monster" 64 84 0 64 84 0 0)' -b '(gimp-quit 0)'
     gimp -i -b '(doom64-tile-crop "SARGB1.png" "doom64monster" 64 79 0 64 79 0 0)' -b '(gimp-quit 0)'
     gimp -i -b '(doom64-tile-crop "SARGC1.png" "doom64monster" 64 82 0 64 82 0 0)' -b '(gimp-quit 0)'
@@ -1090,17 +1089,17 @@ These need to be converted into lumps with twiddled graphic data.
 You need to build five small standalone C programs to complete the process of generating the Dreamcast Doom 64 data.
 These are built with your host GCC compiler (for example `x86_64-linux-gnu-gcc`), not the Dreamcast `sh-elf-gcc`.
 
-    cd doom64-dc/d64dcprep/wadtools
+    cd ~/doom64-dc/d64dcprep/wadtools
 	make
 
 add the wadtools directory to your path so the tools can be found when you need to run them
 
-    export PATH="doom64-dc/d64dcprep/wadtools:$PATH"
+    export PATH="~/doom64-dc/d64dcprep/wadtools:$PATH"
 
 go back to the monster directory and run the `makelump` and `twiddle` tools against each sprite. Again you can copy paste this whole thing, it should only
 take a few seconds to complete.
 
-    cd doom64-dc/d64dcprep/monster
+    cd ~/doom64-dc/d64dcprep/monster
     makelump SARGA1 62 84 31 84 5
     twiddle SARGA1 64 128
     makelump SARGB1 59 79 29 79 7
@@ -2843,53 +2842,50 @@ The files of interest are the `.twid` files.
 
 You will now need to compress the `.twid` files in order to get the sprites into the form needed for the WAD files.
 
+    cd ~/doom64-dc/d64dcprep/monster
     for i in *.twid; do encode $i; done
 
 This will result in a bunch of `.twid.enc` files. These are the final result of all of the transformations being done.
 
-Next, copy the `.twid` AND `.twid.enc` files to the `doom64-dc/d64dcprep/wadfiles` directory.
+Next, copy the `.twid` AND `.twid.enc` files to the `~/doom64-dc/d64dcprep/wadfiles` directory.
 
-    cp *.twid* doom64-dc/d64dcprep/wadfiles
+    cp *.twid* ~/doom64-dc/d64dcprep/wadfiles
 
-and change directory to the `doom64-dc/d64dcprep/wadfiles` directory and run the fixwad tool we built a few steps back
+and change directory to the `~/doom64-dc/d64dcprep/wadfiles` directory and run the fixwad tool we built a few steps back
 
-    cd doom64-dc/d64dcprep/wadfiles
+This reads `doom64.wad`. replaces the monster sprites with our newly re-colored, twiddled and compressed sprite lumps, and writes out a file named `out.wad` . 
+I don't want to keep changing code so you'll need to update some permissions to access the file. Then rename that to `pow2.wad` and move that to `doom64-dc/selfboot` .
+
+    cd ~/doom64-dc/d64dcprep/wadfiles
     fixwad
+	chmod u+rw out.wad
+    mv out.wad ~/doom64-dc/d64dcprep/selfboot/pow2.wad
 
-This opens `doom64.wad` and replaces the monster sprites with our newly re-colored, twiddled and compressed sprite lumps, creating a file named `out.wad` . Rename that to `pow2.wad` and move that to `doom64-dc/selfboot` .
+One step remains. We need to make a new WAD file containing just the sprites with alternate palettes applied. From the wadfiles directory, run the `makewad` tool.  This creates a file named `alt.wad`. It has two marker lumps (`S2_START` / `S2_END`) and compressed graphic lumps in between.
+I don't want to keep changing code so you'll need to update some permissions to access the file. Move that file to `~/doom64-dc/d64dcprep/selfboot`.
 
-    mv out.wad doom64-dc/d64dcprep/selfboot/pow2.wad
-
-One step remains. We need to make a new WAD file containing just the sprites with alternate palettes applied.
-
-From the wadfiles directory, run the `makewad` tool .
-
-    cd repo/d64dcprep/wadfiles
+    cd ~/doom64-dc/d64dcprep/wadfiles
     makewad
-
-This creates a file named `alt.wad`. It has two marker lumps (`S2_START` / `S2_END`) and compressed graphic lumps in between.
-
-Move that file to `doom64-dc/d64dcprep/selfboot`.
-
-    mv alt.wad doom64-dc/d64dcprep/selfboot
+	chmod u+rw alt.wad
+    mv alt.wad ~/doom64-dc/d64dcprep/selfboot
 
 Check the md5sum of each new wad file to see if they are as expected:
 
-    md5sum doom64-dc/d64dcprep/selfboot/pow2.wad 
+    md5sum ~/doom64-dc/d64dcprep/selfboot/pow2.wad 
     376fed2a0b00257de775e0815e0b3c5f  pow2.wad
 
-    md5sum doom64-dc/d64dcprep/selfboot/alt.wad
+    md5sum ~/doom64-dc/d64dcprep/selfboot/alt.wad
     2649f740d0dc2d930a219a1bde951d91  alt.wad
 
 
-You now have all of the updated files required to run Doom 64 for Dreamcast.
+You now have all of the updated files required to run Doom 64 for Dreamcast in the places they need to be.
 
-Go to the repo source directory and compile it like any other KOS project. 
+Go to the repo source directory and compile it like any other KallistiOS project. 
 
-    cd doom64-dc/src
+    cd ~/doom64-dc/src
     make
     sh-elf-objcopy -R .stack -O binary doom64.elf doom64.bin
-    /opt/toolchains/dc/kos/utils/scramble/scramble doom64.bin doom64-dc/selfboot/1ST_READ.BIN
+    /opt/toolchains/dc/kos/utils/scramble/scramble doom64.bin ~/doom64-dc/selfboot/1ST_READ.BIN
 
 Finally, make a self-booting CDI from the contents of the selfboot directory. 
 I am not explaining this process. It depends on the tools and OS you are using.
