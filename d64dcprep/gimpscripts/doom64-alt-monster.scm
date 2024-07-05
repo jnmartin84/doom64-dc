@@ -6,7 +6,7 @@
          (palimage (car (gimp-file-load 1 palfilename palfilename)))
          (drawable (car (gimp-image-get-active-layer image)))
          (paldrawable (car (gimp-image-get-active-layer palimage))))
-		   (gimp-image-set-colormap image 768 (car (cdr (gimp-image-get-colormap palimage))))
+	   (gimp-image-set-colormap image 768 (car (cdr (gimp-image-get-colormap palimage))))
            (set! drawable (car (gimp-image-get-active-layer image)))
            (gimp-file-save 1 image drawable filename filename)
          (set! filelist (cdr filelist))))))

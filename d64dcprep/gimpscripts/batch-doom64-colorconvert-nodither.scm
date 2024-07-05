@@ -4,7 +4,7 @@
   (let* ((filename (car filelist))
          (image (car (gimp-file-load 1 filename filename)))
          (drawable (car (gimp-image-get-active-layer image))))
-		   (gimp-image-convert-rgb image)
+	   (gimp-image-convert-rgb image)
            (gimp-context-set-background (car (gimp-palette-entry-get-color palname 0)))
            (gimp-layer-flatten (car (gimp-image-get-active-layer image)))
            (gimp-image-convert-indexed image 0 4 0 0 0 palname)
