@@ -16,8 +16,6 @@ A host GCC install and a full working Dreamcast/KallistiOS toolchain (https://dr
 Install `SLADE` (for Linux see https://flathub.org/apps/net.mancubus.SLADE)
 
 Install `Doom64 EX` 
-	OR
-Install Nightdive Studios `Doom 64` remaster (from Steam? or whatever)
 
 Install `rename` if you don't already have it
 ( `sudo apt-get install rename` )
@@ -121,11 +119,7 @@ dump the original N64 Doom 64 IWAD from the ROM
 
 Run Doom64ex's WADGEN against `doom64.z64` to dump a PC version of `DOOM64.WAD`.
 
-OR
-
-Use the Steam Doom 64 PC version of DOOM64.WAD
-
-Either way, put the PC wad somewhere else not in the repo directory tree, we don't want to mess things up.
+Put the PC wad somewhere else not in the repo directory tree, we don't want to mess things up.
 
 Open the PC wad in SLADE.
 
