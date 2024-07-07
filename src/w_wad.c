@@ -283,7 +283,7 @@ void W_Init (void)
 //		}
 		pvr_set_pal_entry(i, get_color_argb1555(r,g,b,1));//pal1[i]);
 #endif
-		pvr_set_pal_entry(i, pal1[i]);
+		pvr_set_pal_entry(i, 0x8000 | pal1[i]);
 	}
 	for(int i=1;i<256;i++) {
 #if 0
@@ -306,7 +306,7 @@ void W_Init (void)
 //		}		
 		pvr_set_pal_entry(256 + i, get_color_argb1555(r,g,b,1));//pal1[i]);	
 #endif
-		pvr_set_pal_entry(256+i, pal2[i]);
+		pvr_set_pal_entry(256+i, 0x8000 | pal2[i]);
 	}
 	
 	pvr_set_pal_entry(0,0);
@@ -345,7 +345,7 @@ void W_Init (void)
 	fs_read(wad_file, (void*)fullwad + wad_read, wad_rem_size);
 	wad_read += wad_rem_size;
 	W_DrawLoadScreen("Doom 64 IWAD", wad_read, full_wad_size);
-
+malloc_stats();
 	dbgio_printf("Done.\n");
 	fs_close(wad_file);
 
@@ -366,6 +366,7 @@ void W_Init (void)
 	W_DrawLoadScreen("Sprite WAD", wad_read, alt_wad_size);
 	dbgio_printf("Done.\n");
 	fs_close(s2_file);
+malloc_stats();
 
 	pvr_poly_cxt_txr(&pvr_sprite_cxt, PVR_LIST_TR_POLY, PVR_TXRFMT_PAL8BPP | PVR_TXRFMT_8BPP_PAL(1) | PVR_TXRFMT_TWIDDLED, 1024, 1024, pvr_non_enemy, PVR_FILTER_BILINEAR);
 	pvr_sprite_cxt.gen.specular = PVR_SPECULAR_ENABLE;

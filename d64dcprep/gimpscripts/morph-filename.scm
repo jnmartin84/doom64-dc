@@ -1,7 +1,0 @@
-(define (morph-filename orig-name new-extension)
- (let* ((buffer (vector "" "" "")))
-  (if (re-match "^(.*)[.]([^.]+)$" orig-name buffer)
-   (string-append (substring orig-name 0 (car (vector-ref buffer 2))) new-extension)
-  )
- )
-)

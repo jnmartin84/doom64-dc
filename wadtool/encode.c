@@ -1,12 +1,13 @@
+/*
+ * adapted from https://github.com/Erick194/D64TOOL/blob/main/src/Lzlib.cpp
+ */
+
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>     /* malloc, free, rand */
 #include <fcntl.h>
 #include <unistd.h>
-
-//#include <conio.h>     /* getch */
-
-//#include "D64Tool.h"
 
 #define WINDOW_SIZE	4096
 #define LENSHIFT 4		// this must be log2(LOOKAHEAD_SIZE)
@@ -82,68 +83,15 @@ void addnode(unsigned char *pointer)
     list->start = target;
 }
 
-unsigned char *outbuf;
-int outlen;
 unsigned char *encode(unsigned char *input, int inputlen, int *size);
 
-int main(int argc, char **argv) {
-
-	char *fn = argv[1];
-	FILE *file;
-	char *buffer;
-	unsigned long fileLen;
-
-	//Open file
-	file = fopen(fn, "rb");
-	if (!file)
-	{
-		fprintf(stderr, "Unable to open file %s", fn);
-		return -1;
-	}
-	
-	//Get file length
-	fseek(file, 0, SEEK_END);
-	fileLen=ftell(file);
-	fseek(file, 0, SEEK_SET);
-
-	//Allocate memory
-	buffer=(char *)malloc(fileLen+1);
-	if (!buffer)
-	{
-		fprintf(stderr, "Memory error!");
-                                fclose(file);
-		return -1;
-	}
-
-	//Read file contents into buffer
-	fread(buffer, fileLen, 1, file);
-	fclose(file);
-
-	//Do what ever with buffer
-
-	outbuf = encode(buffer, fileLen, &outlen);
-	printf("%s input size %lud output size %d\n", fn, fileLen, outlen);
-//	printf("%d\n", outlen);
-
-FILE *encfile;
-char encfn[256];
-sprintf(encfn, "%s.enc", fn);
-encfile = fopen(encfn, "wb");
-fwrite(outbuf, outlen, 1, encfile);
-fclose(encfile);
-free(outbuf);
-
-
-	free(buffer);	
-return 0;
-}
 
 unsigned char *encode(unsigned char *input, int inputlen, int *size)
 {
     int putidbyte = 0;
     unsigned char *encodedpos;
     int encodedlen;
-    int i, pacifier=0;
+    int i;
     int len;
     int numbytes, numcodes;
     int codelencount;
@@ -154,7 +102,6 @@ unsigned char *encode(unsigned char *input, int inputlen, int *size)
     node_t *hashp;
     int lookaheadlen;
     int samelen;
-    int pow;
 
     // initialize the hash table to the occurences of bytes
     for (i=0 ; i<256 ; i++)
@@ -288,10 +235,6 @@ unsigned char *encode(unsigned char *input, int inputlen, int *size)
 
 int decodedsize(unsigned char *input)
 {
-    typedef unsigned short ushort;
-    typedef unsigned long ulong;
-    typedef unsigned char uchar;
-
     int getidbyte = 0;
     int len;
     int pos;
