@@ -12,6 +12,7 @@ Windows + WSL or Cygwin or Mingw and host `GCC`... or ... Ubuntu 22.04 host or V
 A host GCC install and a full working Dreamcast/KallistiOS toolchain (https://dreamcast.wiki/Getting_Started_with_Dreamcast_development).
 
 **Repo contents**
+
 Whatever the directory you cloned this github repo to is named and wherever it is located, it will be referred to in this document as
 
 `doom64-dc`
