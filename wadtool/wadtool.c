@@ -260,7 +260,8 @@ int main (int argc, char **argv) {
 
 			PalettizedImage *palImg;
 			// 179 - 182 no dither
-			if ((i >= 179 && i <= 182) || (i >= 211 && i <= 322)) {
+//			if ((i >= 179 && i <= 182) || (i >= 216 && i <= 339)) {
+			if (i <= 346) {
 				palImg = Palettize(curImg, comPal);
 			} else {
 				palImg = FloydSteinbergDither(curImg, comPal);
@@ -652,7 +653,8 @@ int main (int argc, char **argv) {
 
 					PalettizedImage *palImg;
 					// 179 - 182 no dither
-					if ((i >= 179 && i <= 182) || (i >= 211 && i <= 322)) {
+//					if ((i >= 179 && i <= 182) || (i >= 216 && i <= 339)) {
+					if (i <= 346) {
 						palImg = Palettize(curImg, comPal);
 					} else {
 						palImg = FloydSteinbergDither(curImg, comPal);
