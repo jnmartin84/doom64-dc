@@ -774,7 +774,7 @@ void A_ChainSawReady(player_t *player, pspdef_t *psp) // 8001BDA8
 
 void A_PlasmaReady(player_t *player, pspdef_t *psp) {
 	if (plasma_loopcount == 0) {
-		if ((framecount > electric_framestart) && (framecount - electric_framestart > 63)) {
+		if ((framecount > electric_framestart) && (framecount - electric_framestart > 60)) {
 			snd_sfx_stop(plasma_channel);
 			plasma_channel = -1;
 			plasma_loop_channel = S_StartSound(player->mo, NUMSFX); //sfx_electric_loop);
@@ -782,7 +782,7 @@ void A_PlasmaReady(player_t *player, pspdef_t *psp) {
 			plasma_loopcount += 1;
 		}
 	} else {
-		if ((framecount > electric_framestart) && (framecount - electric_framestart > 57)) {
+		if ((framecount > electric_framestart) && (framecount - electric_framestart > 53)) {
 			plasma_loop_channel = S_StartSound(player->mo, NUMSFX); //sfx_electric_loop);
 			electric_framestart = framecount;
 			plasma_loopcount += 1;
