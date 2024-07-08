@@ -57,12 +57,14 @@ Go to the `wadtool` directory in a terminal. Build the `wadtool`. Run the `wadto
 This should take a minute or less to run depending on your processor and disk speed.
 
 When it is complete, you will now have the following new files in the `wadtool` directory:
+
     non_enemy.tex
     pow2.wad
     alt.wad
 
-Copy these files to the selfboot directory one level up
-    cp non_enemy.tex ../selfboot
+Copy these files to the selfboot directory one level up:
+
+    cp non_enemy.tex ../selfboot/vq
     cp pow2.wad ../selfboot
     cp alt.wad ../selfboot
 
