@@ -30,8 +30,7 @@ Under doom64-dc, you will find the following files and directories
     -- wadtool/ (the tool that builds texture and WAD files from Doom 64 ROM)
     -- selfboot/
     ---- ogg/
-    ------ lower/ 
-    -------- *.ogg (all of the music tracks as 44khz mono OGG)
+    ------ *.ogg (all of the music tracks as 44khz mono OGG)
     ---- sfx/
     ------ *.wav (all of the game sfx as 22khz ADPCM WAV)
     ---- vq/ (where the sprite sheet for non enemy sprites ends up)
@@ -78,7 +77,9 @@ Go to the repo source directory and compile it like any other KallistiOS project
     sh-elf-objcopy -R .stack -O binary doom64.elf doom64.bin
     /opt/toolchains/dc/kos/utils/scramble/scramble doom64.bin ../selfboot/1ST_READ.BIN
 
-Finally, make a self-booting CDI from the contents of the selfboot directory. 
-I am not explaining this process. It depends on the tools and OS you are using.
+Finally, make a self-booting CDI from the contents of the selfboot directory. On Linux using `mkdcdisc` the process looks like this:
+
+    cd ~/doom64-dc
+    mkdcdisc -d selfboot/ogg/ -d selfboot/sfx/ -d selfboot/vq -f selfboot/doom64monster.pal -f selfboot/doom64nonenemy.pal -f selfboot/pow2.wad -f selfboot/alt.wad -e src/doom64.elf -o doom64.cdi -n "Doom 64"
 
 Good luck.
