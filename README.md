@@ -71,7 +71,7 @@ Copy these files to the selfboot directory one level up:
 
 You now have all of the updated files required to run Doom 64 for Dreamcast in the places they need to be.
 
-Go to the repo source directory and compile it like any other KallistiOS project. 
+Go to the repo source directory and compile it like any other KallistiOS project. Make sure you source your KOS environment first.
 
     cd ~/doom64-dc/src
     make
