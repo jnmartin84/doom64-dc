@@ -262,7 +262,7 @@ void S_StartMusic(int mus_seq)
 			break;
 		}
 
-		sprintf(itname, "/cd/ogg/lower/%s.ogg", name);
+		sprintf(itname, "/cd/ogg/%s.ogg", name);
 
 		int looping = 1;
 		if(mus_seq == 115 || mus_seq == 114) {
@@ -358,8 +358,9 @@ int S_StartSound(mobj_t *origin, int sound_id) // 80029970
 		wess_seq_trigger_type_special(sound_id, (unsigned long)origin, &attr);
 #endif
 
-		return snd_sfx_play(sounds[sound_id], (int)((float)(vol * 2.0)*soundscale), pan*2); 
+		return snd_sfx_play(sounds[sound_id], (int)((float)(vol * 2.0)*soundscale), pan*2);
 	}
+	return -1;
 }
 
 #define S_CLIPPING_DIST     (1700)

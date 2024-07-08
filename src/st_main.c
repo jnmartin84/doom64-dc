@@ -1048,6 +1048,8 @@ void ST_drawVMUFace(void) {
 	maple_device_t *dev;
 	for(vmu = 0; !!(dev = maple_enum_type(vmu, MAPLE_FUNC_LCD)); vmu++) {
 		vmu_draw_lcd(dev, faces[st_faceindex]);
+		// only draw to one vmu
+		break;
 	}
 }
 
@@ -1066,11 +1068,13 @@ void ST_updateFaceWidget(void)
 	angle_t diffang;
 	static int lastattackdown = -1;
 	static int priority = 0;
+	static int last_priority = -1;
 	boolean doevilgrin;
 
 	if (priority < 10) {
 		// dead
 		if (!plyr->health) {
+			last_priority = priority;
 			priority = 9;
 			st_faceindex = ST_DEADFACE;
 			st_facecount = 1;
@@ -1092,6 +1096,7 @@ void ST_updateFaceWidget(void)
 
 			if (doevilgrin) {
 				// evil grin if just picked up weapon
+				last_priority = priority;
 				priority = 8;
 				st_facecount = ST_EVILGRINCOUNT;
 				st_faceindex = ST_calcPainOffset() + ST_EVILGRINOFFSET;
@@ -1105,6 +1110,7 @@ void ST_updateFaceWidget(void)
 			plyr->attacker && 
 			plyr->attacker != plyr->mo) {
 
+			last_priority = priority;
 			// being attacked
 			priority = 7;
 	
@@ -1151,11 +1157,13 @@ void ST_updateFaceWidget(void)
 		// getting hurt because of your own damn stupidity
 		if (plyr->damagecount) {
 			if (plyr->health - st_oldhealth > ST_MUCHPAIN) {
+			last_priority = priority;
 				priority = 7;
 				st_facecount = ST_TURNCOUNT;
 				st_faceindex = ST_calcPainOffset() + ST_OUCHOFFSET;
 				ST_drawVMUFace();
 			} else {
+			last_priority = priority;
 				priority = 6;
 				st_facecount = ST_TURNCOUNT;
 				st_faceindex = ST_calcPainOffset() + ST_RAMPAGEOFFSET;
@@ -1170,6 +1178,7 @@ void ST_updateFaceWidget(void)
 			if (lastattackdown == -1) {
 				lastattackdown = ST_RAMPAGEDELAY;
 			} else if (!--lastattackdown) {
+			last_priority = priority;
 				priority = 5;
 				st_faceindex = ST_calcPainOffset() + ST_RAMPAGEOFFSET;
 				ST_drawVMUFace();
@@ -1186,10 +1195,12 @@ void ST_updateFaceWidget(void)
 		if ((plyr->cheats & CF_GODMODE) || 
 			plyr->powers[pw_invulnerability]) {
 
+			last_priority = priority;
 			priority = 4;
 
 			st_faceindex = ST_GODFACE;
-			ST_drawVMUFace();
+			if(last_priority != priority)
+				ST_drawVMUFace();
 			st_facecount = 1;
 		}
 	}
@@ -1200,6 +1211,7 @@ void ST_updateFaceWidget(void)
 		ST_drawVMUFace();
 
 		st_facecount = ST_STRAIGHTFACECOUNT;
+		last_priority = priority;
 		priority = 0;
 	}
 
