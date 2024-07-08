@@ -77,14 +77,14 @@ Build targets exist to create disc images for CD and Dreamshell SD ISO Loader.
     make clean
     make
 
-If you have `mkdcdisc` installed, you can use the `makecd` build target to create a self-booting CDI.
+If you have `mkdcdisc` installed, you can use the `cdi` build target to create a self-booting CDI.
 
     cd ~/doom64-dc
-    make makecd
+    make cdi
 
-If you have both `mksdiso` and `mkdcdisc` installed, you can use the `makesd` build target to create an ISO suitable for loading from SD card with Dreamshell ISO loader.
+If you have both `mksdiso` and `mkdcdisc` installed, you can use the `sdiso` build target to create an ISO suitable for loading from SD card with Dreamshell ISO loader.
 
     cd ~/doom64-dc
-    make makesd
+    make sdiso
 
 Good luck.
