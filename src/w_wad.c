@@ -169,9 +169,6 @@ void W_DrawLoadScreen(char *what, int current, int total) {
 		vert->argb = color;
 		vert++;
 
-
-// (240 * current / total)
-
 		vert->flags = PVR_CMD_VERTEX;
 		vert->x = 242.0f;
 		vert->y = (REAL_SCREEN_HT/2) + 6;
@@ -199,35 +196,34 @@ void W_DrawLoadScreen(char *what, int current, int total) {
 		vert->z = 5.1f;
 		vert->argb = color2;
 		vert++;
-		
+
 		vert->flags = PVR_CMD_VERTEX;
 		vert->x = 243.0f;
 		vert->y = (REAL_SCREEN_HT/2) + 5;
-		vert->z = 5.1f;
+		vert->z = 5.2f;
 		vert->argb = color3;
 		vert++;
 
 		vert->flags = PVR_CMD_VERTEX;
 		vert->x = 243.0f;
 		vert->y = (REAL_SCREEN_HT/2) - 13;
-		vert->z = 5.1f;
+		vert->z = 5.2f;
 		vert->argb = color3;
 		vert++;
 
 		vert->flags = PVR_CMD_VERTEX;
 		vert->x = 243.0f  + (234.0f * (float)current / (float)total);
 		vert->y = (REAL_SCREEN_HT/2) + 5;
-		vert->z = 5.1f;
+		vert->z = 5.2f;
 		vert->argb = color3;
 		vert++;
 
 		vert->flags = PVR_CMD_VERTEX_EOL;
 		vert->x = 243.0f  + (234.0f * (float)current / (float)total);
 		vert->y = (REAL_SCREEN_HT/2) - 13;
-		vert->z = 5.1f;
+		vert->z = 5.2f;
 		vert->argb = color3;
-		
-		
+
 		vid_waitvbl();
 		pvr_scene_begin();
 		pvr_set_vertbuf(PVR_LIST_OP_POLY, op_buf, VERTBUF_SIZE);
