@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define NODITHER 0
+
 // adapatation and extension of
 // https://literateprograms.org/floyd-steinberg_dithering__c_.html
 
@@ -167,7 +169,30 @@ if (y + 1 < image->height) { \
 }
 
 /* must free returnvalue->pixels and returnvalue */
+PalettizedImage *Palettize(RGBImage *image, RGBPalette *palette) {
+	int x, y;
+	PalettizedImage *retImg = (PalettizedImage *)malloc(sizeof(PalettizedImage *));
+	retImg->width = image->width;
+	retImg->height = image->height;
+	retImg->pixels = malloc(image->width * image->height);
+	memset(retImg->pixels, 0, image->width * image->height);
+	for(y = 0; y < image->height; y++) {
+		for(x = 0; x < image->width; x++) {
+			RGBTriple *currentPixel = &(image->pixels[(y * image->width) + x]);
+			unsigned char index = FindNearestColor(currentPixel, palette);
+			if (index) {
+				retImg->pixels[(y * image->width) + x] = index;
+			}
+		}
+	}
+	return retImg;
+}
+
+/* must free returnvalue->pixels and returnvalue */
 PalettizedImage *FloydSteinbergDither(RGBImage *image, RGBPalette *palette) {
+#if NODITHER
+	return Palettize(image, palette);
+#else
 	int x, y;
 	PalettizedImage *retImg = (PalettizedImage *)malloc(sizeof(PalettizedImage *));
 	retImg->width = image->width;
@@ -189,27 +214,7 @@ PalettizedImage *FloydSteinbergDither(RGBImage *image, RGBPalette *palette) {
 		}
 	}
 	return retImg;
-}
-
-
-/* must free returnvalue->pixels and returnvalue */
-PalettizedImage *Palettize(RGBImage *image, RGBPalette *palette) {
-	int x, y;
-	PalettizedImage *retImg = (PalettizedImage *)malloc(sizeof(PalettizedImage *));
-	retImg->width = image->width;
-	retImg->height = image->height;
-	retImg->pixels = malloc(image->width * image->height);
-	memset(retImg->pixels, 0, image->width * image->height);
-	for(y = 0; y < image->height; y++) {
-		for(x = 0; x < image->width; x++) {
-			RGBTriple *currentPixel = &(image->pixels[(y * image->width) + x]);
-			unsigned char index = FindNearestColor(currentPixel, palette);
-			if (index) {
-				retImg->pixels[(y * image->width) + x] = index;
-			}
-		}
-	}
-	return retImg;
+#endif
 }
 
 void Resize(PalettizedImage *image, int wp2, int hp2) {
