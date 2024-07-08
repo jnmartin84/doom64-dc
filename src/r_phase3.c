@@ -1731,14 +1731,14 @@ bail_evict:
 skip_cached_setup:
 
 					if (!flip) {
-						dVTX[0]->v.u = dVTX[3]->v.u = (1.0f / (float)wp2);
-						dVTX[1]->v.u = dVTX[2]->v.u = ((float)troowid / (float)wp2) - (1.0f / (float)wp2);
+						dVTX[0]->v.u = dVTX[3]->v.u = 0.0f; // (1.0f / (float)wp2);
+						dVTX[1]->v.u = dVTX[2]->v.u = ((float)troowid / (float)wp2); // - (1.0f / (float)wp2);
 					} else {
-						dVTX[1]->v.u = dVTX[2]->v.u = (1.0f / (float)wp2);
-						dVTX[0]->v.u = dVTX[3]->v.u = ((float)troowid / (float)wp2) - (1.0f / (float)wp2);
+						dVTX[1]->v.u = dVTX[2]->v.u = 0.0f; // (1.0f / (float)wp2);
+						dVTX[0]->v.u = dVTX[3]->v.u = ((float)troowid / (float)wp2); // - (1.0f / (float)wp2);
 					}
-					dVTX[0]->v.v = dVTX[1]->v.v = (1.0f / (float)hp2);
-					dVTX[2]->v.v = dVTX[3]->v.v = ((float)height / (float)hp2) - (1.0f / (float)hp2);
+					dVTX[0]->v.v = dVTX[1]->v.v = 0.0f; // (1.0f / (float)hp2);
+					dVTX[2]->v.v = dVTX[3]->v.v = ((float)height / (float)hp2); // - (1.0f / (float)hp2);
 					theheader = &hdr_troo[cached_index];
 				}
 			}
