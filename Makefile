@@ -24,12 +24,12 @@ COLOR ?= 1
 BUILD_DIR := build
 
 # Directories containing source files
-SRC_DIRS += .
+SRC_DIRS += src
 
-C_FILES           := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
+C_FILES := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
 
 # Object files
-O_FILES := $(foreach file,$(C_FILES),./$(file:.c=.o))
+O_FILES := $(foreach file,$(C_FILES),$(file:.c=.o))
 
 CFLAGS=${KOS_CFLAGS} -std=c11
 
@@ -58,11 +58,20 @@ endef
 
 all: $(TARGET)
 
-$(TARGET): $(O_FILES)
-	${KOS_CC} ${KOS_CFLAGS} ${KOS_LDFLAGS} -o $@ ${KOS_START} $(O_FILES) -lkosfat -loggvorbisplay -lvorbis -logg ${KOS_LIBS} -lm
+buildtarget:
+	mkdir -p $(BUILD_DIR)
+
+$(TARGET): $(O_FILES) | buildtarget
+	${KOS_CC} ${KOS_CFLAGS} ${KOS_LDFLAGS} -o ${BUILD_DIR}/$@ ${KOS_START} $(O_FILES) -loggvorbisplay -lvorbis -logg ${KOS_LIBS} -lm
 
 clean:
-	$(RM) $(O_FILES)
+	$(RM) doom64.cdi d64isoldr.iso $(O_FILES) $(BUILD_DIR)/$(TARGET)
+
+makecdi: $(TARGET)
+	mkdcdisc -d selfboot/ogg/ -d selfboot/sfx/ -d selfboot/vq -f selfboot/doom64monster.pal -f selfboot/doom64nonenemy.pal -f selfboot/pow2.wad -f selfboot/alt.wad -e $(BUILD_DIR)/$(TARGET) -o doom64.cdi -n "Doom 64"
+
+makesdiso: makecdi
+	mksdiso -h doom64.cdi d64isoldr.iso
 
 ALL_DIRS := $(BUILD_DIR) $(addprefix $(BUILD_DIR)/,$(SRC_DIRS))
 
