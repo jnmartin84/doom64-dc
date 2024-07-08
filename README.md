@@ -80,6 +80,6 @@ Go to the repo source directory and compile it like any other KallistiOS project
 Finally, make a self-booting CDI from the contents of the selfboot directory. On Linux using `mkdcdisc` the process looks like this:
 
     cd ~/doom64-dc
-    mkdcdisc -d selfboot/ogg/ -d selfboot/sfx/ -d selfboot/vq -f selfboot/doom64monster.pal -f selfboot/doom64nonenemy.pal -f selfboot/pow2.wad -f selfboot/alt.wad -e src/doom64.elf -o doom64.cdi -n "Doom 64"
+    mkdcdisc -d selfboot/ogg -d selfboot/sfx -d selfboot/vq -f selfboot/doom64monster.pal -f selfboot/doom64nonenemy.pal -f selfboot/pow2.wad -f selfboot/alt.wad -e src/doom64.elf -o doom64.cdi -n "Doom 64"
 
 Good luck.
