@@ -2,9 +2,11 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include <unistd.h>
 #include <fcntl.h>
+
+#include "imgtypes.h"
+
 #include "lumpinfo.h"
 #include "newlumpslist.h"
 #include "newd64pals.h"
@@ -13,21 +15,6 @@
 
 // original code jnmartin84
 
-typedef struct {
-    unsigned char R, G, B;
-} RGBTriple;
-typedef struct {
-    int size;
-    RGBTriple* table;
-} RGBPalette;
-typedef struct {
-    int width, height;
-    RGBTriple* pixels;
-} RGBImage;
-typedef struct {
-    int width, height;
-    unsigned char* pixels;
-} PalettizedImage;
 unsigned char *encode(unsigned char *input, int inputlen, int *size);
 int decodedsize(unsigned char *input);
 void decode(unsigned char *input, unsigned char *output);
@@ -69,6 +56,7 @@ bfggpal.table = (RGBTriple *)malloc(256*sizeof(RGBTriple));
 lasrpal.table = (RGBTriple *)malloc(256*sizeof(RGBTriple));
 }
 
+// https://stackoverflow.com/a/466242
 static inline uint32_t np2(uint32_t v)
 {
 	v--;
@@ -80,6 +68,9 @@ static inline uint32_t np2(uint32_t v)
 	v++;
 	return v;
 }
+
+// https://github.com/KallistiOS/KallistiOS/blob/master/kernel/arch/dreamcast/hardware/pvr/pvr_texture.c
+// adapted from pvr_txr_load_ex
 /* Linear/iterative twiddling algorithm from Marcus' tatest */
 #define TWIDTAB(x) ( (x&1)|((x&2)<<1)|((x&4)<<2)|((x&8)<<3)|((x&16)<<4)| \
                      ((x&32)<<5)|((x&64)<<6)|((x&128)<<7)|((x&256)<<8)|((x&512)<<9) )
@@ -269,7 +260,7 @@ int main (int argc, char **argv) {
 
 			PalettizedImage *palImg;
 			// 179 - 182 no dither
-			if (i >= 179 && i <= 182) {
+			if ((i >= 179 && i <= 182) || (i >= 211 && i <= 322)) {
 				palImg = Palettize(curImg, comPal);
 			} else {
 				palImg = FloydSteinbergDither(curImg, comPal);
@@ -661,7 +652,7 @@ int main (int argc, char **argv) {
 
 					PalettizedImage *palImg;
 					// 179 - 182 no dither
-					if (i >= 179 && i <= 182) {
+					if ((i >= 179 && i <= 182) || (i >= 211 && i <= 322)) {
 						palImg = Palettize(curImg, comPal);
 					} else {
 						palImg = FloydSteinbergDither(curImg, comPal);

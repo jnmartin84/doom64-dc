@@ -3,45 +3,36 @@
 #include <stdlib.h>
 #include <string.h>
 
+// adapatation and extension of
 // https://literateprograms.org/floyd-steinberg_dithering__c_.html
 
 extern short SwapShort(short val);
 
-typedef struct {
-    unsigned char R, G, B;
-} RGBTriple;
-typedef struct {
-    int size;
-    RGBTriple* table;
-} RGBPalette;
-typedef struct {
-    int width, height;
-    RGBTriple* pixels;
-} RGBImage;
-typedef struct {
-    int width, height;
-    unsigned char* pixels;
-} PalettizedImage;
-
+#include "imgtypes.h"
 
 /* must free returnvalue->table AND returnvalue */
-RGBPalette *fromDoom64Palette(short *data, int count) {
+RGBPalette *fromDoom64Palette(uint16_t *data, int32_t count) {
+	uint16_t *palsrc;
+	RGBPalette *retPal;
+	uint16_t val;
+	uint8_t r;
+	uint8_t g;
+	uint8_t b;
 
-	RGBPalette *retPal = (RGBPalette *)malloc(sizeof(RGBPalette));
+	retPal = (RGBPalette *)malloc(sizeof(RGBPalette));
 	retPal->size = count;
 	retPal->table = (RGBTriple *)malloc(count * sizeof(RGBTriple));
 
-	short *palsrc = data;
+	palsrc = data;
 
-	for(int j = 0; j < count; j++) {
-		short val = *palsrc;
-		palsrc++;
+	for(int32_t j = 0; j < count; j++) {
+		val = *palsrc++;
 		val = SwapShort(val);
-		uint8_t b = (val & 0x003E) << 2;
-		uint8_t g = (val & 0x07C0) >> 3;
-		uint8_t r = (val & 0xF800) >> 8;
+		b = (val & 0x003E) << 2;
+		g = (val & 0x07C0) >> 3;
+		r = (val & 0xF800) >> 8;
 
-		if((j + r + g + b) == 0) {
+		if ((j + r + g + b) == 0) {
 			retPal->table[0].R = 255;
 			retPal->table[0].G = 0;
 			retPal->table[0].B = 255;
@@ -56,19 +47,24 @@ RGBPalette *fromDoom64Palette(short *data, int count) {
 }
 
 /* must free returnvalue->pixels AND returnvalue */
-RGBImage *fromDoom64Sprite(uint8_t *data, int w, int h, RGBPalette *pal) {
-	RGBImage *retImg = (RGBImage *)malloc(sizeof(RGBImage));
+RGBImage *fromDoom64Sprite(uint8_t *data, int32_t w, int32_t h, RGBPalette *pal) {
+	RGBImage *retImg;
+	int32_t index;
+	uint8_t pixel;
+
+	retImg = (RGBImage *)malloc(sizeof(RGBImage));
 	retImg->width = w;
 	retImg->height = h;
 	retImg->pixels = (RGBTriple *)malloc((w * h) * sizeof(RGBTriple));
 
-	for (int j=0;j<h;j++) {
-		for (int i=0; i<w; i++) {
-			uint32_t index = (j*w) + i;
+	for (int32_t j=0;j<h;j++) {
+		for (int32_t i=0; i<w; i++) {
+			index = (j*w) + i;
+			pixel = data[index];
 
-			retImg->pixels[index].R = pal->table[data[index]].R;
-			retImg->pixels[index].G = pal->table[data[index]].G;
-			retImg->pixels[index].B = pal->table[data[index]].B;
+			retImg->pixels[index].R = pal->table[pixel].R;
+			retImg->pixels[index].G = pal->table[pixel].G;
+			retImg->pixels[index].B = pal->table[pixel].B;
 		}
 	}
 
@@ -76,71 +72,60 @@ RGBImage *fromDoom64Sprite(uint8_t *data, int w, int h, RGBPalette *pal) {
 }
 
 // https://stackoverflow.com/a/34187992
-/* static will allow inlining */
-static uint32_t usqrt4(unsigned val) {
-    unsigned a, b;
+static uint32_t usqrt4(uint32_t val) {
+	uint32_t a, b;
 
-    if (val < 2) return val; /* avoid div/0 */
+	if (val < 2) return val;
 
-    a = 1255;       /* starting point is relatively unimportant */
+	a = 1255;
 
-    b = val / a; a = (a+b) /2;
-    b = val / a; a = (a+b) /2;
-    b = val / a; a = (a+b) /2;
-    b = val / a; a = (a+b) /2;
+	b = val / a;
+	a = (a + b) >> 1;
 
-    return a;
+	b = val / a;
+	a = (a + b) >> 1;
+	b = val / a;
+	a = (a + b) >> 1;
+	b = val / a;
+	a = (a + b) >> 1;
+
+	return a;
 }
 
-//https://stackoverflow.com/a/9085524
-uint32_t
-ColourDistance(RGBTriple *c1, RGBTriple *c2)
+// m_fixed.c
+static uint32_t D_abs(int32_t x)
 {
-    long rmean = ( (long)c1->R + (long)c2->R ) / 2;
-    long r = (long)c1->R - (long)c2->R;
-    long g = (long)c1->G - (long)c2->G;
-    long b = (long)c1->B - (long)c2->B;
-    return //sqrt
-	usqrt4((((512+rmean)*r*r)>>8) + 4*g*g + (((767-rmean)*b*b)>>8));
+    int32_t _s = x >> 31;
+    return (uint32_t)((x ^ _s) - _s);
 }
 
-#if 1
+// https://stackoverflow.com/a/9085524
+uint32_t ColorDistance(RGBTriple *c1, RGBTriple *c2)
+{
+	uint32_t rmean = ((int32_t)c1->R + (int32_t)c2->R) / 2;
+	uint32_t r = D_abs((int32_t)c1->R - (int32_t)c2->R);
+	uint32_t g = D_abs((int32_t)c1->G - (int32_t)c2->G);
+	uint32_t b = D_abs((int32_t)c1->B - (int32_t)c2->B);
+	return usqrt4(
+		(((512 + rmean) * r * r) >> 8)
+		+ (4 * g * g)
+		+ (((767 - rmean) * b * b) >> 8) );
+}
+
+// this does a much better job than GIMP version of the art pipeline
 unsigned char FindNearestColor(RGBTriple *color, RGBPalette *palette) {
-    int i, bestIndex = 0;
-    //, distanceSquared, minDistanceSquared, bestIndex = 0;
+	int i, bestIndex = 0;
 	uint32_t distanceSquared, minDistanceSquared;
-    minDistanceSquared = (1 << 31);//255*255 + 255*255 + 255*255 + 1;
-    for (i=0; i<palette->size; i++) {
-        //int Rdiff = ((int)color->R) - palette->table[i].R;
-        //int Gdiff = ((int)color->G) - palette->table[i].G;
-        //int Bdiff = ((int)color->B) - palette->table[i].B;
-        distanceSquared = ColourDistance(color, &(palette->table[i]));//Rdiff*Rdiff + Gdiff*Gdiff + Bdiff*Bdiff;
-        if (distanceSquared < minDistanceSquared) {
-            minDistanceSquared = distanceSquared;
-            bestIndex = i;
-        }
-    }
-    return bestIndex;
+	minDistanceSquared = (1 << 31);
+	for (i=0; i<palette->size; i++) {
+		distanceSquared = ColorDistance(color, &(palette->table[i]));
+		if (distanceSquared < minDistanceSquared) {
+			minDistanceSquared = distanceSquared;
+			bestIndex = i;
+		}
+	}
+	return bestIndex;
 }
-#endif
-
-#if 0
-unsigned char FindNearestColor(RGBTriple *color, RGBPalette *palette) {
-    int i, distanceSquared, minDistanceSquared, bestIndex = 0;
-    minDistanceSquared = 255*255 + 255*255 + 255*255 + 1;
-    for (i=0; i<palette->size; i++) {
-        int Rdiff = ((int)color->R) - palette->table[i].R;
-        int Gdiff = ((int)color->G) - palette->table[i].G;
-        int Bdiff = ((int)color->B) - palette->table[i].B;
-        distanceSquared = Rdiff*Rdiff + Gdiff*Gdiff + Bdiff*Bdiff;
-        if (distanceSquared < minDistanceSquared) {
-            minDistanceSquared = distanceSquared;
-            bestIndex = i;
-        }
-    }
-    return bestIndex;
-}
-#endif
 
 #define plus_truncate_uchar(a, b) \
     if (((int)(a)) + (b) < 0) \
@@ -249,6 +234,7 @@ void Resize(PalettizedImage *image, int wp2, int hp2) {
 }
 
 // from Doom64EX wadgen
+// https://github.com/svkaiser/Doom64EX/blob/a5a8ccb87db062d4aacfbda09ac1404d49b5e973/src/engine/wadgen/sprite.cc#L179
 /* must free return value */
 uint8_t *expand_4to8(uint8_t *src, int width, int height) {
 	int tmp, i;
@@ -265,6 +251,7 @@ uint8_t *expand_4to8(uint8_t *src, int width, int height) {
 
 
 // from Doom64EX wadgen
+// https://github.com/svkaiser/Doom64EX/blob/a5a8ccb87db062d4aacfbda09ac1404d49b5e973/src/engine/wadgen/sprite.cc#L218
 /* modifies img in place; no returnvalue, nothing to free */
 void unscramble(uint8_t *img, int width, int height, int tileheight, int compressed) {
 	uint8_t *buffer;
