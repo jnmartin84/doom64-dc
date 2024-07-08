@@ -1,7 +1,7 @@
 # Doom 64 for Dreamcast 
 
 # playing guide
-A is attack, b is use, x is weapon backward, y is weapon forward, start is start (bring up menu), d-pad/analog stick move, l trig strafe left (analog sensitive), R trig strafe right (analog sensitive), l+R trig together for automap, again for line map, third time back to game
+A is attack, b is use, x is weapon backward, y is weapon forward, start is start (bring up menu), d-pad/analog stick move, L trig strafe left (analog sensitive), R trig strafe right (analog sensitive), L+R trig together for automap, again for line map, third time back to game
 
 # build guide
 
@@ -12,6 +12,7 @@ Windows + WSL or Cygwin or Mingw and host `GCC`... or ... Ubuntu 22.04 host or V
 A host GCC install and a full working Dreamcast/KallistiOS toolchain (https://dreamcast.wiki/Getting_Started_with_Dreamcast_development).
 
 **Repo contents**
+
 Whatever the directory you cloned this github repo to is named and wherever it is located, it will be referred to in this document as
 
 `doom64-dc`
@@ -57,23 +58,25 @@ Go to the `wadtool` directory in a terminal. Build the `wadtool`. Run the `wadto
 This should take a minute or less to run depending on your processor and disk speed.
 
 When it is complete, you will now have the following new files in the `wadtool` directory:
+
     non_enemy.tex
     pow2.wad
     alt.wad
 
-Copy these files to the selfboot directory one level up
-    cp non_enemy.tex ../selfboot
+Copy these files to the selfboot directory one level up:
+
+    cp non_enemy.tex ../selfboot/vq
     cp pow2.wad ../selfboot
     cp alt.wad ../selfboot
 
 You now have all of the updated files required to run Doom 64 for Dreamcast in the places they need to be.
 
-Go to the repo source directory and compile it like any other KallistiOS project. 
+Go to the repo source directory and compile it like any other KallistiOS project. Make sure you source your KOS environment first.
 
     cd ~/doom64-dc/src
     make
     sh-elf-objcopy -R .stack -O binary doom64.elf doom64.bin
-    /opt/toolchains/dc/kos/utils/scramble/scramble doom64.bin ~/doom64-dc/selfboot/1ST_READ.BIN
+    /opt/toolchains/dc/kos/utils/scramble/scramble doom64.bin ../selfboot/1ST_READ.BIN
 
 Finally, make a self-booting CDI from the contents of the selfboot directory. 
 I am not explaining this process. It depends on the tools and OS you are using.
