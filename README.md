@@ -70,16 +70,21 @@ Copy these files to the selfboot directory one level up:
 
 You now have all of the updated files required to run Doom 64 for Dreamcast in the places they need to be.
 
-Go to the repo source directory and compile it like any other KallistiOS project. Make sure you source your KOS environment first.
-
-    cd ~/doom64-dc/src
-    make
-    sh-elf-objcopy -R .stack -O binary doom64.elf doom64.bin
-    /opt/toolchains/dc/kos/utils/scramble/scramble doom64.bin ../selfboot/1ST_READ.BIN
-
-Finally, make a self-booting CDI from the contents of the selfboot directory. On Linux using `mkdcdisc` the process looks like this:
+Go to the repo directory and compile it like any other KallistiOS project. Make sure you source your KOS environment first.
+Build targets exist to create disc images for CD and Dreamshell SD ISO Loader.
 
     cd ~/doom64-dc
-    mkdcdisc -d selfboot/ogg/ -d selfboot/sfx/ -d selfboot/vq -f selfboot/doom64monster.pal -f selfboot/doom64nonenemy.pal -f selfboot/pow2.wad -f selfboot/alt.wad -e src/doom64.elf -o doom64.cdi -n "Doom 64"
+    make clean
+    make
+
+If you have `mkdcdisc` installed, you can use the `makecd` build target to create a self-booting CDI.
+
+    cd ~/doom64-dc
+    make makecd
+
+If you have both `mksdiso` and `mkdcdisc` installed, you can use the `makesd` build target to create an ISO suitable for loading from SD card with Dreamshell ISO loader.
+
+    cd ~/doom64-dc
+    make makesd
 
 Good luck.

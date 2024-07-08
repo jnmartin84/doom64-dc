@@ -67,10 +67,10 @@ $(TARGET): $(O_FILES) | buildtarget
 clean:
 	$(RM) doom64.cdi d64isoldr.iso $(O_FILES) $(BUILD_DIR)/$(TARGET)
 
-makecdi: $(TARGET)
+makecd: $(TARGET)
 	mkdcdisc -d selfboot/ogg/ -d selfboot/sfx/ -d selfboot/vq -f selfboot/doom64monster.pal -f selfboot/doom64nonenemy.pal -f selfboot/pow2.wad -f selfboot/alt.wad -e $(BUILD_DIR)/$(TARGET) -o doom64.cdi -n "Doom 64"
 
-makesdiso: makecdi
+makesd: makecd
 	mksdiso -h doom64.cdi d64isoldr.iso
 
 ALL_DIRS := $(BUILD_DIR) $(addprefix $(BUILD_DIR)/,$(SRC_DIRS))
