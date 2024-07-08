@@ -115,34 +115,32 @@ int	EV_Teleport( line_t *line, mobj_t *thing ) // 8000E3A0
 ==============
 */
 
-int	EV_SilentTeleport( line_t *line, mobj_t *thing ) // 8000E5C0
+int EV_SilentTeleport( line_t *line, mobj_t *thing ) // 8000E5C0
 {
-	int		    tag;
-	mobj_t		*m;
-	unsigned	an;
+	int    tag;
+	mobj_t *m;
 
 	tag = line->tag;
-    for (m=mobjhead.next ; m != &mobjhead ; m=m->next)
-    {
-        if (m->type != MT_DEST_TELEPORT )
-            continue;		/* not a teleportman */
+	for (m=mobjhead.next ; m != &mobjhead ; m=m->next) {
+		if (m->type != MT_DEST_TELEPORT)
+			continue; /* not a teleportman */
 
-        if((tag != m->tid))
-            continue;   /* not matching the tid */
+		if (tag != m->tid)
+			continue; /* not matching the tid */
 
-        thing->flags |= MF_TELEPORT;
-        numthingspec = 0;
+		thing->flags |= MF_TELEPORT;
+		numthingspec = 0;
 
-        if (thing->player)
-            P_Telefrag (thing, m->x, m->y);
+		if (thing->player)
+			P_Telefrag (thing, m->x, m->y);
 
-        P_TryMove (thing, m->x, m->y);
-        thing->flags &= ~MF_TELEPORT;
-        thing->z = m->z;
-        thing->angle = m->angle;
-        thing->momx = thing->momy = thing->momz = 0;
-        return 1;
-    }
+		P_TryMove (thing, m->x, m->y);
+		thing->flags &= ~MF_TELEPORT;
+		thing->z = m->z;
+		thing->angle = m->angle;
+		thing->momx = thing->momy = thing->momz = 0;
+		return 1;
+	}
 
 	return 0;
 }

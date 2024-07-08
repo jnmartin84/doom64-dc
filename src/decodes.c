@@ -88,30 +88,6 @@ static void WriteOutput(byte outByte) // 8002D214
 /*
 ========================
 =
-= WriteBinary
-= routine required for encoding
-=
-========================
-*/
-
-static void WriteBinary(int binary) // 8002D288
-{
-    decoder.var3 = (decoder.var3 << 1);
-
-    if (binary != 0)
-        decoder.var3 = (decoder.var3 | 1);
-
-    decoder.var2 = (decoder.var2 + 1);
-    if (decoder.var2 == 8)
-    {
-        WriteOutput((byte)decoder.var3);
-        decoder.var2 = 0;
-    }
-}
-
-/*
-========================
-=
 = DecodeScan
 =
 ========================
@@ -136,30 +112,6 @@ static int DecodeScan(void) // 8002D2F4
     decoder.var1 = (decoder.var1 << 1);
 
     return resultbyte;
-}
-
-/*
-========================
-=
-= MakeExtraBinary
-= routine required for encoding
-=
-========================
-*/
-
-static void MakeExtraBinary(int binary, int shift) // 8002D364
-{
-    int i;
-
-    i = 0;
-    if (shift > 0)
-    {
-        do
-        {
-            WriteBinary(binary & 1);
-            binary = (binary >> 1);
-        } while (++i != shift);
-    }
 }
 
 /*
@@ -193,22 +145,6 @@ static int RescanByte(int byte) // 8002D3B8
     } while (i != byte);
 
     return resultbyte;
-}
-
-/*
-========================
-=
-= WriteEndCode
-= routine required for encoding
-=
-========================
-*/
-
-static void WriteEndCode(void) // 8002D424
-{
-    if (decoder.var2 > 0) {
-        WriteOutput((byte)(decoder.var3 << (8 - decoder.var2)) & 0xff);
-    }
 }
 
 /*

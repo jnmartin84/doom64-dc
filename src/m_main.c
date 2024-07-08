@@ -4,8 +4,6 @@
 #include "r_local.h"
 #include "st_main.h"
 
-#define get_color_argb1555(rrr,ggg,bbb,aaa) ((uint16_t)(((aaa&1)<<15) | (((rrr>>3)&0x1f)<<10) | (((ggg>>3)&0x1f)<<5) | ((bbb>>3)&0x1f)))
-	
 //intermission
 int DrawerStatus;
 
@@ -637,22 +635,17 @@ void M_AlphaOutStart(void) // 800079F8
 int M_AlphaInOutTicker(void) // 80007A14
 {
     if ((gamevbls < gametic) && ((gametic & 3) == 0)) {
-        MenuAnimationTic = MenuAnimationTic + 1 & 7;
+        MenuAnimationTic = (MenuAnimationTic + 1) & 7;
     }
 
     text_alpha += text_alpha_change_value;
-    if (text_alpha_change_value < 0)
-    {
-        if (text_alpha < 0)
-        {
+    if (text_alpha_change_value < 0) {
+        if (text_alpha < 0) {
             text_alpha = 0;
             return 8;
         }
-    }
-    else
-    {
-        if ((text_alpha_change_value > 0) && (text_alpha >= 256))
-        {
+    } else {
+        if ((text_alpha_change_value > 0) && (text_alpha >= 256)) {
             text_alpha = 255;
             return 8;
         }
@@ -2562,19 +2555,14 @@ pvr_ptr_t pvrbg[2] = {0,0};
 
 void M_DrawBackground(int x, int y, int color, char *name, float z, int num) // 80009A68
 {
-	pvr_poly_hdr_t hdr;
 	pvr_vertex_t __attribute__((aligned(32))) verts[4];
 	int width, height;
-	int yh, xh, t;
 	int offset;
 	byte *data;
 	byte *gfxsrc;
 	short *palsrc;
 	float u0,v0,u1,v1;
-	uint8_t r1,g1,b1,a1;
-	r1 = (color  >> 24);
-	g1 = (color  >> 16) & 0xff;
-	b1 = (color  >> 8) & 0xff;
+	uint8_t a1;
 	a1 = color & 0xff;
 
 	if (!pvrbg[num]) {
@@ -2596,7 +2584,7 @@ void M_DrawBackground(int x, int y, int color, char *name, float z, int num) // 
 		offset = (width * height);
 		offset = (offset + 7) & ~7;
 		gfxsrc = data + sizeof(gfxN64_t);
-		palsrc = data + offset + sizeof(gfxN64_t);
+		palsrc = (short *)((void *)data + offset + sizeof(gfxN64_t));
 
 		for(int j = 0; j < 256; j++) {
 			short val = *palsrc;
@@ -2609,7 +2597,7 @@ void M_DrawBackground(int x, int y, int color, char *name, float z, int num) // 
 			u8 a = 0xff;    // Alpha is always 255..
 			if(j == 0 && r == 0 && g == 0 && b == 0) {
 				bgpal[j] = get_color_argb1555(0,0,0,0);
-			} else {
+			} else { // always brighten the backgrounds
 #if 1
 //				if (r && g && b) {
 					int hsv = LightGetHSV(r,g,b);
@@ -2770,7 +2758,7 @@ int M_ScreenTicker(void) // 8000A0F8
     }
 
     if ((gamevbls < gametic) && ((gametic & 3) == 0))
-        MenuAnimationTic = MenuAnimationTic + 1 & 7;
+        MenuAnimationTic = (MenuAnimationTic + 1) & 7;
 
     buttons = M_ButtonResponder(ticbuttons[0]);
     oldbuttons = oldticbuttons[0] & 0xffff0000;
@@ -3002,15 +2990,15 @@ void M_SavePakStop(void) // 8000A7B4
 
 int M_SavePakTicker(void) // 8000A804
 {
+#if 0
     unsigned int buttons;
     unsigned int oldbuttons;
     int size;
 
     if ((gamevbls < gametic) && ((gametic & 3) == 0)) {
-        MenuAnimationTic = MenuAnimationTic + 1 & 7;
+        MenuAnimationTic = (MenuAnimationTic + 1) & 7;
     }
 
-#if 0
     buttons = M_ButtonResponder(ticbuttons[0]);
     oldbuttons = oldticbuttons[0] & 0xffff0000;
 
@@ -3074,7 +3062,6 @@ int M_SavePakTicker(void) // 8000A804
         }
     }
 
-#if 0
     if (last_ticon == 0)
     {
         if ((buttons != oldbuttons) && (buttons == (PAD_RIGHT_C|PAD_LEFT_C)))
@@ -3111,7 +3098,7 @@ int M_SavePakTicker(void) // 8000A804
         }
     }
     else
-#endif
+
  if ((ticon - last_ticon) >= 60) // 2 * TICRATE
     {
         return ga_exit;
@@ -3235,6 +3222,7 @@ void M_LoadPakStop(void) // 8000AF8C
 
 int M_LoadPakTicker(void) // 8000AFE4
 {
+#if 0
     unsigned int buttons;
     unsigned int oldbuttons;
     int size;
@@ -3246,7 +3234,6 @@ int M_LoadPakTicker(void) // 8000AFE4
         MenuAnimationTic = MenuAnimationTic + 1 & 7;
     }
 
-#if 0
     buttons = M_ButtonResponder(ticbuttons[0]);
     oldbuttons = oldticbuttons[0] & 0xffff0000;
 
@@ -3435,7 +3422,7 @@ int M_ControlPadTicker(void) // 8000B694
     int *tmpcfg, code;
 
     if ((gamevbls < gametic) && ((gametic & 3U) == 0)) {
-        MenuAnimationTic = MenuAnimationTic + 1 & 7;
+        MenuAnimationTic = (MenuAnimationTic + 1) & 7;
     }
 
     buttons = M_ButtonResponder(ticbuttons[0] & 0xffff);

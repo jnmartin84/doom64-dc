@@ -4,14 +4,6 @@
 #include "st_main.h"
 #include "r_local.h"
 
-extern float *all_u;
-extern float *all_v;
-extern float *all2_u;
-extern float *all2_v;
-
-extern pvr_poly_hdr_t **headers_for_sprites;
-extern pvr_poly_hdr_t **headers2_for_sprites;
-
 #define T_NULL	        ""
 
 // [Immorpher] New introduction text adapted from Doom 64 reloaded!
@@ -886,16 +878,22 @@ void F_Drawer(void) // 800039DC
 
 	I_DrawFrame();
 }
+
 extern uint32_t lighted_color(uint32_t c, float lc);
+
+extern float *all_u;
+extern float *all_v;
+extern pvr_poly_hdr_t **headers_for_sprites;
+
 static inline uint32_t np2(uint32_t v) {
-v--;
-v |= v >> 1;
-v |= v >> 2;
-v |= v >> 4;
-v |= v >> 8;
-v |= v >> 16;
-v++;
-return v;
+	v--;
+	v |= v >> 1;
+	v |= v >> 2;
+	v |= v >> 4;
+	v |= v >> 8;
+	v |= v >> 16;
+	v++;
+	return v;
 }
 
 void BufferedDrawSprite(int type, state_t *state, int rotframe, int color, int xpos, int ypos) // 80003D1C

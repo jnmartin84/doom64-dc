@@ -174,30 +174,23 @@ dospecial:
 
 void P_PlayerXYMovement (mobj_t *mo) // 80021E20
 {
-    /* */
 	/* try to slide along a blocked move */
-	/* */
-    if (!P_TryMove(mo, mo->x + mo->momx, mo->y + mo->momy))
-        P_SlideMove(mo);
+	if (!P_TryMove(mo, mo->x + mo->momx, mo->y + mo->momy))
+		P_SlideMove(mo);
 
-	/* */
 	/* slow down */
-	/* */
 	if (mo->z > mo->floorz)
-		return;		/* no friction when airborne */
+		return; /* no friction when airborne */
 
 	if (mo->flags & MF_CORPSE)
 		if (mo->floorz != mo->subsector->sector->floorheight)
-			return;			/* don't stop halfway off a step */
+			return; /* don't stop halfway off a step */
 
-	if (mo->momx > -STOPSPEED && mo->momx < STOPSPEED &&
-        mo->momy > -STOPSPEED && mo->momy < STOPSPEED)
-	{
+	if (mo->momx > -STOPSPEED && mo->momx < STOPSPEED
+		&& mo->momy > -STOPSPEED && mo->momy < STOPSPEED) {
 		mo->momx = 0;
 		mo->momy = 0;
-	}
-	else
-	{
+	} else {
 		mo->momx = (mo->momx>>8)*(FRICTION>>8);
 		mo->momy = (mo->momy>>8)*(FRICTION>>8);
 	}

@@ -8,8 +8,12 @@
 #include <dc/vblank.h>
 #include <dc/video.h>
 #include <arch/irq.h>
+#include <unistd.h>
 
-KOS_INIT_FLAGS(INIT_DEFAULT | INIT_MALLOCSTATS);
+KOS_INIT_FLAGS(	INIT_CONTROLLER |
+		INIT_VMU |
+		INIT_CDROM);
+//INIT_DEFAULT | INIT_MALLOCSTATS);
 
 pvr_init_params_t pvr_params = {
 { PVR_BINSIZE_16, 0, PVR_BINSIZE_16, 0, 0 }, VERTBUF_SIZE, 1, 0, 0, 3
@@ -313,13 +317,18 @@ void I_MoveDisplay(int x,int y) // 80006790
 #define US_ONE_FRAME (1000000 / 60)
 void I_WIPE_MeltScreen(void)
 {
+	pvr_vertex_t __attribute__((aligned(32))) verts[8];
 	pvr_poly_cxt_t wipecxt;
 	pvr_poly_hdr_t wipehdr;
 	pvr_ptr_t pvrfb = 0;
-	uint32_t save;
-    uint16_t *fb;
+	pvr_vertex_t *vert;
 
-    fb = (uint16_t *)Z_Malloc(FB_TEX_SIZE, PU_STATIC, NULL);	
+	float x0,y0,x1,y1;
+	float y0a,y1a;
+	float u0,v0,u1,v1;
+
+	uint32_t save;
+	uint16_t *fb = (uint16_t *)Z_Malloc(FB_TEX_SIZE, PU_STATIC, NULL);
 
 	if (!fb) {
 		goto wipe_return;
@@ -330,32 +339,31 @@ void I_WIPE_MeltScreen(void)
 	if(!pvrfb) {
 		goto wipe_end;
 	}
-	
+
 	memset(fb, 0, FB_TEX_SIZE);
 
 	save = irq_disable();
 #if REAL_SCREEN_WD == 640
 	for (uint32_t y=0;y<480;y+=2) {
 		for (uint32_t x=0;x<640;x+=2) {
-			// (y/2) * 512 == y << 8 
+			// (y/2) * 512 == y << 8
 			// y*640 == (y<<9) + (y<<7)
 			fb[(y << 8) + (x >> 1)] = vram_s[((y<<9) + (y<<7)) + x];
 		}
 	}
 #else
 	for (uint32_t y=0;y<240;y++) {
-//		memcpy(fb + (y*1024), vram_s + (y*640), 640);
 		for (uint32_t x=0;x<320;x++) {
 			fb[(y << 9) + x] = vram_s[(y<<8) + (y<<6) + x];
 		}
 	}
 #endif
 	irq_restore(save);
-	
+
 	pvr_txr_load(fb, pvrfb, FB_TEX_SIZE);
-	pvr_poly_cxt_txr(&wipecxt, PVR_LIST_TR_POLY, 
-						PVR_TXRFMT_RGB565 | PVR_TXRFMT_NONTWIDDLED, 
-						FB_TEX_W, FB_TEX_H, pvrfb, PVR_FILTER_BILINEAR);
+	pvr_poly_cxt_txr(&wipecxt, PVR_LIST_TR_POLY,
+					PVR_TXRFMT_RGB565 | PVR_TXRFMT_NONTWIDDLED,
+					FB_TEX_W, FB_TEX_H, pvrfb, PVR_FILTER_BILINEAR);
 	wipecxt.blend.src = PVR_BLEND_ONE;
 	wipecxt.blend.dst = PVR_BLEND_ONE;
 	pvr_poly_compile(&wipehdr,  &wipecxt);
@@ -363,18 +371,14 @@ void I_WIPE_MeltScreen(void)
 	pvr_set_bg_color(0,0,0);
 	pvr_fog_table_color(0.0f,0.0f,0.0f,0.0f);
 
-	float x0,y0,x1,y1;
-	float y0a,y1a;
-	float u0,v0,u1,v1;
-	pvr_vertex_t __attribute__((aligned(32))) verts[8];
 	u0 = 0.0f;
 	u1 = 0.625f; // 320.0f / 512.0f;
 	v0 = 0.0f;
 	v1 = 0.9375f; // 240.0f / 256.0f;
 	x0 = 0.0f;
 	y0 = 0.0f;
-	x1 = REAL_SCREEN_WD - 1;//639.0f;
-	y1 = REAL_SCREEN_HT - 1;//479.0f;
+	x1 = REAL_SCREEN_WD - 1;
+	y1 = REAL_SCREEN_HT - 1;
 	y0a = y0;
 	y1a = y1;
 
@@ -394,11 +398,9 @@ void I_WIPE_MeltScreen(void)
 	}
 	verts[7].flags = PVR_CMD_VERTEX_EOL;
 
-	pvr_vertex_t *vert;
-
 	for (int i=0;i<160;i+=2) {
 		vid_waitvbl();
-			
+
 		pvr_scene_begin();
 		pvr_set_vertbuf(PVR_LIST_OP_POLY, op_buf, VERTBUF_SIZE);
 		pvr_set_vertbuf(PVR_LIST_TR_POLY, tr_buf, VERTBUF_SIZE);
@@ -418,9 +420,9 @@ void I_WIPE_MeltScreen(void)
 		vert->x = x1;
 		vert->y = y1;
 		vert->u = u1;
-		vert->v = v1;	
+		vert->v = v1;
 		vert++;
-		
+
 		vert->x = x1;
 		vert->y = y0;
 		vert->u = u1;
@@ -444,13 +446,13 @@ void I_WIPE_MeltScreen(void)
 		vert->u = u1;
 		vert->v = v1;
 		vert++;
-		
+
 		vert->x = x1;
 		vert->y = y0a;
 		vert->u = u1;
 		vert->v = v0;
 
-		pvr_list_prim(PVR_LIST_TR_POLY, &wipehdr, sizeof(pvr_poly_hdr_t));		
+		pvr_list_prim(PVR_LIST_TR_POLY, &wipehdr, sizeof(pvr_poly_hdr_t));
 		pvr_list_prim(PVR_LIST_TR_POLY, &verts, sizeof(verts));
 
 		pvr_scene_finish();
@@ -460,18 +462,17 @@ void I_WIPE_MeltScreen(void)
 #if REAL_SCREEN_WD == 640
 		for (uint32_t y=0;y<480;y+=2) {
 			for (uint32_t x=0;x<640;x+=2) {
-				// (y/2) * 512 == y << 8 
+				// (y/2) * 512 == y << 8
 				// y*640 == (y<<9) + (y<<7)
 				fb[(y << 8) + (x >> 1)] = vram_s[((y<<9) + (y<<7)) + x];
 			}
 		}
 #else
-	for (uint32_t y=0;y<240;y++) {
-//		memcpy(fb + (y*1024), vram_s + (y*640), 640);
-		for (uint32_t x=0;x<320;x++) {
-			fb[(y << 9) + x] = vram_s[(y<<8) + (y<<6) + x];
+		for (uint32_t y=0;y<240;y++) {
+			for (uint32_t x=0;x<320;x++) {
+				fb[(y << 9) + x] = vram_s[(y<<8) + (y<<6) + x];
+			}
 		}
-	}
 #endif
 		irq_restore(save);
 
@@ -485,10 +486,10 @@ void I_WIPE_MeltScreen(void)
 #endif
 		usleep(US_ONE_FRAME);
 	}
-	
+
 	pvr_mem_free(pvrfb);
 
-wipe_end:	
+wipe_end:
 	Z_Free(fb);
 wipe_return:
 	return;
@@ -496,17 +497,17 @@ wipe_return:
 
 void I_WIPE_FadeOutScreen(void) // 80006D34
 {
+	pvr_vertex_t __attribute__((aligned(32))) verts[4];
 	pvr_poly_cxt_t wipecxt;
 	pvr_poly_hdr_t wipehdr;
 	pvr_ptr_t pvrfb = 0;
+	pvr_vertex_t *vert;
 
+	float x0,y0,x1,y1;
+	float u0,v0,u1,v1;
+
+	uint16_t *fb = (uint16_t *)Z_Malloc(FB_TEX_SIZE, PU_STATIC, NULL);
 	uint32_t save;
-
-    uint16_t *fb;
-	uint16_t *fbs;
-	uint16_t *vs;
-
-    fb = (uint16_t *)Z_Malloc(FB_TEX_SIZE, PU_STATIC, NULL);	
 
 	if (!fb) {
 		goto fade_return;
@@ -517,32 +518,31 @@ void I_WIPE_FadeOutScreen(void) // 80006D34
 	if(!pvrfb) {
 		goto fade_end;
 	}
-	
+
 	memset(fb, 0, FB_TEX_SIZE);
 
 	save = irq_disable();
 #if REAL_SCREEN_WD == 640
 	for (uint32_t y=0;y<480;y+=2) {
 		for (uint32_t x=0;x<640;x+=2) {
-			// (y/2) * 512 == y << 8 
+			// (y/2) * 512 == y << 8
 			// y*640 == (y<<9) + (y<<7)
 			fb[(y << 8) + (x >> 1)] = vram_s[((y<<9) + (y<<7)) + x];
 		}
 	}
 #else
 	for (uint32_t y=0;y<240;y++) {
-//		memcpy(fb + (y*1024), vram_s + (y*640), 640);
 		for (uint32_t x=0;x<320;x++) {
 			fb[(y << 9) + x] = vram_s[(y<<8) + (y<<6) + x];
 		}
 	}
 #endif
 	irq_restore(save);
-	
+
 	pvr_txr_load(fb, pvrfb, FB_TEX_SIZE);
-	pvr_poly_cxt_txr(&wipecxt, PVR_LIST_TR_POLY, 
-						PVR_TXRFMT_RGB565 | PVR_TXRFMT_NONTWIDDLED, 
-						FB_TEX_W, FB_TEX_H, pvrfb, PVR_FILTER_BILINEAR);
+	pvr_poly_cxt_txr(&wipecxt, PVR_LIST_TR_POLY,
+					PVR_TXRFMT_RGB565 | PVR_TXRFMT_NONTWIDDLED,
+					FB_TEX_W, FB_TEX_H, pvrfb, PVR_FILTER_BILINEAR);
 	wipecxt.blend.src = PVR_BLEND_ONE;
 	wipecxt.blend.dst = PVR_BLEND_ONE;
 	pvr_poly_compile(&wipehdr, &wipecxt);
@@ -550,9 +550,6 @@ void I_WIPE_FadeOutScreen(void) // 80006D34
 	pvr_set_bg_color(0,0,0);
 	pvr_fog_table_color(0.0f,0.0f,0.0f,0.0f);
 
-	float x0,y0,x1,y1;
-	float u0,v0,u1,v1;
-	pvr_vertex_t __attribute__((aligned(32))) verts[4];
 	u0 = 0.0f;
 	u1 = 0.625f; // 320.0f / 512.0f;
 	v0 = 0.0f;
@@ -567,8 +564,6 @@ void I_WIPE_FadeOutScreen(void) // 80006D34
 		verts[vn].oargb = 0;
 	}
 	verts[3].flags = PVR_CMD_VERTEX_EOL;
-
-	pvr_vertex_t *vert;
 
 	for (int i=248;i>=0;i-=8) {
 		uint8_t ui = (uint8_t)(i & 0xff);
@@ -596,29 +591,29 @@ void I_WIPE_FadeOutScreen(void) // 80006D34
 		vert->x = x1;
 		vert->y = y1;
 		vert->u = u1;
-		vert->v = v1;	
+		vert->v = v1;
 		vert->argb = fcol;
 		vert++;
-		
+
 		vert->x = x1;
 		vert->y = y0;
 		vert->u = u1;
 		vert->v = v0;
 		vert->argb = fcol;
-		pvr_list_prim(PVR_LIST_TR_POLY, &wipehdr, sizeof(pvr_poly_hdr_t));		
+		pvr_list_prim(PVR_LIST_TR_POLY, &wipehdr, sizeof(pvr_poly_hdr_t));
 		pvr_list_prim(PVR_LIST_TR_POLY, &verts, sizeof(verts));
 
 		pvr_scene_finish();
 		pvr_wait_ready();
 		usleep(US_ONE_FRAME);
 	}
-	
+
 	pvr_mem_free(pvrfb);
 
-fade_end:	
+fade_end:
 	Z_Free(fb);
 fade_return:
-	return;	
+	return;
 }
 
 

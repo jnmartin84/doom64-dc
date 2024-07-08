@@ -45,9 +45,6 @@ byte		*rejectmatrix;			/* for fast sight rejection */
 mapthing_t  *spawnlist;     // 800A5D74
 int         spawncount;     // 800A5D78
 
-//mapthing_t	deathmatchstarts[10], *deathmatch_p;//80097e4c, 80077E8C
-//mapthing_t	playerstarts[MAXPLAYERS];//800a8c60
-
 /*
 =================
 =
@@ -58,13 +55,13 @@ int         spawncount;     // 800A5D78
 
 void P_LoadVertexes (void) // 8001CF20
 {
-	int			i, lumpSize;
-	mapvertex_t	*ml;
-	vertex_t	*li;
+	int         i;
+	mapvertex_t *ml;
+	vertex_t    *li;
 
 	numvertexes = W_MapLumpLength(ML_VERTEXES) / sizeof(mapvertex_t);
-	vertexes = Z_Malloc (numvertexes*sizeof(vertex_t),PU_LEVEL,0);
-	D_memset (vertexes, 0, numvertexes*sizeof(vertex_t));
+	vertexes = Z_Malloc(numvertexes * sizeof(vertex_t), PU_LEVEL, 0);
+	D_memset(vertexes, 0, numvertexes * sizeof(vertex_t));
 
 	ml = (mapvertex_t *)W_GetMapLump(ML_VERTEXES);
 	li = vertexes;
@@ -745,19 +742,13 @@ void P_GroupLines (void) // 8001E614
 
 void P_SetupLevel(int map, skill_t skill) // 8001E974
 {
-	int		i, memory;
-	int		lumpnum;
-	mobj_t	*mobj;
-	char	lumpname[16];
+	int memory;
 
 	/* free all tags except the PU_STATIC tag */
 	Z_FreeTags(mainzone, ~PU_STATIC); // (PU_LEVEL | PU_LEVSPEC | PU_CACHE)
 
-	Z_CheckZone(mainzone);//Z_CheckHeap
+	Z_CheckZone(mainzone);
 	M_ClearRandom();
-
-	//printf("P_SetupLevel(%i,%i)\n", map, skill);
-	//PRINTF_D2(WHITE, 0, 24, "P_SetupLevel(%i,%i)\n", map, skill);
 
 	totalkills = totalitems = totalsecret = 0;
 
@@ -769,20 +760,20 @@ void P_SetupLevel(int map, skill_t skill) // 8001E974
 
 	W_OpenMapWad(map);
 
-	/* note: most of this ordering is important	 */
-    P_LoadMacros();
-    P_LoadBlockMap();
-    P_LoadVertexes();
-    P_LoadSectors();
-    P_LoadSideDefs();
-    P_LoadLineDefs();
-    P_LoadSubSectors();
-    P_LoadNodes();
-    P_LoadSegs();
-    P_LoadLeafs();
-    P_LoadReject();
-    P_LoadLights();
-    P_GroupLines();
+	/* note: most of this ordering is important */
+	P_LoadMacros();
+	P_LoadBlockMap();
+	P_LoadVertexes();
+	P_LoadSectors();
+	P_LoadSideDefs();
+	P_LoadLineDefs();
+	P_LoadSubSectors();
+	P_LoadNodes();
+	P_LoadSegs();
+	P_LoadLeafs();
+	P_LoadReject();
+	P_LoadLights();
+	P_GroupLines();
 	P_LoadThings();
 	W_FreeMapLump();
 
@@ -792,20 +783,14 @@ void P_SetupLevel(int map, skill_t skill) // 8001E974
 	P_SpawnSpecials();
 	R_SetupSky();
 
-    Z_SetAllocBase(mainzone);
-    Z_CheckZone(mainzone);
+	Z_SetAllocBase(mainzone);
+	Z_CheckZone(mainzone);
 
 	memory = Z_FreeMemory(mainzone);
-	if (memory < 0x10000)
-	{
+	if (memory < 0x10000) {
 		Z_DumpHeap(mainzone);
 		I_Error("P_SetupLevel: not enough free memory %d", memory);
 	}
 
-    P_SpawnPlayer();
-
-//	malloc_stats();
-//	usleep(5*1000000);
-
-    //PRINTF_D2(WHITE, 0, 27, "P_SetupLevel DONE\n");
+	P_SpawnPlayer();
 }

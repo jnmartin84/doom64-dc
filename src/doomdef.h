@@ -4,6 +4,7 @@
 
 #include <kos.h>
 #include <stdint.h>
+#include <strings.h>
 
 #define u64 uint64_t
 #define u32 uint32_t
@@ -148,6 +149,7 @@ int LightGetRGB(int h,int s,int v); // 8000248C
 void init_all_sounds(void);
 
 void P_RefreshBrightness(void);
+void P_RefreshVideo(void);
 
 void R_RenderFilter(void);
 
@@ -901,6 +903,7 @@ void G_InitSkill(skill_t skill); // [Immorpher] skill initialize
 void G_CompleteLevel (void);
 void G_RecordDemo (void);
 int G_PlayDemoPtr (int skill, int map);
+void G_PlayerFinishLevel (int player);
 
 /*------*/
 /* PLAY */
@@ -1144,6 +1147,11 @@ void S_PauseSound(void);
 void S_ResumeSound(void);
 void S_StopSound(mobj_t *origin,int seqnum);
 void S_StopAll(void);
+
+void S_RemoveOrigin(mobj_t* origin);
+void S_ResetSound(void);
+void S_UpdateSounds(void);
+
 int S_SoundStatus(int seqnum);
 int S_StartSound(mobj_t *origin, int sound_id);
 int S_AdjustSoundParams(mobj_t *listener, mobj_t *origin, int* vol, int* pan);

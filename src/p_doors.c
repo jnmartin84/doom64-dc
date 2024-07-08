@@ -222,7 +222,6 @@ int EV_DoDoor (line_t *line, vldoor_e  type) // 80010750
 /*================================================================== */
 void EV_VerticalDoor (line_t *line, mobj_t *thing) // 80010998
 {
-	player_t		*player;
 	sector_t		*sec;
 	vldoor_t		*door;
 	int				side;
