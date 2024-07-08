@@ -76,7 +76,7 @@ Go to the repo source directory and compile it like any other KallistiOS project
     cd ~/doom64-dc/src
     make
     sh-elf-objcopy -R .stack -O binary doom64.elf doom64.bin
-    /opt/toolchains/dc/kos/utils/scramble/scramble doom64.bin ~/doom64-dc/selfboot/1ST_READ.BIN
+    /opt/toolchains/dc/kos/utils/scramble/scramble doom64.bin ../selfboot/1ST_READ.BIN
 
 Finally, make a self-booting CDI from the contents of the selfboot directory. 
 I am not explaining this process. It depends on the tools and OS you are using.
