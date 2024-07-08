@@ -68,7 +68,7 @@ clean:
 	$(RM) doom64.cdi d64isoldr.iso $(O_FILES) $(BUILD_DIR)/$(TARGET)
 
 makecd: $(TARGET)
-	mkdcdisc -d selfboot/ogg/ -d selfboot/sfx/ -d selfboot/vq -f selfboot/doom64monster.pal -f selfboot/doom64nonenemy.pal -f selfboot/pow2.wad -f selfboot/alt.wad -e $(BUILD_DIR)/$(TARGET) -o doom64.cdi -n "Doom 64"
+	mkdcdisc -d selfboot/ogg -d selfboot/sfx -d selfboot/vq -f selfboot/doom64monster.pal -f selfboot/doom64nonenemy.pal -f selfboot/pow2.wad -f selfboot/alt.wad -e $(BUILD_DIR)/$(TARGET) -o doom64.cdi -n "Doom 64"
 
 makesd: makecd
 	mksdiso -h doom64.cdi d64isoldr.iso
