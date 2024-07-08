@@ -20,7 +20,7 @@ sfxhnd_t sounds[NUMSFX+1];
 
 #define fullsfxname(sn) "/cd/sfx/"sn".wav"
 #define stringed(sfxname) #sfxname
-#define setsfx(sn) sounds[sn] = snd_sfx_load(fullsfxname(stringed(sn))); W_DrawLoadScreen("Sounds", sn, NUMSFX)
+#define setsfx(sn) sounds[sn] = snd_sfx_load(fullsfxname(stringed(sn))); W_DrawLoadScreen("Sounds", sn, NUMSFX-24)
 
 void init_all_sounds(void) {
 	snd_init();
