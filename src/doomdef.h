@@ -36,12 +36,19 @@
 #define D64_PVR_REPACK_COLOR_ALPHA(color,a) (((color >> 8) & 0x00ffffff) | (a << 24))
 #define D64_PVR_PACK_COLOR(a,r,g,b) ((a << 24) | (r << 16) | (g << 8) | b)
 
+#if 1
 #define REAL_SCREEN_WD 640
-//#define REAL_SCREEN_WD 320
+#else
+#define REAL_SCREEN_WD 320
+#endif
+
 #define SCREEN_WD 320
 
+#if REAL_SCREEN_WD == 640
 #define REAL_SCREEN_HT 480
-//#define REAL_SCREEN_HT 240
+#else
+#define REAL_SCREEN_HT 240
+#endif
 #define SCREEN_HT 240
 
 #define RES_RATIO (REAL_SCREEN_WD / SCREEN_WD)
