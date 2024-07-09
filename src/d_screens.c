@@ -182,6 +182,9 @@ int D_Credits(void) // 8002BA34
     cred_step = 0;
     exit = MiniLoop(NULL, NULL, D_CreditTicker, D_CreditDrawer);
 
+	// if you exit while screens are up you can end up with colored background in main menu
+	pvr_set_bg_color(0,0,0);
+
     return exit;
 }
 
