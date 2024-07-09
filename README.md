@@ -92,10 +92,9 @@ Go to the repo directory and compile it like any other KallistiOS project. Make 
 
 For the best performing build possible, modify `KOS_CFLAGS` in your `environ.sh`, changing `-O2` to `-O3 -flto=auto`.
 
-   source /opt/toolchains/dc/kos/environ.sh
-
 To build the source into an ELF file, run `make`.
 
+    source /opt/toolchains/dc/kos/environ.sh
     cd ~/doom64-dc
     make clean
     make
