@@ -73,6 +73,7 @@ pvr_ptr_t dlstex;
 // LOADING DOOM64 IWAD
 
 void W_DrawLoadScreen(char *what, int current, int total) {
+#if REAL_SCREEN_WD == 640
 		pvr_vertex_t __attribute__((aligned(32))) txtverts[4];
 
 		pvr_vertex_t __attribute__((aligned(32))) verts[12];
@@ -239,6 +240,7 @@ void W_DrawLoadScreen(char *what, int current, int total) {
 		pvr_wait_ready();
 		free(printtex);
 		pvr_mem_free(dlstex);
+#endif
 }
 
 
