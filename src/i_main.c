@@ -10,10 +10,7 @@
 #include <arch/irq.h>
 #include <unistd.h>
 
-KOS_INIT_FLAGS(	INIT_CONTROLLER |
-		INIT_VMU |
-		INIT_CDROM);
-//INIT_DEFAULT | INIT_MALLOCSTATS);
+KOS_INIT_FLAGS(INIT_DEFAULT | INIT_MALLOCSTATS);
 
 pvr_init_params_t pvr_params = {
 { PVR_BINSIZE_16, 0, PVR_BINSIZE_16, 0, 0 }, VERTBUF_SIZE, 1, 0, 0, 3
