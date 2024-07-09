@@ -33,9 +33,10 @@ d64Triangle_t dT1, dT2;
 
 const float inv64 = 1.0f / 64.0f;
 const float inv255 = 1.0f / 255.0f;
-const float inv256 = 1.0f / 256.0f;
+const float inv511 = 1.0f / 511.0f;
 const float inv1024 = 1.0f / 1024.0f;
-const float inv65535 = 1.0f / 65536.0f;
+const float halfinv1024 = 0.5f / 1024.0f;
+const float inv65536 = 1.0f / 65536.0f;
 
 static inline int vismask(d64Triangle_t *triangle)
 {
@@ -107,14 +108,55 @@ void clip_edge(d64Vertex_t *v1, d64Vertex_t *v2, d64Vertex_t *out)
 	blend_color(t, v1->v.oargb, v2->v.oargb, &(out->v.oargb));
 }
 
-uint32_t lighted_color(uint32_t c, float lc)
+uint32_t lighted_color(uint32_t c, int ll) //float lc)
 {
-	float r = (float)UNPACK_R(c) * inv255;
-	float g = (float)UNPACK_G(c) * inv255;
-	float b = (float)UNPACK_B(c) * inv255;
-	float a = (float)UNPACK_A(c) * inv255;
-
-	return PVR_PACK_COLOR(a, (0.5 + (r*0.5))*lc, (0.5 + (g*0.5))*lc, (0.5 + (b*0.5))*lc);
+// why I switched from fp lights to integer lights
+//
+// ============================================================================
+//
+// floating point lighting
+// =======================
+//#define PVR_PACK_COLOR(a, r, g, b) ( \
+//                                     ( ((uint8)( a * 255 ) ) << 24 ) | \
+//                                     ( ((uint8)( r * 255 ) ) << 16 ) | \
+//                                     ( ((uint8)( g * 255 ) ) << 8 ) | \
+//
+// 4 * (1 bitshift, 1 and, 1 int->fp conv, 1 fp mult per r,g,bcomponent)
+// + 3 fp adds, 9 fp mult, 3 fp->int conv, 3 bitshifts, 3 ors per color
+//
+// 7 bitsifts, 4 ands, 4 int->fp conv, 13 fp mult, 3 fp adds, 3 fp->int conv, 3 ors 
+//	float r = (float)UNPACK_R(c) * inv255;
+//	float g = (float)UNPACK_G(c) * inv255;
+//	float b = (float)UNPACK_B(c) * inv255;
+//	float a = (float)UNPACK_A(c) * inv255;
+//	return PVR_PACK_COLOR(a, (0.5 + (r*0.5))*lc, (0.5 + (g*0.5))*lc, (0.5 + (b*0.5))*lc);
+//
+// same as above but 10 fp mult instead of 13
+//	float r = (0.5f + ((float)UNPACK_R(c) * inv511))*lc;
+//	float g = (0.5f + ((float)UNPACK_G(c) * inv511))*lc;
+//	float b = (0.5f + ((float)UNPACK_B(c) * inv511))*lc;
+//	float a = (0.5f + ((float)UNPACK_A(c) * inv511));
+//	return PVR_PACK_COLOR(a, r, g, b);
+//
+// ============================================================================
+//
+// integer lighting
+// ================
+//#define UNPACK_R(color) ((color >> 24) & 0xff)
+//#define UNPACK_G(color) ((color >> 16) & 0xff)
+//#define UNPACK_B(color) ((color >> 8) & 0xff)
+//#define UNPACK_A(color) (color & 0xff)
+//#define D64_PVR_PACK_COLOR(a,r,g,b) ((a << 24) | (r << 16) | (g << 8) | b)
+// 
+// 3 * (3 bitshifts, 1 add, 1 and, 1 multiply per r,g,b component)
+// + 1 bitshift, 1 and per a component
+// + 3 shifts, 3 ors per color
+// 13 bitshifts, 3 adds, 4 ands, 3 multiplies, 3 ors 
+	uint8_t r = ((128 + ((uint8_t)UNPACK_R(c) >> 1))*(uint8_t)ll) >> 8;
+	uint8_t g = ((128 + ((uint8_t)UNPACK_G(c) >> 1))*(uint8_t)ll) >> 8;
+	uint8_t b = ((128 + ((uint8_t)UNPACK_B(c) >> 1))*(uint8_t)ll) >> 8;
+	uint8_t a = UNPACK_A(c);
+	return D64_PVR_PACK_COLOR(a,r,g,b);
 }
 
 pvr_vertex_t __attribute__((aligned(32))) cq_stverts[8];
@@ -122,7 +164,7 @@ pvr_vertex_t __attribute__((aligned(32))) cq_stverts[8];
 void clip_quad(d64Triangle_t *triangle, d64Triangle_t *triangle2, pvr_poly_hdr_t *hdr, int lightlevel, pvr_list_t list, int specd) {
 	int vm = vismask2(triangle, triangle2);
 
-	float lightc = (float)lightlevel * inv255;
+//	float lightc = (float)lightlevel * inv255;
 
 	if (!vm) {
 		return;
@@ -130,10 +172,14 @@ void clip_quad(d64Triangle_t *triangle, d64Triangle_t *triangle2, pvr_poly_hdr_t
 		
 	if (vm == 15) {
 		if (!specd) {
-			triangle->dVerts[0].v.oargb = lighted_color(triangle->dVerts[0].v.argb, lightc);
+/*			triangle->dVerts[0].v.oargb = lighted_color(triangle->dVerts[0].v.argb, lightc);
 			triangle->dVerts[1].v.oargb = lighted_color(triangle->dVerts[1].v.argb, lightc);
 			triangle->dVerts[2].v.oargb = lighted_color(triangle->dVerts[2].v.argb, lightc);
-			triangle2->dVerts[2].v.oargb = lighted_color(triangle2->dVerts[2].v.argb, lightc);
+			triangle2->dVerts[2].v.oargb = lighted_color(triangle2->dVerts[2].v.argb, lightc);*/
+			triangle->dVerts[0].v.oargb = lighted_color(triangle->dVerts[0].v.argb, lightlevel);
+			triangle->dVerts[1].v.oargb = lighted_color(triangle->dVerts[1].v.argb, lightlevel);
+			triangle->dVerts[2].v.oargb = lighted_color(triangle->dVerts[2].v.argb, lightlevel);
+			triangle2->dVerts[2].v.oargb = lighted_color(triangle2->dVerts[2].v.argb, lightlevel);
 		}
 
 		triangle->dVerts[0].v.flags = PVR_CMD_VERTEX;
@@ -172,7 +218,7 @@ void clip_triangle(d64Triangle_t *triangle, pvr_poly_hdr_t *hdr, int lightlevel,
 	pvr_vertex_t __attribute__((aligned(32))) stverts[6];
 #endif
 	int vm = vismask(triangle);
-	float lightc = (float)lightlevel * inv255;
+//	float lightc = (float)lightlevel * inv255;
 
 	if (!vm) {
 		return;
@@ -183,9 +229,12 @@ void clip_triangle(d64Triangle_t *triangle, pvr_poly_hdr_t *hdr, int lightlevel,
 	triangle->dVerts[2].v.flags = PVR_CMD_VERTEX_EOL;
 
 	if (!specd) {
-		triangle->dVerts[0].v.oargb = lighted_color(triangle->dVerts[0].v.argb, lightc);
+/*		triangle->dVerts[0].v.oargb = lighted_color(triangle->dVerts[0].v.argb, lightc);
 		triangle->dVerts[1].v.oargb = lighted_color(triangle->dVerts[1].v.argb, lightc);
-		triangle->dVerts[2].v.oargb = lighted_color(triangle->dVerts[2].v.argb, lightc);
+		triangle->dVerts[2].v.oargb = lighted_color(triangle->dVerts[2].v.argb, lightc);*/
+		triangle->dVerts[0].v.oargb = lighted_color(triangle->dVerts[0].v.argb, lightlevel);
+		triangle->dVerts[1].v.oargb = lighted_color(triangle->dVerts[1].v.argb, lightlevel);
+		triangle->dVerts[2].v.oargb = lighted_color(triangle->dVerts[2].v.argb, lightlevel);
 	}
 
 	switch (vm) {
@@ -693,8 +742,8 @@ void R_WallPrep(seg_t *seg)
 #endif
 #if 0
 					if (f_floorheight < f_ceilingheight) {
-                        height2 = ((height << 16) / (f_ceilingheight - f_floorheight));
-                    } else {
+						height2 = ((height << 16) / (f_ceilingheight - f_floorheight));
+					} else {
 						height2 = 0;
 					}
 
@@ -717,10 +766,11 @@ void R_WallPrep(seg_t *seg)
 						gf = (((gf<<16) / max) * 255) >> 16;
 						bf = (((bf<<16) / max) * 255) >> 16;
 					}
-#endif
+
 					/*tmp_lowcolor = (((((r2 - r1) * height2) >> 16) + r1) << 24) |
 									(((((g2 - g1) * height2) >> 16) + g1) << 16) |
 									(((((b2 - b1) * height2) >> 16) + b1) << 8)  | 0xff;*/
+#endif
 					tmp_lowcolor = (rf << 24) | (gf << 16) | (bf << 8) | 0xff;
 #endif
 				} 
@@ -830,7 +880,7 @@ void R_WallPrep(seg_t *seg)
 						height2 = ((height << 16) / (f_ceilingheight - f_floorheight));
 					} else {
 						height2 = 0;
-                    }
+					}
 
 					unsigned int rf = (((unsigned int)r2 * height2) >> 16) + (((unsigned int)r1*(65536 - height2)) >> 16);
 					unsigned int gf = (((unsigned int)g2 * height2) >> 16) + (((unsigned int)g1*(65536 - height2)) >> 16);
@@ -851,11 +901,12 @@ void R_WallPrep(seg_t *seg)
 						gf = (((gf<<16) / max) * 255) >> 16;
 						bf = (((bf<<16) / max) * 255) >> 16;
 					}
-#endif 
 
 					/*tmp_upcolor = (((((r2 - r1) * height2) >> 16) + r1) << 24) |
 									(((((g2 - g1) * height2) >> 16) + g1) << 16) |
 									(((((b2 - b1) * height2) >> 16) + b1) << 8)  | 0xff;*/
+#endif 
+
 					tmp_upcolor = (rf << 24) | (gf << 16) | (bf << 8) | 0xff;
 #endif
 				}
@@ -990,6 +1041,7 @@ void R_RenderWall(seg_t *seg, int flags, int texture, int topHeight, int bottomH
 		v1 = seg->v1;
 		v2 = seg->v2;
 
+#if 0
 		signed short sx1 = (signed short)(v1->x >> 16);
 		signed short sx2 = (signed short)(v2->x >> 16);
 		signed short sy1 = -((signed short)(v1->y >> 16));
@@ -999,6 +1051,12 @@ void R_RenderWall(seg_t *seg, int flags, int texture, int topHeight, int bottomH
 		float x2 = (float)sx2;
 		float z1 = (float)sy1;
 		float z2 = (float)sy2;
+#else
+		float x1 = (float)v1->x * inv65536;
+		float z1 = -((float)v1->y * inv65536);
+		float x2 = (float)v2->x * inv65536;
+		float z2 = -((float)v2->y * inv65536);
+#endif
 		float y1 = (float)topHeight;
 		float y2 = (float)bottomHeight;
 		short stu1 = curTextureoffset >> 16;
@@ -1099,13 +1157,20 @@ void R_RenderSwitch(seg_t *seg, int texture, int topOffset, int color) // 800276
 	cos = finecosine[seg->angle >> ANGLETOFINESHIFT] << 1;
 	sin = finesine[seg->angle >> ANGLETOFINESHIFT] << 1;
 
-	float x1 = (float)(((x) - (cos << 3) + sin) >> 16);
-	float x2 = (float)(((x) + (cos << 3) + sin) >> 16);
 	float y1 = (float)topOffset;
 	float y2 = y1 - 32.0f;
+
+#if 0
+	float x1 = (float)(((x) - (cos << 3) + sin) >> 16);
+	float x2 = (float)(((x) + (cos << 3) + sin) >> 16);
 	float z1 = (float)(((-y) + (sin << 3) + cos) >> 16);
 	float z2 = (float)(((-y) - (sin << 3) + cos) >> 16);
-
+#else
+	float x1 = (float)((x) - (cos << 3) + sin) * inv65536;
+	float x2 = (float)((x) + (cos << 3) + sin) * inv65536;
+	float z1 = (float)((-y) + (sin << 3) + cos) * inv65536;
+	float z2 = (float)((-y) - (sin << 3) + cos) * inv65536;
+#endif
 	float tu1 = 0.0f;
 	float tu2 = 32.0f / (float)last_sw;
 	float tv1 = 0.0f;
@@ -1194,10 +1259,15 @@ void R_RenderPlane(leaf_t *leaf, int numverts, int zpos, int texture, int xpos, 
 	dVTX[3] = &(dT1.dVerts[2]);
 
 	vrt = lf[0].vertex;
-
+#if 0
 	dVTX[0]->v.x = ((float)(vrt->x >> 16));
 	dVTX[0]->v.y = (float)(zpos);
 	dVTX[0]->v.z = -((float)(vrt->y >> 16));
+#else
+	dVTX[0]->v.x = ((float)vrt->x * inv65536);
+	dVTX[0]->v.y = (float)(zpos);
+	dVTX[0]->v.z = -((float)vrt->y * inv65536);
+#endif
 	x = ((vrt->x + xpos) >> 16) & -64;
 	y = ((vrt->y + ypos) >> 16) & -64;
 
@@ -1220,10 +1290,15 @@ void R_RenderPlane(leaf_t *leaf, int numverts, int zpos, int texture, int xpos, 
 
 		vrt1 = lf[1].vertex;
 
+#if 0
 		dVTX[1]->v.x = ((float)(vrt1->x >> 16));
 		dVTX[1]->v.y = (float)(zpos);
 		dVTX[1]->v.z = -((float)(vrt1->y >> 16));
-
+#else
+		dVTX[1]->v.x = ((float)vrt1->x * inv65536);
+		dVTX[1]->v.y = (float)(zpos);
+		dVTX[1]->v.z = -((float)vrt1->y * inv65536);
+#endif
 		stu = (((vrt1->x + xpos) >> FRACBITS) - x);
 		stv = -(((vrt1->y + ypos) >> FRACBITS) - y);
 		tu = (float)stu * inv64;
@@ -1234,10 +1309,15 @@ void R_RenderPlane(leaf_t *leaf, int numverts, int zpos, int texture, int xpos, 
 
 		vrt2 = lf[2].vertex;
 
+#if 0
 		dVTX[2]->v.x = ((float)(vrt2->x >> 16));
 		dVTX[2]->v.y = (float)(zpos);
 		dVTX[2]->v.z = -((float)(vrt2->y >> 16));
-
+#else
+		dVTX[2]->v.x = ((float)vrt2->x * inv65536);
+		dVTX[2]->v.y = (float)(zpos);
+		dVTX[2]->v.z = -((float)vrt2->y * inv65536);
+#endif
 		stu = (((vrt2->x + xpos) >> FRACBITS) - x);
 		stv = -(((vrt2->y + ypos) >> FRACBITS) - y);
 		tu = (float)stu * inv64;
@@ -1297,9 +1377,15 @@ void R_RenderPlane(leaf_t *leaf, int numverts, int zpos, int texture, int xpos, 
 			stv = -(((vrt1->y + ypos) >> FRACBITS) - y);
 			tu = (float)stu * inv64;
 			tv = (float)stv * inv64;
+#if 0
 			dVTX[1]->v.x = ((float)(vrt1->x >> 16));
 			dVTX[1]->v.y = (float)(zpos);
 			dVTX[1]->v.z = -((float)(vrt1->y >> 16));
+#else
+			dVTX[1]->v.x = ((float)vrt1->x * inv65536);
+			dVTX[1]->v.y = (float)(zpos);
+			dVTX[1]->v.z = -((float)vrt1->y * inv65536);
+#endif
 			dVTX[1]->v.u = tu;
 			dVTX[1]->v.v = tv;
 
@@ -1307,9 +1393,16 @@ void R_RenderPlane(leaf_t *leaf, int numverts, int zpos, int texture, int xpos, 
 			stv = -(((vrt2->y + ypos) >> FRACBITS) - y);
 			tu = (float)stu * inv64;
 			tv = (float)stv * inv64;
+#if 0
 			dVTX[2]->v.x = ((float)(vrt2->x >> 16));
 			dVTX[2]->v.y = (float)(zpos);
 			dVTX[2]->v.z = -((float)(vrt2->y >> 16));
+#else
+			dVTX[2]->v.x = ((float)vrt2->x * inv65536);
+			dVTX[2]->v.y = (float)(zpos);
+			dVTX[2]->v.z = -((float)vrt2->y * inv65536);
+#endif
+
 			dVTX[2]->v.u = tu;
 			dVTX[2]->v.v = tv;
 
@@ -1317,9 +1410,15 @@ void R_RenderPlane(leaf_t *leaf, int numverts, int zpos, int texture, int xpos, 
 			stv = -(((vrt3->y + ypos) >> FRACBITS) - y);
 			tu = (float)stu * inv64;
 			tv = (float)stv * inv64;
+#if 0
 			dVTX[3]->v.x = ((float)(vrt3->x >> 16));
 			dVTX[3]->v.y = (float)(zpos);
 			dVTX[3]->v.z = -((float)(vrt3->y >> 16));
+#else
+			dVTX[3]->v.x = ((float)vrt3->x * inv65536);
+			dVTX[3]->v.y = (float)(zpos);
+			dVTX[3]->v.z = -((float)vrt3->y * inv65536);
+#endif
 			dVTX[3]->v.u = tu;
 			dVTX[3]->v.v = tv;
 
@@ -1498,16 +1597,16 @@ void R_RenderThings(subsector_t *sub)
 				// pull in each side of sprite by one pixel
 				// fix for filtering 'crud' around the edge due to lack of padding
 				if(!flip) {
-					dVTX[0]->v.u = dVTX[3]->v.u = all_u[lump] + inv1024;
-					dVTX[1]->v.u = dVTX[2]->v.u = all_u[lump] + (((float)spos - 1.0f)*inv1024);
+					dVTX[0]->v.u = dVTX[3]->v.u = all_u[lump] + halfinv1024;
+					dVTX[1]->v.u = dVTX[2]->v.u = all_u[lump] + (((float)spos - 0.5f)*inv1024);
 				} else {
-					dVTX[1]->v.u = dVTX[2]->v.u = all_u[lump] + inv1024;
-					dVTX[0]->v.u = dVTX[3]->v.u = all_u[lump] + (((float)spos - 1.0f)*inv1024);
+					dVTX[1]->v.u = dVTX[2]->v.u = all_u[lump] + halfinv1024;
+					dVTX[0]->v.u = dVTX[3]->v.u = all_u[lump] + (((float)spos - 0.5f)*inv1024);
 				}
 
 				theheader = headers_for_sprites[lump];
-				dVTX[0]->v.v = dVTX[1]->v.v = all_v[lump] + inv1024;
-				dVTX[3]->v.v = dVTX[2]->v.v = all_v[lump] + (((float)height-1.0f)*inv1024);
+				dVTX[0]->v.v = dVTX[1]->v.v = all_v[lump] + halfinv1024;
+				dVTX[3]->v.v = dVTX[2]->v.v = all_v[lump] + (((float)height-0.5f)*inv1024);
 			} else {
 				int lumpoff = lump - 349;
 				int cached_index = -1;
@@ -1944,7 +2043,7 @@ void R_RenderPSprites(void)
 				}
 			} else {
 				uint32_t color = lights[frontsector->colors[2]].rgba;
-				float lightc = (float)frontsector->lightlevel * inv255;
+				//float lightc = (float)frontsector->lightlevel * inv255;
 				uint32_t pspr_color;
 				uint8_t a1;
 
@@ -1954,7 +2053,8 @@ void R_RenderPSprites(void)
 					a1 = psp->alpha;
 
 				// hi Immorpher -- fixed the dynamic lighting of weapons
-				pspr_color = lighted_color(D64_PVR_REPACK_COLOR_ALPHA(color, a1), lightc);
+				pspr_color = lighted_color(D64_PVR_REPACK_COLOR_ALPHA(color, a1), frontsector->lightlevel);
+				//lighted_color(D64_PVR_REPACK_COLOR_ALPHA(color, a1), lightc);
 
 				for(int i = 0; i < 4; i++) {
 					quad2[i].argb = D64_PVR_REPACK_COLOR_ALPHA(color, a1);
@@ -1979,26 +2079,26 @@ void R_RenderPSprites(void)
 			// fix for filtering 'crud' around the edge due to lack of padding
 			vert->x = x1;
 			vert->y = y2;
-			vert->u = u1 + inv1024;
-			vert->v = v2 - inv1024;
+			vert->u = u1 + halfinv1024;
+			vert->v = v2 - halfinv1024;
 			vert++;
 
 			vert->x = x1;
 			vert->y = y1;
-			vert->u = u1 + inv1024;
-			vert->v = v1 + inv1024;
+			vert->u = u1 + halfinv1024;
+			vert->v = v1 + halfinv1024;
 			vert++;
 
 			vert->x = x2;
 			vert->y = y2;
-			vert->u = u2 - inv1024;
-			vert->v = v2 - inv1024;
+			vert->u = u2 - halfinv1024;
+			vert->v = v2 - halfinv1024;
 			vert++;
 
 			vert->x = x2;
 			vert->y = y1;
-			vert->u = u2 - inv1024;
-			vert->v = v1 + inv1024;
+			vert->u = u2 - halfinv1024;
+			vert->v = v1 + halfinv1024;
 
 			pvr_list_prim(PVR_LIST_TR_POLY, headers_for_sprites[lump], sizeof(pvr_poly_hdr_t));
 			pvr_list_prim(PVR_LIST_TR_POLY, &quad2, sizeof(quad2));

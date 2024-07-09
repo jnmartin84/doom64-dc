@@ -1,4 +1,3 @@
-
 //Renderer phase 1 - BSP traversal
 
 #include "doomdef.h"
@@ -6,93 +5,63 @@
 
 extern short SwapShort(short dat);
 
-int checkcoord[12][4] =				// 8005B110
+int checkcoord[12][4] =
 {
-	{ 3, 0, 2, 1 },/* Above,Left */
-	{ 3, 0, 2, 0 },/* Above,Center */
-	{ 3, 1, 2, 0 },/* Above,Right */
+	{ 3, 0, 2, 1 }, /* Above,Left */
+	{ 3, 0, 2, 0 }, /* Above,Center */
+	{ 3, 1, 2, 0 }, /* Above,Right */
 	{ 0, 0, 0, 0 },
-	{ 2, 0, 2, 1 },/* Center,Left */
-	{ 0, 0, 0, 0 },/* Center,Center */
-	{ 3, 1, 3, 0 },/* Center,Right */
+	{ 2, 0, 2, 1 }, /* Center,Left */
+	{ 0, 0, 0, 0 }, /* Center,Center */
+	{ 3, 1, 3, 0 }, /* Center,Right */
 	{ 0, 0, 0, 0 },
-	{ 2, 0, 3, 1 },/* Below,Left */
-	{ 2, 1, 3, 1 },/* Below,Center */
-	{ 2, 1, 3, 0 },/* Below,Right */
+	{ 2, 0, 3, 1 }, /* Below,Left */
+	{ 2, 1, 3, 1 }, /* Below,Center */
+	{ 2, 1, 3, 0 }, /* Below,Right */
 	{ 0, 0, 0, 0 }
 };
 
 void	R_RenderBSPNode(int bspnum);
-boolean R_CheckBBox(fixed_t bspcoord[4]);
+boolean	R_CheckBBox(fixed_t bspcoord[4]);
 void	R_Subsector(int num);
 void	R_AddLine(seg_t *line);
-void    R_AddSprite(subsector_t *sub);
-void    R_RenderBSPNodeNoClip(int bspnum);
-void	R_RenderFilter(void); // [Immorpher] Rendering function to set filter
-// [GEC and Immorpher] Set texture render options
-void R_RenderFilter(void)
-{
-#if 0
-	// Texture Filtering
-	if (VideoFilter == 0) {
-        gDPSetTextureFilter(GFX1++, G_TF_BILERP); // <- Linear Texture Filtering
-    }
-    else {
-        gDPSetTextureFilter(GFX1++, G_TF_POINT); // <- Nearest Texture Filtering
-    }
-	
-	// Color Dithering
-	if (ColorDither == 0) {
-		gDPSetColorDither(GFX1++, G_CD_DISABLE);
-	}
-	else if (ColorDither == 1) {
-		gDPSetColorDither(GFX1++, G_CD_MAGICSQ);
-	}
-	else if (ColorDither == 2) {
-		gDPSetColorDither(GFX1++, G_CD_BAYER);
-	}
-	else {
-		gDPSetColorDither(GFX1++, G_CD_NOISE);
-	}
-#endif
-}
+void	R_AddSprite(subsector_t *sub);
+void	R_RenderBSPNodeNoClip(int bspnum);
 
 // Kick off the rendering process by initializing the solidsubsectors array and then
 // starting the BSP traversal.
 //
-void R_BSP(void) // 80023F30
+void R_BSP(void)
 {
-    int count;
-    subsector_t **sub;
-    validcount++;
-    rendersky = false;
+	int count;
+	subsector_t **sub;
 
-    numdrawsubsectors = 0;
-    numdrawvissprites = 0;
+	validcount++;
 
-    visspritehead = vissprites;
+	rendersky = false;
+
+	numdrawsubsectors = 0;
+	numdrawvissprites = 0;
+
+	visspritehead = vissprites;
 
 	endsubsector = solidsubsectors; /* Init the free memory pointer */
 	D_memset(solidcols, 0, 320);
 
-    if (camviewpitch == 0)
-    {
-        R_RenderBSPNode(numnodes - 1);  /* Begin traversing the BSP tree for all walls in render range */
-    }
-    else
-    {
-        R_RenderBSPNodeNoClip(numnodes - 1);  /* Begin traversing the BSP tree for all walls in render range */
-        rendersky = true;
-    }
+	if (camviewpitch == 0) {
+		R_RenderBSPNode(numnodes - 1); /* Begin traversing the BSP tree for all walls in render range */
+	} else {
+		R_RenderBSPNodeNoClip(numnodes - 1); /* Begin traversing the BSP tree for all walls in render range */
+		rendersky = true;
+	}
 
-    sub = solidsubsectors;
-    count = numdrawsubsectors;
-    while(count)
-    {
-        R_AddSprite(*sub);	/* Render each sprite */
-        sub++;				/* Inc the sprite pointer */
-        count--;
-    }
+	sub = solidsubsectors;
+	count = numdrawsubsectors;
+	while (count) {
+		R_AddSprite(*sub);	// Render each sprite
+		sub++;				// Inc the sprite pointer
+		count--;
+	}
 }
 
 //
@@ -101,143 +70,99 @@ void R_BSP(void) // 80023F30
 //
 static boolean R_RenderBspSubsector(int bspnum)
 {
-	if(bspnum & NF_SUBSECTOR)
-	{
-	    if(bspnum == -1)
+	if (bspnum & NF_SUBSECTOR) {
+		if (bspnum == -1)
 			R_Subsector(0);
 		else
 			R_Subsector(bspnum & (~NF_SUBSECTOR));
-		
+
 		return true;
 	}
-    return false;	
+	return false;	
 }
 
+// BSP stack algorithm borrowed from GBADoom 
+// https://github.com/doomhack/GBADoom/blob/3bd2cf34fb66dd60f9b66efe25cc1d6945a21f74/source/r_hotpath.iwram.c#L2791
 #define MAX_BSP_DEPTH 128
-//
+
 // RenderBSPNode
 // Renders all subsectors below a given node,
-//  traversing subtree recursively.
+// traversing subtree recursively.
 // Just call with BSP root.
+//
+// Non recursive version.
+// constant stack space used and easier to
+// performance profile.
 static int bspstack[MAX_BSP_DEPTH];
 
-void R_RenderBSPNode(int bspnum) // 80024020
+void R_RenderBSPNode(int bspnum)
 {
-	int sp = 0;
 	node_t *bsp;
-	int     side;
-	fixed_t	dx, dy;
-	fixed_t	left, right;
+	int side;
+	fixed_t dx, dy;
+	fixed_t left, right;
 
-	//printf("R_RenderBSPNode\n");
-	while(true)
-	{
-		while (!R_RenderBspSubsector(bspnum))
-		{
-			if(sp == MAX_BSP_DEPTH)
+	int sp = 0;
+
+	while (true) {
+		while (!R_RenderBspSubsector(bspnum)) {
+			if (sp == MAX_BSP_DEPTH)
 				break;
-			
+
 			bsp = &nodes[bspnum];
-//			side = R_PointOnSide(viewx,viewy,bsp);
-        dx = (viewx - bsp->line.x);
-        dy = (viewy - bsp->line.y);
 
-        left = (bsp->line.dy >> 16) * (dx >> 16);
-        right = (dy >> 16) * (bsp->line.dx >> 16);
+			dx = (viewx - bsp->line.x);
+			dy = (viewy - bsp->line.y);
 
-        if (right < left)
-            side = 0;		/* front side */
-        else
-            side = 1;		/* back side */
-			
+			left = (bsp->line.dy >> 16) * (dx >> 16);
+			right = (dy >> 16) * (bsp->line.dx >> 16);
+
+			if (right < left)
+				side = 0; // front side
+			else
+				side = 1; // back side
+
 			bspstack[sp++] = bspnum;
 			bspstack[sp++] = side;
-			
+
 			bspnum = bsp->children[side];
-			
 		}
-        if(sp == 0)
-        {
-            //back at root node and not visible. All done!
-            return;
-        }
 
-        //Back sides.
-        side = bspstack[--sp];
-        bspnum = bspstack[--sp];
-        bsp = &nodes[bspnum];
+		if (sp == 0) {
+			// back at root node and not visible. All done!
+			return;
+		}
 
-        // Possibly divide back space.
-        //Walk back up the tree until we find
-        //a node that has a visible backspace.
-        while(!R_CheckBBox (bsp->bbox[side^1]))
-        {
-            if(sp == 0)
-            {
-                //back at root node and not visible. All done!
-                return;
-            }
+		// Back sides.
+		side = bspstack[--sp];
+		bspnum = bspstack[--sp];
+		bsp = &nodes[bspnum];
 
-            //Back side next.
-            side = bspstack[--sp];
-            bspnum = bspstack[--sp];
+		// Possibly divide back space.
+		// Walk back up the tree until we find
+		// a node that has a visible backspace.
+		while (!R_CheckBBox (bsp->bbox[side^1])) {
+			if (sp == 0) {
+				// back at root node and not visible. All done!
+				return;
+			}
 
-            bsp = &nodes[bspnum];
-        }
+			// Back side next.
+			side = bspstack[--sp];
+			bspnum = bspstack[--sp];
 
-        bspnum = bsp->children[side^1];		
+			bsp = &nodes[bspnum];
+		}
+
+		bspnum = bsp->children[side^1];		
 	}
-#if 0	
-    while(!(bspnum & NF_SUBSECTOR))
-    {
-        bsp = &nodes[bspnum];
-
-        // Decide which side the view point is on.
-        //side = R_PointOnSide(viewx, viewy, bsp);
-        dx = (viewx - bsp->line.x);
-        dy = (viewy - bsp->line.y);
-
-        left = (bsp->line.dy >> 16) * (dx >> 16);
-        right = (dy >> 16) * (bsp->line.dx >> 16);
-
-        if (right < left)
-            side = 0;		/* front side */
-        else
-            side = 1;		/* back side */
-
-        // check the front space
-        if(R_CheckBBox(bsp->bbox[side]))
-        {
-            R_RenderBSPNode(bsp->children[side]);
-        }
-
-        // continue down the back space
-        if(!R_CheckBBox(bsp->bbox[side^1]))
-        {
-            return;
-        }
-
-        bspnum = bsp->children[side^1];
-    }
-
-    // subsector with contents
-    // add all the drawable elements in the subsector
-    if(bspnum == -1)
-        bspnum = 0;
-
-    R_Subsector(bspnum & ~NF_SUBSECTOR);
-#endif
 }
 
 //
 // Checks BSP node/subtree bounding box. Returns true if some part of the bbox
 // might be visible.
 //
-
-
-
-
-boolean R_CheckBBox(fixed_t bspcoord[4]) // 80024170
+boolean R_CheckBBox(fixed_t bspcoord[4])
 {
 	int boxx;
 	int boxy;
@@ -272,61 +197,70 @@ boolean R_CheckBBox(fixed_t bspcoord[4]) // 80024170
 	x2 = bspcoord[checkcoord[boxpos][2]];
 	y2 = bspcoord[checkcoord[boxpos][3]];
 
-    vx1 = FixedMul(viewsin, x1 - viewx) - FixedMul(viewcos, y1 - viewy);
-    vy1 = FixedMul(viewcos, x1 - viewx) + FixedMul(viewsin, y1 - viewy);
-    vx2 = FixedMul(viewsin, x2 - viewx) - FixedMul(viewcos, y2 - viewy);
-    vy2 = FixedMul(viewcos, x2 - viewx) + FixedMul(viewsin, y2 - viewy);
+	vx1 = FixedMul(viewsin, x1 - viewx) - FixedMul(viewcos, y1 - viewy);
+	vy1 = FixedMul(viewcos, x1 - viewx) + FixedMul(viewsin, y1 - viewy);
+	vx2 = FixedMul(viewsin, x2 - viewx) - FixedMul(viewcos, y2 - viewy);
+	vy2 = FixedMul(viewcos, x2 - viewx) + FixedMul(viewsin, y2 - viewy);
 
-    if ((vx1 < -vy1) && (vx2 < -vy2))
-        return false;
+	if ((vx1 < -vy1) && (vx2 < -vy2))
+		return false;
 
-    if ((vy1 < vx1) && (vy2 < vx2))
-        return false;
+	if ((vy1 < vx1) && (vy2 < vx2))
+		return false;
 
-    if ((((vx2 >> 16) * (vy1 >> 16)) - ((vx1 >> 16) * (vy2 >> 16))) < 2)
-        return true;
+	if ((((vx2 >> 16) * (vy1 >> 16)) - ((vx1 >> 16) * (vy2 >> 16))) < 2)
+		return true;
 
-    if ((vy1 <= 0) && (vy2 <= 0))
-        return false;
+	if ((vy1 <= 0) && (vy2 <= 0))
+		return false;
 
-    if (vx1 < -vy1)
-    {
-        delta = (vx1 + vy1);
-        delta = FixedDiv2(delta, ((delta - vx2) - vy2));
-        delta = FixedMul(delta, (vy2 - vy1));
+	if (vx1 < -vy1) {
+		delta = (vx1 + vy1);
+		delta = FixedDiv2(delta, ((delta - vx2) - vy2));
+		delta = FixedMul(delta, (vy2 - vy1));
 
-        vy1 += delta;
-        vx1 = -vy1;
-    }
+		vy1 += delta;
+		vx1 = -vy1;
+	}
 
-    if (vy2 < vx2)
-    {
-        delta = (vx1 - vy1);
-        delta = FixedDiv2(delta, ((delta - vx2) + vy2));
-        delta = FixedMul(delta, (vy2 - vy1));
-        vx2 = delta + vy1;
-        vy2 = vx2;
-    }
+	if (vy2 < vx2) {
+		delta = (vx1 - vy1);
+		delta = FixedDiv2(delta, ((delta - vx2) + vy2));
+		delta = FixedMul(delta, (vy2 - vy1));
+		vx2 = delta + vy1;
+		vy2 = vx2;
+	}
 
-    Xstart = ((FixedDiv2(vx1, vy1) * 160) >> 16) + 160;
-    Xend   = ((FixedDiv2(vx2, vy2) * 160) >> 16) + 160;
+	// multiply by 320 
+	// is (x*256) + (x*64)
+	// (x << 8) + (x << 6)
+	// by 160
+	// is (x*128) + (x*32)
+	// ((x << 7) + (x << 5)
+//	Xstart = ((FixedDiv2(vx1, vy1) * 160) >> 16) + 160;
+//	Xend   = ((FixedDiv2(vx2, vy2) * 160) >> 16) + 160;
 
-    if (Xstart < 0)
-        Xstart = 0;
+	fixed_t vxovery1 = FixedDiv2(vx1, vy1);
+	fixed_t vxovery2 = FixedDiv2(vx2, vy2);
 
-    if (Xend >= 320)
-        Xend = 320;
+	Xstart = (((vxovery1 << 7) + (vxovery1 << 5)) >> 16) + 160;
+	Xend   = (((vxovery2 << 7) + (vxovery2 << 5)) >> 16) + 160;
 
-    solid_cols = &solidcols[Xstart];
-    while (Xstart < Xend)
-    {
-        if (*solid_cols == 0)
-            return true;
-        solid_cols++;
-        Xstart++;
-    }
+	if (Xstart < 0)
+		Xstart = 0;
 
-    return false;
+	if (Xend >= 320)
+		Xend = 320;
+
+	solid_cols = &solidcols[Xstart];
+	while (Xstart < Xend) {
+		if (*solid_cols == 0)
+			return true;
+		solid_cols++;
+		Xstart++;
+	}
+
+	return false;
 }
 
 //
@@ -340,169 +274,168 @@ void R_Subsector(int num) // 8002451C
 	seg_t       *line;
 	int          count;
 
-	if (num >= numsubsectors)
-	{
+#ifdef RANGECHECK
+	if (num >= numsubsectors) {
 		I_Error("R_Subsector: ss %i with numss = %i", num, numsubsectors);
 	}
+#endif
 
-	if (numdrawsubsectors < MAXSUBSECTORS)
-	{
-	    numdrawsubsectors++;
+	if (numdrawsubsectors < MAXSUBSECTORS) {
+		numdrawsubsectors++;
 
 		sub = &subsectors[num];
 		sub->drawindex = numdrawsubsectors;
 
-		*endsubsector = sub;//copy subsector
+		*endsubsector = sub; // copy subsector
 		endsubsector++;
 
 		frontsector = sub->sector;
 
 		line = &segs[sub->firstline];
 		count = sub->numlines;
-        do
-        {
-            R_AddLine(line);	/* Render each line */
-            ++line;				/* Inc the line pointer */
-        } while (--count);		/* All done? */
+
+		do {
+			R_AddLine(line);	/* Render each line */
+			++line;				/* Inc the line pointer */
+		} while (--count);		/* All done? */
 	}
 }
 
 //
 // Clips the given segment and adds any visible pieces to the line list.
 //
-
-void R_AddLine(seg_t *line) // 80024604
+void R_AddLine(seg_t *line)
 {
-	sector_t    *backsector;
-	vertex_t    *vrt, *vrt2;
-	int         x1, y1, x2, y2, count;
-	int        Xstart, Xend, delta;
-	byte        *solid_cols;
+	sector_t *backsector;
+	vertex_t *vrt, *vrt2;
+	int x1, y1, x2, y2, count;
+	int Xstart, Xend, delta;
+	byte *solid_cols;
 
 	line->flags &= ~1;
 
 	vrt = line->v1;
-	if (vrt->validcount != validcount)
-	{
-        x1 = FixedMul(viewsin, (vrt->x - viewx)) - FixedMul(viewcos,(vrt->y - viewy));
-        y1 = FixedMul(viewcos, (vrt->x - viewx)) + FixedMul(viewsin,(vrt->y - viewy));
+	if (vrt->validcount != validcount) {
+		x1 = FixedMul(viewsin, (vrt->x - viewx)) - FixedMul(viewcos,(vrt->y - viewy));
+		y1 = FixedMul(viewcos, (vrt->x - viewx)) + FixedMul(viewsin,(vrt->y - viewy));
 
-        vrt->vx = x1;
-        vrt->vy = y1;
+		vrt->vx = x1;
+		vrt->vy = y1;
 
-        vrt->validcount = validcount;
-	}
-	else
-	{
-        x1 = vrt->vx;
-        y1 = vrt->vy;
+		vrt->validcount = validcount;
+	} else {
+		x1 = vrt->vx;
+		y1 = vrt->vy;
 	}
 
 	vrt2 = line->v2;
-	if (vrt2->validcount != validcount)
-	{
-        x2 = FixedMul(viewsin, (vrt2->x - viewx)) - FixedMul(viewcos,(vrt2->y - viewy));
-        y2 = FixedMul(viewcos, (vrt2->x - viewx)) + FixedMul(viewsin,(vrt2->y - viewy));
+	if (vrt2->validcount != validcount) {
+		x2 = FixedMul(viewsin, (vrt2->x - viewx)) - FixedMul(viewcos,(vrt2->y - viewy));
+		y2 = FixedMul(viewcos, (vrt2->x - viewx)) + FixedMul(viewsin,(vrt2->y - viewy));
 
-        vrt2->vx = x2;
-        vrt2->vy = y2;
+		vrt2->vx = x2;
+		vrt2->vy = y2;
 
-        vrt2->validcount = validcount;
-	}
-	else
-	{
-        x2 = vrt2->vx;
-        y2 = vrt2->vy;
+		vrt2->validcount = validcount;
+	} else {
+		x2 = vrt2->vx;
+		y2 = vrt2->vy;
 	}
 
 	if ((x1 < -y1) && (x2 < -y2))
-        return;
+		return;
 
-    if ((y1 < x1) && (y2 < x2))
-        return;
+	if ((y1 < x1) && (y2 < x2))
+		return;
 
-    if ((y1 < ((8*FRACUNIT)+1)) && (y2 < ((8*FRACUNIT)+1)))
-        return;
+	if ((y1 < ((8*FRACUNIT)+1)) && (y2 < ((8*FRACUNIT)+1)))
+		return;
 
-    if ((((x2 >> 16) * (y1 >> 16)) - ((x1 >> 16) * (y2 >> 16))) <= 0)
-        return;
+	if ((((x2 >> 16) * (y1 >> 16)) - ((x1 >> 16) * (y2 >> 16))) <= 0)
+		return;
 
-    if (y1 < (8*FRACUNIT))
-    {
-        delta = FixedDiv2(((8*FRACUNIT) - y1), (y2 - y1));
-        delta = FixedMul(delta, (x2 - x1));
-        x1 += delta;
-        y1 = (8*FRACUNIT);
-    }
-    else if (y2 < (8*FRACUNIT))
-    {
-        delta = FixedDiv2(((8*FRACUNIT) - y2), (y1 - y2));
-        delta = FixedMul(delta, (x1 - x2));
-        x2 += delta;
-        y2 = (8*FRACUNIT);
-    }
+	if (y1 < (8*FRACUNIT))
+	{
+		delta = FixedDiv2(((8*FRACUNIT) - y1), (y2 - y1));
+		delta = FixedMul(delta, (x2 - x1));
+		x1 += delta;
+		y1 = (8*FRACUNIT);
+	}
+	else if (y2 < (8*FRACUNIT))
+	{
+		delta = FixedDiv2(((8*FRACUNIT) - y2), (y1 - y2));
+		delta = FixedMul(delta, (x1 - x2));
+		x2 += delta;
+		y2 = (8*FRACUNIT);
+	}
 
-    Xstart = ((FixedDiv2(x1, y1) * 160) >> 16) + 160;
-    Xend   = ((FixedDiv2(x2, y2) * 160) >> 16) + 160;
+	// multiply by 320 
+	// is (x*256) + (x*64)
+	// (x << 8) + (x << 6)
+	// by 160
+	// is (x*128) + (x*32)
+	// ((x << 7) + (x << 5)
+//	Xstart = ((FixedDiv2(x1, y1) * 160) >> 16) + 160;
+//	Xend   = ((FixedDiv2(x2, y2) * 160) >> 16) + 160;
 
-    if (Xstart < 0)
-        Xstart = 0;
+	fixed_t xovery1 = FixedDiv2(x1, y1);
+	fixed_t xovery2 = FixedDiv2(x2, y2);
 
-    if (Xend >= 320)
-        Xend = 320;
+	Xstart = (((xovery1 << 7) + (xovery1 << 5)) >> 16) + 160;
+	Xend   = (((xovery2 << 7) + (xovery2 << 5)) >> 16) + 160;
+	
+	if (Xstart < 0)
+		Xstart = 0;
 
-    if (Xstart != Xend)
-    {
-        solid_cols = &solidcols[Xstart];
-        count = Xstart;
-        while (count < Xend)
-        {
-            if (*solid_cols == 0)
-            {
-                line->flags |= 1;
-                line->linedef->flags |= ML_MAPPED;
-                break;
-            }
-            solid_cols++;
-            count++;
-        }
+	if (Xend >= 320)
+		Xend = 320;
 
-        if (frontsector->ceilingpic == -1) {
-            rendersky = true;
-        }
+	if (Xstart != Xend) {
+		solid_cols = &solidcols[Xstart];
+		count = Xstart;
+		while (count < Xend) {
+			if (*solid_cols == 0) {
+				line->flags |= 1;
+				line->linedef->flags |= ML_MAPPED;
+				break;
+			}
+			solid_cols++;
+			count++;
+		}
 
-        if (!(line->linedef->flags & (ML_DONTOCCLUDE|ML_DRAWMASKED)))
-        {
-            backsector = line->backsector;
+		if (frontsector->ceilingpic == -1) {
+			rendersky = true;
+		}
 
-            if(!backsector ||
-                backsector->ceilingheight <= frontsector->floorheight ||
-                backsector->floorheight   >= frontsector->ceilingheight ||
-                backsector->floorheight   == backsector->ceilingheight) // New line on Doom 64
-            {
-                solid_cols = &solidcols[Xstart];
-                while (Xstart < Xend)
-                {
-                    *solid_cols = 1;
-                    solid_cols++;
-                    Xstart += 1;
-                }
-            }
-        }
-    }
+		if (!(line->linedef->flags & (ML_DONTOCCLUDE|ML_DRAWMASKED))) {
+			backsector = line->backsector;
+
+			if(!backsector ||
+				backsector->ceilingheight <= frontsector->floorheight ||
+				backsector->floorheight   >= frontsector->ceilingheight ||
+				backsector->floorheight   == backsector->ceilingheight) { // New line on Doom 64
+				solid_cols = &solidcols[Xstart];
+				while (Xstart < Xend) {
+					*solid_cols = 1;
+					solid_cols++;
+					Xstart += 1;
+				}
+			}
+		}
+	}
 }
 
 void R_AddSprite(subsector_t *sub) // 80024A98
 {
-    byte *data;
-    mobj_t *thing;
-    spritedef_t		*sprdef;
+	byte *data;
+	mobj_t *thing;
+	spritedef_t		*sprdef;
 	spriteframe_t	*sprframe;
 
 	subsector_t     *pSub;
 	subsector_t     *CurSub;
-    vissprite_t     *VisSrpCur, *VisSrpCurTmp;
-    vissprite_t     *VisSrpNew;
+	vissprite_t     *VisSrpCur, *VisSrpCurTmp;
+	vissprite_t     *VisSrpNew;
 
 	angle_t         ang;
 	unsigned int    rot;
@@ -511,116 +444,116 @@ void R_AddSprite(subsector_t *sub) // 80024A98
 	fixed_t         tx, tz;
 	fixed_t         x, y;
 
-    sub->vissprite = NULL;
+	sub->vissprite = NULL;
 
-    for (thing = sub->sector->thinglist; thing; thing = thing->snext)
-    {
-        if (thing->subsector != sub)
+	for (thing = sub->sector->thinglist; thing; thing = thing->snext)
+	{
+		if (thing->subsector != sub)
 			continue;
 
-        if (numdrawvissprites >= MAXVISSPRITES)
-            break;
+		if (numdrawvissprites >= MAXVISSPRITES)
+			break;
 
-        if (thing->flags & MF_RENDERLASER)
-        {
-            visspritehead->zdistance = MAXINT;
-            visspritehead->thing = thing;
-            visspritehead->next = sub->vissprite;
-            sub->vissprite = visspritehead;
+		if (thing->flags & MF_RENDERLASER)
+		{
+			visspritehead->zdistance = MAXINT;
+			visspritehead->thing = thing;
+			visspritehead->next = sub->vissprite;
+			sub->vissprite = visspritehead;
 
-            visspritehead++;
-            numdrawvissprites++;
-        }
-        else
-        {
-            // transform origin relative to viewpoint
-            x = (thing->x - viewx) >> 16;
-            y = (thing->y - viewy) >> 16;
-            tx = ((viewsin * x) - (viewcos * y)) >> 16;
-            tz = ((viewcos * x) + (viewsin * y)) >> 16;
+			visspritehead++;
+			numdrawvissprites++;
+		}
+		else
+		{
+			// transform origin relative to viewpoint
+			x = (thing->x - viewx) >> 16;
+			y = (thing->y - viewy) >> 16;
+			tx = ((viewsin * x) - (viewcos * y)) >> 16;
+			tz = ((viewcos * x) + (viewsin * y)) >> 16;
 
-            // thing is behind view plane?
-            if (tz < MINZ)
-                continue;
+			// thing is behind view plane?
+			if (tz < MINZ)
+				continue;
 
-            // too far off the side?
-            if (tx > (tz << 1) || tx < -(tz << 1))
-                continue;
+			// too far off the side?
+			if (tx > (tz << 1) || tx < -(tz << 1))
+				continue;
 
-            sprdef = &sprites[thing->sprite];
-            sprframe = &sprdef->spriteframes[thing->frame & FF_FRAMEMASK];
+			sprdef = &sprites[thing->sprite];
+			sprframe = &sprdef->spriteframes[thing->frame & FF_FRAMEMASK];
 
-            if (sprframe->rotate != 0)
-            {
-                ang = R_PointToAngle2(viewx, viewy, thing->x, thing->y);
-                rot = ((ang - thing->angle) + ((unsigned int)(ANG45 / 2) * 9)) >> 29;
-                lump = sprframe->lump[rot];
-                flip = (boolean)(sprframe->flip[rot]);
-            }
-            else
-            {
-                lump = sprframe->lump[0];
-                flip = (boolean)(sprframe->flip[0]);
-            }
+			if (sprframe->rotate != 0)
+			{
+				ang = R_PointToAngle2(viewx, viewy, thing->x, thing->y);
+				rot = ((ang - thing->angle) + ((unsigned int)(ANG45 / 2) * 9)) >> 29;
+				lump = sprframe->lump[rot];
+				flip = (boolean)(sprframe->flip[rot]);
+			}
+			else
+			{
+				lump = sprframe->lump[0];
+				flip = (boolean)(sprframe->flip[0]);
+			}
 
-            visspritehead->zdistance = tz;
-            visspritehead->thing = thing;
-            visspritehead->lump = lump;
-            visspritehead->flip = flip;
-            visspritehead->next = NULL;
-            visspritehead->sector = sub->sector;
+			visspritehead->zdistance = tz;
+			visspritehead->thing = thing;
+			visspritehead->lump = lump;
+			visspritehead->flip = flip;
+			visspritehead->next = NULL;
+			visspritehead->sector = sub->sector;
 //dbgio_printf("r_phase1 1\n");
-            data = (byte *)W_CacheLumpNum(lump, PU_CACHE, dec_jag);
+			data = (byte *)W_CacheLumpNum(lump, PU_CACHE, dec_jag);
 
-            CurSub = sub;
-            if (tz < MAXZ)
-            {
-                if (thing->flags & (MF_CORPSE|MF_SHOOTABLE))
-                {
-                    x = (( SwapShort(((spriteN64_t*)data)->width) >> 1) * viewsin);
-                    y = (( SwapShort(((spriteN64_t*)data)->width) >> 1) * viewcos);
+			CurSub = sub;
+			if (tz < MAXZ)
+			{
+				if (thing->flags & (MF_CORPSE|MF_SHOOTABLE))
+				{
+					x = (( SwapShort(((spriteN64_t*)data)->width) >> 1) * viewsin);
+					y = (( SwapShort(((spriteN64_t*)data)->width) >> 1) * viewcos);
 
-                    pSub = R_PointInSubsector((thing->x - x), (thing->y + y));
-                    if ((pSub->drawindex) && (pSub->drawindex < sub->drawindex)) {
-                        CurSub = pSub;
-                    }
+					pSub = R_PointInSubsector((thing->x - x), (thing->y + y));
+					if ((pSub->drawindex) && (pSub->drawindex < sub->drawindex)) {
+						CurSub = pSub;
+					}
 
-                    pSub = R_PointInSubsector((thing->x + x), (thing->y - y));
-                    if ((pSub->drawindex) && (pSub->drawindex < CurSub->drawindex)) {
-                        CurSub = pSub;
-                    }
-                }
-            }
+					pSub = R_PointInSubsector((thing->x + x), (thing->y - y));
+					if ((pSub->drawindex) && (pSub->drawindex < CurSub->drawindex)) {
+						CurSub = pSub;
+					}
+				}
+			}
 
-            VisSrpCur = CurSub->vissprite;
-            VisSrpNew = NULL;
+			VisSrpCur = CurSub->vissprite;
+			VisSrpNew = NULL;
 
-            if (VisSrpCur)
-            {
-                VisSrpCurTmp = VisSrpCur;
-                while ((VisSrpCur = VisSrpCurTmp, tz < VisSrpCur->zdistance))
-                {
-                    VisSrpCur = VisSrpCurTmp->next;
-                    VisSrpNew = VisSrpCurTmp;
+			if (VisSrpCur)
+			{
+				VisSrpCurTmp = VisSrpCur;
+				while ((VisSrpCur = VisSrpCurTmp, tz < VisSrpCur->zdistance))
+				{
+					VisSrpCur = VisSrpCurTmp->next;
+					VisSrpNew = VisSrpCurTmp;
 
-                    if (VisSrpCur == NULL)
-                        break;
+					if (VisSrpCur == NULL)
+						break;
 
-                    VisSrpCurTmp = VisSrpCur;
-                }
-            }
+					VisSrpCurTmp = VisSrpCur;
+				}
+			}
 
-            if (VisSrpNew)
-                VisSrpNew->next = visspritehead;
-            else
-                CurSub->vissprite = visspritehead;
+			if (VisSrpNew)
+				VisSrpNew->next = visspritehead;
+			else
+				CurSub->vissprite = visspritehead;
 
-            visspritehead->next = VisSrpCur;
+			visspritehead->next = VisSrpCur;
 
-            numdrawvissprites++;
-            visspritehead++;
-        }
-    }
+			numdrawvissprites++;
+			visspritehead++;
+		}
+	}
 }
 
 void R_RenderBSPNodeNoClip(int bspnum) // 80024E64
@@ -633,46 +566,46 @@ void R_RenderBSPNodeNoClip(int bspnum) // 80024E64
 	fixed_t	     dx, dy;
 	fixed_t	     left, right;
 
-    while(!(bspnum & NF_SUBSECTOR))
-    {
-        bsp = &nodes[bspnum];
+	while(!(bspnum & NF_SUBSECTOR))
+	{
+		bsp = &nodes[bspnum];
 
-        // Decide which side the view point is on.
-        //side = R_PointOnSide(viewx, viewy, bsp);
-        dx = (viewx - bsp->line.x);
-        dy = (viewy - bsp->line.y);
+		// Decide which side the view point is on.
+		//side = R_PointOnSide(viewx, viewy, bsp);
+		dx = (viewx - bsp->line.x);
+		dy = (viewy - bsp->line.y);
 
-        left = (bsp->line.dy >> 16) * (dx >> 16);
-        right = (dy >> 16) * (bsp->line.dx >> 16);
+		left = (bsp->line.dy >> 16) * (dx >> 16);
+		right = (dy >> 16) * (bsp->line.dx >> 16);
 
-        if (right < left)
-            side = 1;		/* back side */
-        else
-            side = 0;		/* front side */
+		if (right < left)
+			side = 1;		/* back side */
+		else
+			side = 0;		/* front side */
 
-        R_RenderBSPNodeNoClip(bsp->children[side ^ 1]);
+		R_RenderBSPNodeNoClip(bsp->children[side ^ 1]);
 
-        bspnum = bsp->children[side];
-    }
+		bspnum = bsp->children[side];
+	}
 
-    // subsector with contents
-    // add all the drawable elements in the subsector
+	// subsector with contents
+	// add all the drawable elements in the subsector
 
-    numdrawsubsectors++;
+	numdrawsubsectors++;
 
-    sub = &subsectors[bspnum & ~NF_SUBSECTOR];
-    sub->drawindex = numdrawsubsectors;
+	sub = &subsectors[bspnum & ~NF_SUBSECTOR];
+	sub->drawindex = numdrawsubsectors;
 
-    *endsubsector = sub;//copy subsector
-    endsubsector++;
+	*endsubsector = sub;//copy subsector
+	endsubsector++;
 
-    frontsector = sub->sector;
+	frontsector = sub->sector;
 
-    line = &segs[sub->firstline];
-    count = sub->numlines;
-    do
-    {
-        line->flags |= 1;	/* Render each line */
-        ++line;				/* Inc the line pointer */
-    } while (--count);		/* All done? */
+	line = &segs[sub->firstline];
+	count = sub->numlines;
+	do
+	{
+		line->flags |= 1;	/* Render each line */
+		++line;				/* Inc the line pointer */
+	} while (--count);		/* All done? */
 }

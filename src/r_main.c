@@ -54,9 +54,6 @@ sector_t    *frontsector;	// 800A6340
 pvr_poly_cxt_t flash_cxt;
 pvr_poly_hdr_t flash_hdr;
 
-extern float inv255;
-extern float inv65535;
-
 /*
 ==============
 =
@@ -70,11 +67,8 @@ void R_Init(void) // 800233E0
 	R_InitData();
 
 	guFrustumF(R_ProjectionMatrix, -8.0f, 8.0f, -6.0f, 6.0f, 8.0f, 3808.0f, 1.0f);
-	//7616.0f, 1.0f);//
-	
-
 	guMtxIdentF(R_ModelMatrix);
-	
+
 	pvr_poly_cxt_col(&flash_cxt, PVR_LIST_TR_POLY);
 	flash_cxt.blend.src = PVR_BLEND_ONE;
 	flash_cxt.blend.dst = PVR_BLEND_ONE;
@@ -88,15 +82,15 @@ void R_Init(void) // 800233E0
 =
 ==============
 */
+static Matrix __attribute__((aligned(32))) RotX;
+static Matrix __attribute__((aligned(32))) RotY;
+static Matrix __attribute__((aligned(32))) Tran;
 
-void R_RenderPlayerView(void) // 80023448
+void R_RenderPlayerView(void)
 {
 	fixed_t pitch;
 	int fogfactor;
 	float fogmin,fogmax,fogposition;
-	Matrix __attribute__((aligned(32))) RotX;
-	Matrix __attribute__((aligned(32))) RotY;
-	Matrix __attribute__((aligned(32))) Tran;
 
 	viewplayer = &players[0];
 
@@ -130,15 +124,13 @@ void R_RenderPlayerView(void) // 80023448
 #if 0
 			gDPSetTextureFilter(GFX1++, G_TF_BILERP);
 #endif
-			
 		}
 		R_RenderSKY();
-		R_RenderFilter();
 	}
-	
+
 #define PVR_MIN_Z 0.0001f
 	 pvr_set_zclip(PVR_MIN_Z);
-	
+
 #if 0
 	gDPSetCycleType(GFX1++, G_CYC_2CYCLE);
 	gDPSetTextureLOD(GFX1++, G_TL_TILE);
@@ -173,24 +165,24 @@ void R_RenderPlayerView(void) // 80023448
 	fogmin = 5.0f / fogposition;
 	fogmax = 30.0f / fogposition;
 	pvr_fog_table_color(
-		1.0f, 
-		(float)UNPACK_R(FogColor)*inv255, 
-		(float)UNPACK_G(FogColor)*inv255, 
+		1.0f,
+		(float)UNPACK_R(FogColor)*inv255,
+		(float)UNPACK_G(FogColor)*inv255,
 		(float)UNPACK_B(FogColor)*inv255);
 	pvr_fog_table_linear(fogmin, fogmax);
 
 	DoomRotateX(RotX,
-				(float)finesine[pitch] * inv65535,
-				(float)finecosine[pitch] * inv65535);
+		(float)finesine[pitch] * inv65536,
+		(float)finecosine[pitch] * inv65536);
 
-	DoomRotateY(RotY, 
-				(float)finesine[viewangle >> ANGLETOFINESHIFT] * inv65535,
-				(float)finecosine[viewangle >> ANGLETOFINESHIFT] * inv65535);
+	DoomRotateY(RotY,
+		(float)finesine[viewangle >> ANGLETOFINESHIFT] * inv65536,
+		(float)finecosine[viewangle >> ANGLETOFINESHIFT] * inv65536);
 
 	DoomTranslate(Tran,
-					-((float)viewx * inv65535),
-					-((float)viewz * inv65535),
-					((float)viewy * inv65535));
+		-((float)viewx * inv65536),
+		-((float)viewz * inv65536),
+		(float)viewy * inv65536);
 
 	mat_load(&R_ProjectionMatrix);
 	mat_apply(&RotX);
@@ -213,7 +205,7 @@ void R_RenderPlayerView(void) // 80023448
 		pvr_vertex_t *vert = verts;
 		vert->flags = PVR_CMD_VERTEX;
 		vert->x = 0.0f;
-		vert->y = REAL_SCREEN_HT - 1;//479.0f;
+		vert->y = REAL_SCREEN_HT - 1;
 		vert->z = 5.0f;
 		vert->argb = color;
 		vert++;
@@ -240,7 +232,7 @@ void R_RenderPlayerView(void) // 80023448
 
 		pvr_list_prim(PVR_LIST_TR_POLY, &flash_hdr, sizeof(pvr_poly_hdr_t));
 		pvr_list_prim(PVR_LIST_TR_POLY, &verts, sizeof(verts));
-	}	
+	}
 }
 
 /*============================================================================= */
@@ -253,19 +245,18 @@ void R_RenderPlayerView(void) // 80023448
 = Returns side 0 (front) or 1 (back)
 ===============================================================================
 */
-int	R_PointOnSide(int x, int y, node_t *node) // 80023B6C
+int R_PointOnSide(int x, int y, node_t *node)
 {
 	fixed_t	dx, dy;
 	fixed_t	left, right;
 
-	if (!node->line.dx)
-	{
+	if (!node->line.dx) {
 		if (x <= node->line.x)
 			return (node->line.dy > 0);
 		return (node->line.dy < 0);
 	}
-	if (!node->line.dy)
-	{
+
+	if (!node->line.dy) {
 		if (y <= node->line.y)
 			return (node->line.dx < 0);
 		return (node->line.dx > 0);
@@ -278,8 +269,9 @@ int	R_PointOnSide(int x, int y, node_t *node) // 80023B6C
 	right = (dy >> 16) * (node->line.dx >> 16);
 
 	if (right < left)
-		return 0;		/* front side */
-	return 1;			/* back side */
+		return 0; /* front side */
+
+	return 1; /* back side */
 }
 
 /*

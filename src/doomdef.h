@@ -46,6 +46,10 @@
 
 #define RES_RATIO (REAL_SCREEN_WD / SCREEN_WD)
 
+extern const float inv64;
+extern const float inv255;
+extern const float inv1024;
+extern const float inv65536;
 
 short SwapShort(short dat);
 
@@ -72,15 +76,10 @@ static inline void perspdiv(d64Vertex_t *v)
 {
 	float invw = 1.0f / v->w;
 	float x = v->v.x * invw;
-#if REAL_SCREEN_WD == 640	
-	x = (1.0f + x) * 320.0f;//(REAL_SCREEN_WD / RES_RATIO);
+	x = (1.0f + x) * (float)(REAL_SCREEN_WD / 2);
 	float y = v->v.y * invw;
-	y = (1.0f - y) * 240.0f;//(REAL_SCREEN_HT / RES_RATIO);
-#else
-	x = (1.0f + x) * 160.0f;
-	float y = v->v.y * invw;
-	y = (1.0f - y) * 120.0f;
-#endif
+	y = (1.0f - y) * (float)(REAL_SCREEN_HT / 2);
+
 	v->v.x = x;
 	v->v.y = y;
 
@@ -148,10 +147,9 @@ int LightGetRGB(int h,int s,int v); // 8000248C
 /* s_sound.c */
 void init_all_sounds(void);
 
+/* p* */
 void P_RefreshBrightness(void);
 void P_RefreshVideo(void);
-
-void R_RenderFilter(void);
 
 typedef float   Matrix[4][4];
 
@@ -168,7 +166,7 @@ static inline void guMtxIdentF(Matrix mf)
 	}
 }
 
-static inline void guFrustumF(float mf[4][4], float l, float r, float b, float t, float n, float f, float scale) {
+static inline void guFrustumF(Matrix mf, float l, float r, float b, float t, float n, float f, float scale) {
 	int i, j;
 	guMtxIdentF(mf);
 	mf[0][0] = 2*n/(r-l);
@@ -187,14 +185,14 @@ static inline void guFrustumF(float mf[4][4], float l, float r, float b, float t
 	}
 }
 
-static inline void DoomTranslate(float mf[4][4], float x, float y, float z) {
+static inline void DoomTranslate(Matrix mf, float x, float y, float z) {
 	guMtxIdentF(mf);
 	mf[3][0] = x;
 	mf[3][1] = y;
 	mf[3][2] = z;
 }
 
-static inline void DoomRotateX(float mf[4][4], float in_sin, float in_cos) {
+static inline void DoomRotateX(Matrix mf, float in_sin, float in_cos) {
 	guMtxIdentF(mf);
 	mf[1][1] = in_cos;
 	mf[1][2] = -in_sin;
@@ -202,7 +200,7 @@ static inline void DoomRotateX(float mf[4][4], float in_sin, float in_cos) {
 	mf[2][2] = in_cos;
 }
 
-static inline void DoomRotateY(float mf[4][4], float in_sin, float in_cos) {
+static inline void DoomRotateY(Matrix mf, float in_sin, float in_cos) {
 	guMtxIdentF(mf);
 	mf[0][0] = in_sin;
 	mf[0][2] = -in_cos;
@@ -210,7 +208,7 @@ static inline void DoomRotateY(float mf[4][4], float in_sin, float in_cos) {
 	mf[2][2] = in_sin;
 }
 
-static inline void DoomRotateZ(float mf[4][4], float in_sin, float in_cos) {
+static inline void DoomRotateZ(Matrix mf, float in_sin, float in_cos) {
 	guMtxIdentF(mf);
 	mf[0][0] = in_cos;
 	mf[0][1] = -in_sin;

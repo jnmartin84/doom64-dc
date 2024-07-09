@@ -208,11 +208,8 @@ int P_Ticker (void)//80021A00
 =============
 */
 
-//extern Mtx R_ProjectionMatrix;  // 800A68B8
-//extern Mtx R_ModelMatrix;       // 8005b0C8
 extern Matrix __attribute__((aligned(32))) R_ProjectionMatrix;
 extern Matrix __attribute__((aligned(32))) R_ModelMatrix;
-
 
 void P_Drawer (void) // 80021AC8
 {

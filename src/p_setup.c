@@ -120,10 +120,10 @@ void P_LoadSegs (void) // 8001D020
 		if (ldef->v1 == li->v1)
 			ldef->fineangle = li->angle >> ANGLETOFINESHIFT;
 
-        x = (float) ((double) (li->v2->x - li->v1->x) / 65535.0);
-        y = (float) ((double) (li->v2->y - li->v1->y) / 65535.0);
+		x = (float)((li->v2->x - li->v1->x) * inv65536);
+		y = (float)((li->v2->y - li->v1->y) * inv65536);
 
-        li->length = (short)((int)((double)fsqrt((x * x) + (y * y)) * 16.0));
+		li->length = ((short)(sqrtf((x * x) + (y * y)) * 16.0f));
 	}
 }
 

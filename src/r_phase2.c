@@ -294,9 +294,6 @@ d64Vertex_t SkyFireVertex[4] = // 8005B210
 extern d64Vertex_t *dVTX[4];
 extern d64Triangle_t dT1, dT2;
 
-extern float inv255;
-extern float inv65535;
-
 void R_RenderClouds(void) // 80025878
 {
 	float pos = (TRUEANGLES(viewangle) / 360.0f) * 2.0f;
@@ -309,10 +306,10 @@ void R_RenderClouds(void) // 80025878
 		CloudOffsetY += (finesine[viewangle >> ANGLETOFINESHIFT] >> 9);
 	}
 
-	u0 = ((float)CloudOffsetX * inv65535) - pos;
-	u1 = (((float)CloudOffsetX * inv65535) + 1.5f) - pos;
-	v0 = ((float)CloudOffsetY * inv65535);
-	v1 = ((float)CloudOffsetY * inv65535) + 2.0f;
+	u0 = ((float)CloudOffsetX * inv65536) - pos;
+	u1 = (((float)CloudOffsetX * inv65536) + 1.5f) - pos;
+	v0 = ((float)CloudOffsetY * inv65536);
+	v1 = ((float)CloudOffsetY * inv65536) + 2.0f;
 
 // this is some kind of blend color
 #if 0

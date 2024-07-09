@@ -879,8 +879,6 @@ void F_Drawer(void) // 800039DC
 	I_DrawFrame();
 }
 
-extern uint32_t lighted_color(uint32_t c, float lc);
-
 extern float *all_u;
 extern float *all_v;
 extern pvr_poly_hdr_t **headers_for_sprites;

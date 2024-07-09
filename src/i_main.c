@@ -247,8 +247,6 @@ void I_ClearFrame(void) // 8000637C
 {
 	NextFrameIdx += 1;
 
-	R_RenderFilter();
-
 	globallump = -1;
 	globalcm = 0;
 }
