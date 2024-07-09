@@ -90,8 +90,6 @@ You now have all of the updated files required to run Doom 64 for Dreamcast in t
 
 Go to the repo directory and compile it like any other KallistiOS project. Make sure you source your KOS environment first.
 
-For the best performing build possible, modify `KOS_CFLAGS` in your `environ.sh`, changing `-O2` to `-O3 -flto=auto`.
-
 To build the source into an ELF file, run `make`.
 
     source /opt/toolchains/dc/kos/environ.sh
