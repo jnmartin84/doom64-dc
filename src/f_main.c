@@ -897,6 +897,13 @@ static inline uint32_t np2(uint32_t v) {
 void BufferedDrawSprite(int type, state_t *state, int rotframe, int color, int xpos, int ypos) // 80003D1C
 {
 	static pvr_ptr_t pvranysprite = 0;
+	pvr_poly_cxt_t cxtanysprite;
+	pvr_poly_hdr_t hdranysprite;
+	float xl;
+	float xh;
+	float u0,v0,u1,v1;
+	int wp2;
+	int hp2;
 	spritedef_t     *sprdef;
 	spriteframe_t   *sprframe;
 	int			    lump;
@@ -910,17 +917,11 @@ void BufferedDrawSprite(int type, state_t *state, int rotframe, int color, int x
 	int xoffs;
 	int yoffs;
 
-	uint8_t cr;//,cg,cb,ca;
-	cr = (color >> 24) & 0xff;
-//	cg = (color >> 16) & 0xff;
-//	cb = (color >> 8) & 0xff;
-//	ca = (color) & 0xff;
-
 	pvr_vertex_t __attribute__((aligned(32))) verts[4];
 	for (int vn = 0; vn < 4; vn++) {
 		verts[vn].z = 5.0f;
-		verts[vn].argb = PVR_PACK_COLOR((float)cr/255.0f,1.0f,1.0f,1.0f);
-		verts[vn].oargb = PVR_PACK_COLOR(1.0,0.0,0.0,0.0);
+		verts[vn].argb = (color & 0xff000000) | 0x00ffffff; // D64_PVR_PACK_COLOR(cr,255,255,255);
+		verts[vn].oargb = 0xff000000; // PVR_PACK_COLOR(1.0, 0.0, 0.0, 0.0);
 		verts[vn].flags = PVR_CMD_VERTEX;
 	}
 	verts[3].flags = PVR_CMD_VERTEX_EOL;
@@ -931,23 +932,6 @@ void BufferedDrawSprite(int type, state_t *state, int rotframe, int color, int x
 	lump = sprframe->lump[rotframe];
 	flip = (boolean)sprframe->flip[rotframe];
 
-	//gDPPipeSync(GFX1++);
-	//gDPSetCycleType(GFX1++, G_CYC_1CYCLE);
-	//gDPSetTexturePersp(GFX1++, G_TP_NONE);
-	//gDPSetTextureLUT(GFX1++, G_TT_RGBA16);
-	//gDPSetAlphaCompare(GFX1++, G_AC_THRESHOLD);
-	//gDPSetBlendColor(GFX1++, 0, 0, 0, 0);
-	//gDPSetCombineMode(GFX1++, G_CC_D64COMB04, G_CC_D64COMB04);
-
-	//gDPSetPrimColorD64(GFX1++, 0, 0, color);
-
-	//if ((color & 255) < 255) {
-		//gDPSetRenderMode(GFX1++, G_RM_XLU_SURF_CLAMP, G_RM_XLU_SURF2_CLAMP);
-	//}
-	//else {
-		//gDPSetRenderMode(GFX1++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
-	//}
-
 	data = W_CacheLumpNum(lump, PU_CACHE, dec_jag);
 
 	compressed = SwapShort(((spriteN64_t*)data)->compressed);
@@ -955,6 +939,9 @@ void BufferedDrawSprite(int type, state_t *state, int rotframe, int color, int x
 	height = SwapShort(((spriteN64_t*)data)->height);
 	xoffs = SwapShort(((spriteN64_t*)data)->xoffs);
 	yoffs = SwapShort(((spriteN64_t*)data)->yoffs);
+
+	wp2 = np2(width);
+	hp2 = np2(height);
 
 	int external_pal = 0;
 	if (compressed < 0) {
@@ -964,13 +951,6 @@ void BufferedDrawSprite(int type, state_t *state, int rotframe, int color, int x
 		}
 	}
 
-	pvr_poly_cxt_t cxtanysprite;
-	pvr_poly_hdr_t hdranysprite;
-	float xl;
-	float xh;
-	float u0,v0,u1,v1;
-	int wp2 = np2(width);
-	int hp2 = np2(height);
 
 	if (pvranysprite) {
 		pvr_mem_free(pvranysprite);
@@ -979,10 +959,8 @@ void BufferedDrawSprite(int type, state_t *state, int rotframe, int color, int x
 
 	pvranysprite = pvr_mem_malloc(wp2*hp2);
 
-	pvr_poly_cxt_txr(&cxtanysprite, PVR_LIST_TR_POLY, PVR_TXRFMT_PAL8BPP | PVR_TXRFMT_8BPP_PAL(0) | PVR_TXRFMT_TWIDDLED, wp2, hp2, pvranysprite, PVR_FILTER_BILINEAR);
-	if (VideoFilter) {
-		cxtanysprite.txr.filter = PVR_FILTER_NONE;
-	}
+	// Don't filter these sprites.
+	pvr_poly_cxt_txr(&cxtanysprite, PVR_LIST_TR_POLY, PVR_TXRFMT_PAL8BPP | PVR_TXRFMT_8BPP_PAL(0) | PVR_TXRFMT_TWIDDLED, wp2, hp2, pvranysprite, PVR_FILTER_NONE);
 	pvr_poly_compile(&hdranysprite, &cxtanysprite);
 	void *src = data + sizeof(spriteN64_t);
 
@@ -1020,16 +998,16 @@ void BufferedDrawSprite(int type, state_t *state, int rotframe, int color, int x
 	if (!flip) {
 		xl = (float)(xpos - xoffs) * (float)RES_RATIO;
 		xh = xl + ((float)width * (float)RES_RATIO);
-		u0 = (1.0f / (float)wp2);
-		u1 = ((float)width / (float)wp2) - (1.0f / (float)wp2);
+		u0 = 0.0f;
+		u1 = (float)width / (float)wp2;
 	} else {
 		xh = (float)(xpos + xoffs) * (float)RES_RATIO;
 		xl = xh - ((float)width * (float)RES_RATIO);
-		u1 = (1.0f / (float)wp2);
-		u0 = ((float)width / (float)wp2) - (1.0f / (float)wp2);
+		u1 = 0.0f;
+		u0 = (float)width / (float)wp2;
 	}
-	v0 = (1.0f / (float)hp2);
-	v1 = ((float)height / (float)hp2) - (1.0f / (float)hp2);
+	v0 = 0.0f;
+	v1 = (float)height / (float)hp2;
 
 	float yl = (float)(ypos - yoffs) * (float)RES_RATIO;
 	float yh = yl + ((float)height * (float)RES_RATIO);
