@@ -83,5 +83,7 @@ void P_StartButton(line_t *line,bwhere_e w,int texture,int time) // 80021608
 		}
     }
 
-	//I_Error("P_StartButton: no button slots left!");
+#if RANGECHECK
+	I_Error("P_StartButton: no button slots left!");
+#endif
 }

@@ -128,10 +128,12 @@ mobj_t *P_SpawnMapThing (mapthing_t *mthing) // 80018C24
 			break;
 	}
 
+#if RANGECHECK
 	if (i==NUMMOBJTYPES)
 	{
 		I_Error ("P_SpawnMapThing: Unknown type %d at (%d, %d)",mthing->type , mthing->x, mthing->y);
 	}
+#endif
 
 	//
 	// [d64] check if spawn is valid

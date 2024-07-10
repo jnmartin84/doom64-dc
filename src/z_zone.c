@@ -24,10 +24,10 @@ extern u32 NextFrameIdx;
 
 memzone_t	*mainzone;
 
-//extern u64 mem_heap[MEM_HEAP_SIZE / sizeof(u64)]; // 800BA2F0
 void *mem_heap;
-// from old merciless edition
-#define MEM_HEAP_SIZE 0x400020 //((5*1024*1024)+32)
+
+#define MEM_HEAP_SIZE 0x500020 
+
 /*
 ========================
 =

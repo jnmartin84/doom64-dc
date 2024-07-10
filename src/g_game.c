@@ -345,19 +345,15 @@ void G_InitSkill (skill_t skill) // [Immorpher] initialize skill
 
 void G_RunGame (void) // 80004794
 {
-
-	while (1)
-	{
+	while (1) {
         /* load a level */
         G_DoLoadLevel ();
-#if 1		
+
 		if(runintroduction && StoryText == true) { // [Immorpher] run introduction text screen
 			MiniLoop(F_StartIntermission, F_StopIntermission, F_TickerIntermission, F_DrawerIntermission);
 			runintroduction = false; // [Immorpher] only run it once!
 		}
-#endif			
-        //printf("RUN P_Start\n");
-        //PRINTF_D2(WHITE, 0, 28, "RUN P_Start\n");
+
 		/* run a level until death or completion */
 		MiniLoop (P_Start, P_Stop, P_Ticker, P_Drawer);
 
@@ -380,8 +376,7 @@ void G_RunGame (void) // 80004794
            ((gamemap ==  4) && (nextmap == 29)) ||
            ((gamemap == 12) && (nextmap == 30)) ||
            ((gamemap == 18) && (nextmap == 31)) ||
-           ((gamemap ==  1) && (nextmap == 32)) && StoryText == true)
-        {
+           ((gamemap ==  1) && (nextmap == 32)) && StoryText == true) {
             /* run the intermission if needed */
             MiniLoop(F_StartIntermission, F_StopIntermission, F_TickerIntermission, F_DrawerIntermission);
 
@@ -393,11 +388,8 @@ void G_RunGame (void) // 80004794
 
             if (gameaction == ga_exitdemo)
                 return;
-        }
-        else
-        {
-            if (nextmap >= LASTLEVEL)
-            {
+        } else {
+            if (nextmap >= LASTLEVEL) {
                 /* run the finale if needed */
                 MiniLoop(F_Start, F_Stop, F_Ticker, F_Drawer);
 

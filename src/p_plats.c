@@ -278,7 +278,9 @@ void P_AddActivePlat(plat_t *plat) // 8001AFF8
 			return;
 		}
     }
+#if RANGECHECK
 	I_Error ("P_AddActivePlat: no more plats!");
+#endif
 }
 
 void P_RemoveActivePlat(plat_t *plat) // 8001B050
@@ -294,5 +296,7 @@ void P_RemoveActivePlat(plat_t *plat) // 8001B050
 			return;
 		}
     }
+#if RANGECHECK
 	I_Error ("P_RemoveActivePlat: can't find plat!");
+#endif
 }

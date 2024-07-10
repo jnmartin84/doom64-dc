@@ -490,7 +490,9 @@ int	W_GetNumForName (char *name) // 8002C1B8
 	if (i != -1)
 		return i;
 
+#if RANGECHECK
 	I_Error ("W_GetNumForName: %s not found!",name);
+#endif
 	return -1;
 }
 
@@ -507,9 +509,10 @@ int	W_GetNumForName (char *name) // 8002C1B8
 
 int W_LumpLength (int lump) // 8002C204
 {
+#if RANGECHECK
     if ((lump < 0) || (lump >= numlumps))
 		I_Error ("W_LumpLength: lump %i out of range",lump);
-
+#endif
 	return lumpinfo[lump].size;
 }
 
@@ -531,10 +534,10 @@ void W_ReadLump (int lump, void *dest, decodetype dectype) // 8002C260
 {
 	lumpinfo_t *l;
 	int lumpsize;
-
+#if RANGECHECK
 	if ((lump < 0) || (lump >= numlumps))
 		I_Error ("W_ReadLump: lump %i out of range",lump);
-
+#endif
 	l = &lumpinfo[lump];
 	if(dectype != dec_none)
 	{
@@ -571,10 +574,10 @@ void *W_CacheLumpNum (int lump, int tag, decodetype dectype) // 8002C430
 {
 	int lumpsize;
 	lumpcache_t *lc;
-
+#if RANGECHECK
 	if ((lump < 0) || (lump >= numlumps))
 		I_Error ("W_CacheLumpNum: lump %i out of range",lump);
-
+#endif
 	lc = &lumpcache[lump];
 
 	if (!lc->cache)
@@ -686,7 +689,9 @@ int	W_S2_GetNumForName (char *name) // 8002C1B8
 	if (i != -1)
 		return i;
 
+#if RANGECHECK
 	I_Error ("W_S2_GetNumForName: %s not found!",name);
+#endif
 	return -1;
 }
 
@@ -703,9 +708,10 @@ int	W_S2_GetNumForName (char *name) // 8002C1B8
 
 int W_S2_LumpLength (int lump) // 8002C204
 {
+#if RANGECHECK
     if ((lump < 0) || (lump >= s2_numlumps))
 		I_Error ("W_S2_LumpLength: lump %i out of range",lump);
-
+#endif
 	return s2_lumpinfo[lump].size;
 }
 
@@ -723,10 +729,10 @@ void W_S2_ReadLump (int lump, void *dest, decodetype dectype) // 8002C260
 {
 	lumpinfo_t *l;
 	int lumpsize;
-
+#if RANGECHECK
 	if ((lump < 0) || (lump >= s2_numlumps))
 		I_Error ("W_S2_ReadLump: lump %i out of range",lump);
-
+#endif
 	l = &s2_lumpinfo[lump];
 	if(dectype != dec_none)
 	{
@@ -763,10 +769,10 @@ void *W_S2_CacheLumpNum (int lump, int tag, decodetype dectype) // 8002C430
 {
 	int lumpsize;
 	lumpcache_t *lc;
-
+#if RANGECHECK
 	if ((lump < 0) || (lump >= s2_numlumps))
 		I_Error ("W_S2_CacheLumpNum: lump %i out of range",lump);
-
+#endif
 	lc = &s2_lumpcache[lump];
 
 	if (!lc->cache)
@@ -872,9 +878,10 @@ void W_FreeMapLump(void) // 8002C748
 
 int W_MapLumpLength(int lump) // 8002C77C
 {
+#if RANGECHECK
 	if (lump >= mapnumlumps)
 		I_Error("W_MapLumpLength: %i out of range", lump);
-
+#endif
 	return maplump[lump].size;
 }
 
@@ -936,8 +943,9 @@ int W_MapGetNumForName(char *name) // 8002C7D0
 
 void  *W_GetMapLump(int lump) // 8002C890
 {
+#if RANGECHECK
 	if (lump >= mapnumlumps)
 		I_Error("W_GetMapLump: lump %d out of range", lump);
-
+#endif
     return (void *) ((byte *)mapfileptr + maplump[lump].filepos);
 }

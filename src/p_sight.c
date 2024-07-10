@@ -256,10 +256,11 @@ boolean PS_CrossBSPNode(int bspnum) // 8001F15C
 
 	if (bspnum & NF_SUBSECTOR) {
 		bsp_num = (bspnum & ~NF_SUBSECTOR);
+#if RANGECHECK
 		if (bsp_num >= numsubsectors) {
 			I_Error("PS_CrossSubsector: ss %i with numss = %i", bsp_num, numsubsectors);
 		}
-
+#endif
 		return PS_CrossSubsector(&subsectors[bsp_num]);
 	}
 

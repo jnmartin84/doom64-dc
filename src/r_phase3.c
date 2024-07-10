@@ -1597,8 +1597,8 @@ bail_evict:
 //					dbgio_printf("could not cache lump %d\n", lumpoff);
 //				} else {
 				if (!nosprite) {
-					// vram_low gets set if the sprite will use more than 1/4 of the available VRAM
-					if (((wp2*hp2) * 4) > pvr_mem_available()) {
+					// vram_low gets set if the sprite will use more than the available VRAM
+					if ((wp2*hp2) > pvr_mem_available()) {
 						nosprite = 1;
 						lump_frame[lumpoff] = -1;
 						used_lumps[lumpoff] = -1;

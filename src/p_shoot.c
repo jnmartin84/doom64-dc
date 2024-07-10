@@ -893,11 +893,12 @@ boolean PA_CrossBSPNode(int bspnum)//L80024CAC()
     if (bspnum & NF_SUBSECTOR)
     {
         bsp_num = (bspnum & ~NF_SUBSECTOR);
+#if RANGECHECK
         if (bsp_num >= numsubsectors)
         {
             I_Error("PA_CrossSubsector: ss %i with numss = %i", bsp_num, numsubsectors);
         }
-
+#endif
         return PA_CrossSubsector(&subsectors[bsp_num]);
     }
 

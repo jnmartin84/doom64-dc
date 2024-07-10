@@ -214,8 +214,10 @@ void P_NewChaseDir (mobj_t *actor) // 80010ED0
 	dirtype_t	d[3];
 	dirtype_t	tdir, olddir, turnaround;
 
+#if RANGECHECK
 	if (!actor->target)
 		I_Error ("P_NewChaseDir: called with no target");
+#endif
 
 	olddir = actor->movedir;
 	turnaround=opposite[olddir];
