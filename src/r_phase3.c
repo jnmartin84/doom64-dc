@@ -174,8 +174,6 @@ void clip_triangle(d64Triangle_t *triangle, pvr_poly_hdr_t *hdr, int lightlevel,
 		triangle->dVerts[2].v.oargb = lighted_color(triangle->dVerts[2].v.argb, lightlevel);
 	}
 
-	pvr_list_prim(list, hdr, sizeof(pvr_poly_hdr_t));
-
 	switch (vm) {
 	/* all verts visible */
 	case 7: {
@@ -183,6 +181,7 @@ void clip_triangle(d64Triangle_t *triangle, pvr_poly_hdr_t *hdr, int lightlevel,
 		perspdiv(&triangle->dVerts[1]);
 		perspdiv(&triangle->dVerts[2]);
 
+		pvr_list_prim(list, hdr, sizeof(pvr_poly_hdr_t));
 		pvr_list_prim(list, &triangle->dVerts[0].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->dVerts[1].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->dVerts[2].v, sizeof(pvr_vertex_t));
@@ -200,6 +199,7 @@ void clip_triangle(d64Triangle_t *triangle, pvr_poly_hdr_t *hdr, int lightlevel,
 		perspdiv(&triangle->spare[0]);
 		perspdiv(&triangle->spare[1]);
 		
+		pvr_list_prim(list, hdr, sizeof(pvr_poly_hdr_t));
 		pvr_list_prim(list, &triangle->dVerts[0].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->spare[0].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->spare[1].v, sizeof(pvr_vertex_t));
@@ -217,6 +217,7 @@ void clip_triangle(d64Triangle_t *triangle, pvr_poly_hdr_t *hdr, int lightlevel,
 		triangle->spare[0].v.flags = PVR_CMD_VERTEX;
 		triangle->spare[1].v.flags = PVR_CMD_VERTEX_EOL;
 
+		pvr_list_prim(list, hdr, sizeof(pvr_poly_hdr_t));
 		pvr_list_prim(list, &triangle->spare[0].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->dVerts[1].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->spare[1].v, sizeof(pvr_vertex_t));
@@ -234,6 +235,7 @@ void clip_triangle(d64Triangle_t *triangle, pvr_poly_hdr_t *hdr, int lightlevel,
 		triangle->spare[0].v.flags = PVR_CMD_VERTEX;
 		triangle->spare[1].v.flags = PVR_CMD_VERTEX;
 
+		pvr_list_prim(list, hdr, sizeof(pvr_poly_hdr_t));
 		pvr_list_prim(list, &triangle->spare[0].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->spare[1].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->dVerts[2].v, sizeof(pvr_vertex_t));
@@ -255,6 +257,7 @@ void clip_triangle(d64Triangle_t *triangle, pvr_poly_hdr_t *hdr, int lightlevel,
 		triangle->spare[0].v.flags = PVR_CMD_VERTEX_EOL;
 		triangle->spare[1].v.flags = PVR_CMD_VERTEX;
 
+		pvr_list_prim(list, hdr, sizeof(pvr_poly_hdr_t));
 		pvr_list_prim(list, &triangle->dVerts[0].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->dVerts[1].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->spare[0].v, sizeof(pvr_vertex_t));
@@ -279,6 +282,7 @@ void clip_triangle(d64Triangle_t *triangle, pvr_poly_hdr_t *hdr, int lightlevel,
 		triangle->spare[0].v.flags = PVR_CMD_VERTEX;
 		triangle->spare[1].v.flags = PVR_CMD_VERTEX;
 
+		pvr_list_prim(list, hdr, sizeof(pvr_poly_hdr_t));
 		pvr_list_prim(list, &triangle->dVerts[0].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->spare[0].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->dVerts[2].v, sizeof(pvr_vertex_t));
@@ -306,6 +310,7 @@ void clip_triangle(d64Triangle_t *triangle, pvr_poly_hdr_t *hdr, int lightlevel,
 		triangle->spare[0].v.flags = PVR_CMD_VERTEX;
 		triangle->spare[1].v.flags = PVR_CMD_VERTEX_EOL;
 
+		pvr_list_prim(list, hdr, sizeof(pvr_poly_hdr_t));
 		pvr_list_prim(list, &triangle->spare[0].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->dVerts[1].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->spare[1].v, sizeof(pvr_vertex_t));
