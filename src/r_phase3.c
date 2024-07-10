@@ -6,7 +6,6 @@
 #include <dc/pvr.h>
 #include <math.h>
 
-#define SUBMIT_VERT_ARRAY 0
 extern int brightness;
 extern short SwapShort(short dat);
 extern int VideoFilter;
@@ -21,6 +20,10 @@ extern float *all_v;
 extern float *all_u2;
 extern float *all_v2;
 
+extern pvr_ptr_t *tex_txr_ptr;
+extern uint8_t *pt;
+extern int firsttex;
+
 pvr_vertex_t __attribute__ ((aligned(32))) quad2[4];
 
 pvr_poly_hdr_t hdr;
@@ -33,7 +36,6 @@ d64Triangle_t dT1, dT2;
 
 const float inv64 = 1.0f / 64.0f;
 const float inv255 = 1.0f / 255.0f;
-const float inv511 = 1.0f / 511.0f;
 const float inv1024 = 1.0f / 1024.0f;
 const float halfinv1024 = 0.5f / 1024.0f;
 const float inv65536 = 1.0f / 65536.0f;
@@ -95,7 +97,6 @@ void clip_edge(d64Vertex_t *v1, d64Vertex_t *v2, d64Vertex_t *out)
 	const float t = (fabs(d0) * frsqrt((d1-d0)*(d1-d0))) + 0.000001f;
 	const float invt = 1.0f - t;
 
-	// I wish there was a field in pvr_vertex_t I could overload for this
 	out->w   = invt * v1->w   + t * v2->w;
 
 	out->v.x = invt * v1->v.x + t * v2->v.x;
@@ -108,63 +109,18 @@ void clip_edge(d64Vertex_t *v1, d64Vertex_t *v2, d64Vertex_t *out)
 	blend_color(t, v1->v.oargb, v2->v.oargb, &(out->v.oargb));
 }
 
-uint32_t lighted_color(uint32_t c, int ll) //float lc)
+uint32_t lighted_color(uint32_t c, int ll)
 {
-// why I switched from fp lights to integer lights
-//
-// ============================================================================
-//
-// floating point lighting
-// =======================
-//#define PVR_PACK_COLOR(a, r, g, b) ( \
-//                                     ( ((uint8)( a * 255 ) ) << 24 ) | \
-//                                     ( ((uint8)( r * 255 ) ) << 16 ) | \
-//                                     ( ((uint8)( g * 255 ) ) << 8 ) | \
-//
-// 4 * (1 bitshift, 1 and, 1 int->fp conv, 1 fp mult per r,g,bcomponent)
-// + 3 fp adds, 9 fp mult, 3 fp->int conv, 3 bitshifts, 3 ors per color
-//
-// 7 bitsifts, 4 ands, 4 int->fp conv, 13 fp mult, 3 fp adds, 3 fp->int conv, 3 ors 
-//	float r = (float)UNPACK_R(c) * inv255;
-//	float g = (float)UNPACK_G(c) * inv255;
-//	float b = (float)UNPACK_B(c) * inv255;
-//	float a = (float)UNPACK_A(c) * inv255;
-//	return PVR_PACK_COLOR(a, (0.5 + (r*0.5))*lc, (0.5 + (g*0.5))*lc, (0.5 + (b*0.5))*lc);
-//
-// same as above but 10 fp mult instead of 13
-//	float r = (0.5f + ((float)UNPACK_R(c) * inv511))*lc;
-//	float g = (0.5f + ((float)UNPACK_G(c) * inv511))*lc;
-//	float b = (0.5f + ((float)UNPACK_B(c) * inv511))*lc;
-//	float a = (0.5f + ((float)UNPACK_A(c) * inv511));
-//	return PVR_PACK_COLOR(a, r, g, b);
-//
-// ============================================================================
-//
-// integer lighting
-// ================
-//#define UNPACK_R(color) ((color >> 24) & 0xff)
-//#define UNPACK_G(color) ((color >> 16) & 0xff)
-//#define UNPACK_B(color) ((color >> 8) & 0xff)
-//#define UNPACK_A(color) (color & 0xff)
-//#define D64_PVR_PACK_COLOR(a,r,g,b) ((a << 24) | (r << 16) | (g << 8) | b)
-// 
-// 3 * (3 bitshifts, 1 add, 1 and, 1 multiply per r,g,b component)
-// + 1 bitshift, 1 and per a component
-// + 3 shifts, 3 ors per color
-// 13 bitshifts, 3 adds, 4 ands, 3 multiplies, 3 ors 
-	uint8_t r = ((128 + ((uint8_t)UNPACK_R(c) >> 1))*(uint8_t)ll) >> 8;
-	uint8_t g = ((128 + ((uint8_t)UNPACK_G(c) >> 1))*(uint8_t)ll) >> 8;
-	uint8_t b = ((128 + ((uint8_t)UNPACK_B(c) >> 1))*(uint8_t)ll) >> 8;
+	uint8_t r = (uint8_t)(((int)(256 + ((int)UNPACK_R(c)))*(int)ll) >> 9);
+	uint8_t g = (uint8_t)(((int)(256 + ((int)UNPACK_G(c)))*(int)ll) >> 9);
+	uint8_t b = (uint8_t)(((int)(256 + ((int)UNPACK_B(c)))*(int)ll) >> 9);
 	uint8_t a = UNPACK_A(c);
 	return D64_PVR_PACK_COLOR(a,r,g,b);
 }
 
-pvr_vertex_t __attribute__((aligned(32))) cq_stverts[8];
-
+// this is special-cased for all of the quads that do not require near-z clipping and will happily submit with 4 unmodified verts
 void clip_quad(d64Triangle_t *triangle, d64Triangle_t *triangle2, pvr_poly_hdr_t *hdr, int lightlevel, pvr_list_t list, int specd) {
 	int vm = vismask2(triangle, triangle2);
-
-//	float lightc = (float)lightlevel * inv255;
 
 	if (!vm) {
 		return;
@@ -172,10 +128,6 @@ void clip_quad(d64Triangle_t *triangle, d64Triangle_t *triangle2, pvr_poly_hdr_t
 		
 	if (vm == 15) {
 		if (!specd) {
-/*			triangle->dVerts[0].v.oargb = lighted_color(triangle->dVerts[0].v.argb, lightc);
-			triangle->dVerts[1].v.oargb = lighted_color(triangle->dVerts[1].v.argb, lightc);
-			triangle->dVerts[2].v.oargb = lighted_color(triangle->dVerts[2].v.argb, lightc);
-			triangle2->dVerts[2].v.oargb = lighted_color(triangle2->dVerts[2].v.argb, lightc);*/
 			triangle->dVerts[0].v.oargb = lighted_color(triangle->dVerts[0].v.argb, lightlevel);
 			triangle->dVerts[1].v.oargb = lighted_color(triangle->dVerts[1].v.argb, lightlevel);
 			triangle->dVerts[2].v.oargb = lighted_color(triangle->dVerts[2].v.argb, lightlevel);
@@ -192,33 +144,21 @@ void clip_quad(d64Triangle_t *triangle, d64Triangle_t *triangle2, pvr_poly_hdr_t
 		perspdiv(&triangle->dVerts[2]);
 		perspdiv(&triangle2->dVerts[2]);
 
-#if SUBMIT_VERT_ARRAY
-		memcpy(&cq_stverts[2], &triangle->dVerts[0].v, sizeof(pvr_vertex_t));
-		memcpy(&cq_stverts[0], &triangle->dVerts[1].v, sizeof(pvr_vertex_t));
-		memcpy(&cq_stverts[1], &triangle->dVerts[2].v, sizeof(pvr_vertex_t));
-		memcpy(&cq_stverts[3], &triangle2->dVerts[2].v, sizeof(pvr_vertex_t));
+		pvr_list_prim(list, hdr, sizeof(pvr_poly_hdr_t));
 
-		pvr_list_prim(list, hdr, sizeof(pvr_poly_hdr_t));
-		pvr_list_prim(list, cq_stverts, sizeof(pvr_vertex_t) * 4);
-#else
-		pvr_list_prim(list, hdr, sizeof(pvr_poly_hdr_t));
 		pvr_list_prim(list, &triangle->dVerts[1].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->dVerts[2].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->dVerts[0].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle2->dVerts[2].v, sizeof(pvr_vertex_t));
-#endif
 	} else {
+		// this is for every quad with at least one vert that needs clipping
 		clip_triangle(triangle, hdr, lightlevel, list, specd);
 		clip_triangle(triangle2, hdr, lightlevel, list, specd);
 	}
 }
 
 void clip_triangle(d64Triangle_t *triangle, pvr_poly_hdr_t *hdr, int lightlevel, pvr_list_t list, int specd) {
-#if SUBMIT_VERT_ARRAY
-	pvr_vertex_t __attribute__((aligned(32))) stverts[6];
-#endif
 	int vm = vismask(triangle);
-//	float lightc = (float)lightlevel * inv255;
 
 	if (!vm) {
 		return;
@@ -229,13 +169,12 @@ void clip_triangle(d64Triangle_t *triangle, pvr_poly_hdr_t *hdr, int lightlevel,
 	triangle->dVerts[2].v.flags = PVR_CMD_VERTEX_EOL;
 
 	if (!specd) {
-/*		triangle->dVerts[0].v.oargb = lighted_color(triangle->dVerts[0].v.argb, lightc);
-		triangle->dVerts[1].v.oargb = lighted_color(triangle->dVerts[1].v.argb, lightc);
-		triangle->dVerts[2].v.oargb = lighted_color(triangle->dVerts[2].v.argb, lightc);*/
 		triangle->dVerts[0].v.oargb = lighted_color(triangle->dVerts[0].v.argb, lightlevel);
 		triangle->dVerts[1].v.oargb = lighted_color(triangle->dVerts[1].v.argb, lightlevel);
 		triangle->dVerts[2].v.oargb = lighted_color(triangle->dVerts[2].v.argb, lightlevel);
 	}
+
+	pvr_list_prim(list, hdr, sizeof(pvr_poly_hdr_t));
 
 	switch (vm) {
 	/* all verts visible */
@@ -244,19 +183,9 @@ void clip_triangle(d64Triangle_t *triangle, pvr_poly_hdr_t *hdr, int lightlevel,
 		perspdiv(&triangle->dVerts[1]);
 		perspdiv(&triangle->dVerts[2]);
 
-#if SUBMIT_VERT_ARRAY
-		memcpy(&stverts[0], &triangle->dVerts[0].v, sizeof(pvr_vertex_t));
-		memcpy(&stverts[1], &triangle->dVerts[1].v, sizeof(pvr_vertex_t));
-		memcpy(&stverts[2], &triangle->dVerts[2].v, sizeof(pvr_vertex_t));
-
-		pvr_list_prim(list, hdr, sizeof(pvr_poly_hdr_t));
-		pvr_list_prim(list, stverts, sizeof(pvr_vertex_t) * 3);
-#else
-		pvr_list_prim(list, hdr, sizeof(pvr_poly_hdr_t));
 		pvr_list_prim(list, &triangle->dVerts[0].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->dVerts[1].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->dVerts[2].v, sizeof(pvr_vertex_t));
-#endif
 	}
 	break;
 	/* dVerts[0] visible */
@@ -271,19 +200,9 @@ void clip_triangle(d64Triangle_t *triangle, pvr_poly_hdr_t *hdr, int lightlevel,
 		perspdiv(&triangle->spare[0]);
 		perspdiv(&triangle->spare[1]);
 		
-#if SUBMIT_VERT_ARRAY
-		memcpy(&stverts[0], &triangle->dVerts[0].v, sizeof(pvr_vertex_t));
-		memcpy(&stverts[1], &triangle->spare[0].v, sizeof(pvr_vertex_t));
-		memcpy(&stverts[2], &triangle->spare[1].v, sizeof(pvr_vertex_t));
-
-		pvr_list_prim(list, hdr, sizeof(pvr_poly_hdr_t));
-		pvr_list_prim(list, stverts, sizeof(pvr_vertex_t) * 3);
-#else
-		pvr_list_prim(list, hdr, sizeof(pvr_poly_hdr_t));
 		pvr_list_prim(list, &triangle->dVerts[0].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->spare[0].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->spare[1].v, sizeof(pvr_vertex_t));
-#endif
 	}
 	break;
 	/* dVerts[1] visible */
@@ -298,19 +217,9 @@ void clip_triangle(d64Triangle_t *triangle, pvr_poly_hdr_t *hdr, int lightlevel,
 		triangle->spare[0].v.flags = PVR_CMD_VERTEX;
 		triangle->spare[1].v.flags = PVR_CMD_VERTEX_EOL;
 
-#if SUBMIT_VERT_ARRAY
-		memcpy(&stverts[0], &triangle->spare[0].v, sizeof(pvr_vertex_t));
-		memcpy(&stverts[1], &triangle->dVerts[1].v, sizeof(pvr_vertex_t));
-		memcpy(&stverts[2], &triangle->spare[1].v, sizeof(pvr_vertex_t));
-
-		pvr_list_prim(list, hdr, sizeof(pvr_poly_hdr_t));
-		pvr_list_prim(list, stverts, sizeof(pvr_vertex_t) * 3);
-#else
-		pvr_list_prim(list, hdr, sizeof(pvr_poly_hdr_t));
 		pvr_list_prim(list, &triangle->spare[0].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->dVerts[1].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->spare[1].v, sizeof(pvr_vertex_t));
-#endif
 	}
 	break;
 	/* dVerts[2] visible */
@@ -324,19 +233,10 @@ void clip_triangle(d64Triangle_t *triangle, pvr_poly_hdr_t *hdr, int lightlevel,
 
 		triangle->spare[0].v.flags = PVR_CMD_VERTEX;
 		triangle->spare[1].v.flags = PVR_CMD_VERTEX;
-#if SUBMIT_VERT_ARRAY
-		memcpy(&stverts[0], &triangle->spare[0].v, sizeof(pvr_vertex_t));
-		memcpy(&stverts[1], &triangle->spare[1].v, sizeof(pvr_vertex_t));
-		memcpy(&stverts[2], &triangle->dVerts[2].v, sizeof(pvr_vertex_t));
 
-		pvr_list_prim(list, hdr, sizeof(pvr_poly_hdr_t));
-		pvr_list_prim(list, stverts, sizeof(pvr_vertex_t) * 3);
-#else
-		pvr_list_prim(list, hdr, sizeof(pvr_poly_hdr_t));
 		pvr_list_prim(list, &triangle->spare[0].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->spare[1].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->dVerts[2].v, sizeof(pvr_vertex_t));
-#endif
 	}
 	break;
 	/* dVerts[0] and dVerts[1] visible */
@@ -354,26 +254,13 @@ void clip_triangle(d64Triangle_t *triangle, pvr_poly_hdr_t *hdr, int lightlevel,
 		
 		triangle->spare[0].v.flags = PVR_CMD_VERTEX_EOL;
 		triangle->spare[1].v.flags = PVR_CMD_VERTEX;
-#if SUBMIT_VERT_ARRAY		
-		memcpy(&stverts[0], &triangle->dVerts[0].v, sizeof(pvr_vertex_t));
-		memcpy(&stverts[1], &triangle->dVerts[1].v, sizeof(pvr_vertex_t));
-		memcpy(&stverts[2], &triangle->spare[0].v, sizeof(pvr_vertex_t));
 
-		memcpy(&stverts[3], &triangle->dVerts[1].v, sizeof(pvr_vertex_t));
-		memcpy(&stverts[4], &triangle->spare[1].v, sizeof(pvr_vertex_t));
-		memcpy(&stverts[5], &triangle->spare[0].v, sizeof(pvr_vertex_t));
-
-		pvr_list_prim(list, hdr, sizeof(pvr_poly_hdr_t));
-		pvr_list_prim(list, stverts, sizeof(pvr_vertex_t) * 6);
-#else
-		pvr_list_prim(list, hdr, sizeof(pvr_poly_hdr_t));
 		pvr_list_prim(list, &triangle->dVerts[0].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->dVerts[1].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->spare[0].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->dVerts[1].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->spare[1].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->spare[0].v, sizeof(pvr_vertex_t));
-#endif
 	}
 	break;
 	/* dVerts[0] and dVerts[2] visible */
@@ -382,7 +269,7 @@ void clip_triangle(d64Triangle_t *triangle, pvr_poly_hdr_t *hdr, int lightlevel,
 		clip_edge(&triangle->dVerts[0], &triangle->dVerts[1], &triangle->spare[0]);
 
 		/* out 2 */
-		clip_edge(&triangle->dVerts[1], &triangle->dVerts[2], &triangle->spare[1]);//, vm);
+		clip_edge(&triangle->dVerts[1], &triangle->dVerts[2], &triangle->spare[1]);
 
 		perspdiv(&triangle->dVerts[0]);
 		perspdiv(&triangle->dVerts[2]);
@@ -392,31 +279,16 @@ void clip_triangle(d64Triangle_t *triangle, pvr_poly_hdr_t *hdr, int lightlevel,
 		triangle->spare[0].v.flags = PVR_CMD_VERTEX;
 		triangle->spare[1].v.flags = PVR_CMD_VERTEX;
 
-#if SUBMIT_VERT_ARRAY
-		memcpy(&stverts[0], &triangle->dVerts[0].v, sizeof(pvr_vertex_t));
-		memcpy(&stverts[1], &triangle->spare[0].v, sizeof(pvr_vertex_t));
-		memcpy(&stverts[2], &triangle->dVerts[2].v, sizeof(pvr_vertex_t));
-
-		triangle->spare[0].v.flags = PVR_CMD_VERTEX_EOL;
-		triangle->dVerts[2].v.flags = PVR_CMD_VERTEX;
-
-		memcpy(&stverts[3], &triangle->spare[1].v, sizeof(pvr_vertex_t));
-		memcpy(&stverts[4], &triangle->dVerts[2].v, sizeof(pvr_vertex_t));
-		memcpy(&stverts[5], &triangle->spare[0].v, sizeof(pvr_vertex_t));
-
-		pvr_list_prim(list, hdr, sizeof(pvr_poly_hdr_t));
-		pvr_list_prim(list, stverts, sizeof(pvr_vertex_t) * 6);
-#else
-		pvr_list_prim(list, hdr, sizeof(pvr_poly_hdr_t));
 		pvr_list_prim(list, &triangle->dVerts[0].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->spare[0].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->dVerts[2].v, sizeof(pvr_vertex_t));
+
 		triangle->dVerts[2].v.flags = PVR_CMD_VERTEX;
 		triangle->spare[0].v.flags = PVR_CMD_VERTEX_EOL;
+
 		pvr_list_prim(list, &triangle->spare[1].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->dVerts[2].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->spare[0].v, sizeof(pvr_vertex_t));
-#endif
 	}
 	break;
 	/* dVerts[1] and dVerts[2] visible */
@@ -434,32 +306,17 @@ void clip_triangle(d64Triangle_t *triangle, pvr_poly_hdr_t *hdr, int lightlevel,
 		triangle->spare[0].v.flags = PVR_CMD_VERTEX;
 		triangle->spare[1].v.flags = PVR_CMD_VERTEX_EOL;
 
-#if SUBMIT_VERT_ARRAY
-		memcpy(&stverts[0], &triangle->spare[0].v, sizeof(pvr_vertex_t));
-		memcpy(&stverts[1], &triangle->dVerts[1].v, sizeof(pvr_vertex_t));
-		memcpy(&stverts[2], &triangle->spare[1].v, sizeof(pvr_vertex_t));
-
-		memcpy(&stverts[3], &triangle->dVerts[1].v, sizeof(pvr_vertex_t));
-		memcpy(&stverts[4], &triangle->dVerts[2].v, sizeof(pvr_vertex_t));
-		memcpy(&stverts[5], &triangle->spare[1].v, sizeof(pvr_vertex_t));
-
-		pvr_list_prim(list, hdr, sizeof(pvr_poly_hdr_t));
-		pvr_list_prim(list, stverts, sizeof(pvr_vertex_t) * 6);
-#else
-		pvr_list_prim(list, hdr, sizeof(pvr_poly_hdr_t));
 		pvr_list_prim(list, &triangle->spare[0].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->dVerts[1].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->spare[1].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->dVerts[1].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->dVerts[2].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->spare[1].v, sizeof(pvr_vertex_t));
-#endif
 	}
 	break;
 	}
 }
 
-//-----------------------------------//
 void R_RenderWorld(subsector_t *sub);
 
 void R_WallPrep(seg_t *seg);
@@ -471,15 +328,8 @@ void R_RenderPlane(leaf_t *leaf, int numverts, int zpos, int texture, int xpos, 
 void R_RenderThings(subsector_t *sub);
 void R_RenderLaser(mobj_t *thing);
 void R_RenderPSprites(void);
-//-----------------------------------//
 
-extern pvr_ptr_t *tex_txr_ptr;
-
-extern uint8_t *pt;
-int renderstuffinit = 0;
-extern int firsttex;
-
-void R_RenderAll(void) // 80026590
+void R_RenderAll(void)
 {
 	subsector_t *sub;
 
@@ -492,7 +342,7 @@ void R_RenderAll(void) // 80026590
 	}
 }
 
-void R_RenderWorld(subsector_t *sub) // 80026638
+void R_RenderWorld(subsector_t *sub)
 {
 	leaf_t *lf;
 	seg_t *seg;
@@ -502,14 +352,9 @@ void R_RenderWorld(subsector_t *sub) // 80026638
 	int numverts;
 	int i;
 
-#if 0
-    gDPSetPrimColor(GFX1++, 0, frontsector->lightlevel, 0, 0, 0, 255);
-#endif
 	numverts = sub->numverts;
 
-	/* */
-	/* Render Walls */
-	/* */
+	// render walls
 	lf = &leafs[sub->leaf];
 	for (i = 0; i < numverts; i++) {
 		seg = lf->seg;
@@ -521,9 +366,7 @@ void R_RenderWorld(subsector_t *sub) // 80026638
 		lf++;
 	}
 
-	/* */
-	/* Render Ceilings */
-	/* */
+	// render ceilings
 	if ((frontsector->ceilingpic != -1) && (viewz < frontsector->ceilingheight)) {
 		if (frontsector->flags & MS_SCROLLCEILING) {
 			xoffset = frontsector->xoffset;
@@ -540,9 +383,7 @@ void R_RenderWorld(subsector_t *sub) // 80026638
 						lights[frontsector->colors[0]].rgba, 1, frontsector->lightlevel, 255);
 	}
 
-	/* */
-	/* Render Floors */
-	/* */
+	// Render Floors
 	if ((frontsector->floorpic != -1) && (frontsector->floorheight < viewz)) {
 		if (!(frontsector->flags & MS_LIQUIDFLOOR)) {
 			if (frontsector->flags & MS_SCROLLFLOOR) {
@@ -558,11 +399,7 @@ void R_RenderWorld(subsector_t *sub) // 80026638
 							textures[frontsector->floorpic],
 							xoffset, yoffset,
 							lights[frontsector->colors[1]].rgba, 0, frontsector->lightlevel, 255);
-		} else {
-#if 0
-			gDPPipeSync(GFX1++);
-			gDPSetRenderMode(GFX1++, G_RM_FOG_SHADE_A, G_RM_XLU_SURF2);
-#endif
+		} else { // liquid floors
 			if (frontsector->flags & MS_SCROLLFLOOR) {
 				xoffset = frontsector->xoffset;
 				yoffset = frontsector->yoffset;
@@ -571,32 +408,21 @@ void R_RenderWorld(subsector_t *sub) // 80026638
 				yoffset = 0;
 			}
 
-			//--------------------------------------------------------------
 			lf = &leafs[sub->leaf];
 			R_RenderPlane(lf, numverts, frontsector->floorheight >> FRACBITS,
 							textures[frontsector->floorpic + 1],
 							xoffset, yoffset,
 							lights[frontsector->colors[1]].rgba, 0, frontsector->lightlevel, 255);
-			//--------------------------------------------------------------
 
 			lf = &leafs[sub->leaf];
-#if 0
-			gDPSetPrimColor(GFX1++, 0, frontsector->lightlevel, 0, 0, 0, 160);
-#endif
 			R_RenderPlane(lf, numverts, frontsector->floorheight >> FRACBITS,
 							textures[frontsector->floorpic],
 							-yoffset, xoffset,
 							lights[frontsector->colors[1]].rgba, 0, frontsector->lightlevel, 160);
-#if 0
-			gDPPipeSync(GFX1++);
-			gDPSetRenderMode(GFX1++, G_RM_FOG_SHADE_A, G_RM_TEX_EDGE2);
-#endif
 		}
 	}
 
-	/* */
-	/* Render Things */
-	/* */
+	// render things
 	R_RenderThings(sub);
 }
 
@@ -612,7 +438,9 @@ void R_WallPrep(seg_t *seg)
 	fixed_t m_top;
 	fixed_t m_bottom;
 	fixed_t rowoffs;
-	//unsigned int height2;
+#if 0
+	unsigned int height2;
+#endif
 	int height;
 	int frontheight;
 	int sideheight1;
@@ -739,8 +567,7 @@ void R_WallPrep(seg_t *seg)
 											0xff;
 						}
 					}
-#endif
-#if 0
+#else
 					if (f_floorheight < f_ceilingheight) {
 						height2 = ((height << 16) / (f_ceilingheight - f_floorheight));
 					} else {
@@ -751,7 +578,6 @@ void R_WallPrep(seg_t *seg)
 					unsigned int gf = (((unsigned int)g2 * height2) >> 16) + (((unsigned int)g1*(65536 - height2)) >> 16);
 					unsigned int bf = (((unsigned int)b2 * height2) >> 16) + (((unsigned int)b1*(65536 - height2)) >> 16);
 
-#if 0
 					if (!((rf < 256) && (gf < 256) && (bf < 256))) {
 						unsigned int max;
 						if (rf >= gf && rf >= bf) {
@@ -767,10 +593,6 @@ void R_WallPrep(seg_t *seg)
 						bf = (((bf<<16) / max) * 255) >> 16;
 					}
 
-					/*tmp_lowcolor = (((((r2 - r1) * height2) >> 16) + r1) << 24) |
-									(((((g2 - g1) * height2) >> 16) + g1) << 16) |
-									(((((b2 - b1) * height2) >> 16) + b1) << 8)  | 0xff;*/
-#endif
 					tmp_lowcolor = (rf << 24) | (gf << 16) | (bf << 8) | 0xff;
 #endif
 				} 
@@ -874,8 +696,7 @@ void R_WallPrep(seg_t *seg)
 											0xff;
 						}
 					}
-#endif
-#if 0
+#else
 					if (f_floorheight < f_ceilingheight) {
 						height2 = ((height << 16) / (f_ceilingheight - f_floorheight));
 					} else {
@@ -886,7 +707,6 @@ void R_WallPrep(seg_t *seg)
 					unsigned int gf = (((unsigned int)g2 * height2) >> 16) + (((unsigned int)g1*(65536 - height2)) >> 16);
 					unsigned int bf = (((unsigned int)b2 * height2) >> 16) + (((unsigned int)b1*(65536 - height2)) >> 16);
 
-#if 0
 					if (!((rf < 256) && (gf < 256) && (bf < 256))) {
 						unsigned int max;
 						if (rf >= gf && rf >= bf) {
@@ -901,11 +721,6 @@ void R_WallPrep(seg_t *seg)
 						gf = (((gf<<16) / max) * 255) >> 16;
 						bf = (((bf<<16) / max) * 255) >> 16;
 					}
-
-					/*tmp_upcolor = (((((r2 - r1) * height2) >> 16) + r1) << 24) |
-									(((((g2 - g1) * height2) >> 16) + g1) << 16) |
-									(((((b2 - b1) * height2) >> 16) + b1) << 8)  | 0xff;*/
-#endif 
 
 					tmp_upcolor = (rf << 24) | (gf << 16) | (bf << 8) | 0xff;
 #endif
@@ -973,13 +788,15 @@ void R_WallPrep(seg_t *seg)
 	}
 }
 
+#define INTEGER_VERT 1
+
 int last_width = 64;
 int last_height = 64;
 
 void P_CachePvrTexture(int i, int tag);
 
 void R_RenderWall(seg_t *seg, int flags, int texture, int topHeight, int bottomHeight,
-				  int topOffset, int bottomOffset, int topColor, int bottomColor) // 80027138
+				  int topOffset, int bottomOffset, int topColor, int bottomColor)
 {
 	byte *data;
 	vertex_t *v1;
@@ -993,15 +810,15 @@ void R_RenderWall(seg_t *seg, int flags, int texture, int topHeight, int bottomH
 	
 	if (texture != 16) {
 		if (flags & ML_HMIRROR) {
-			cms = 1; /* G_TX_MIRROR */
+			cms = 1;
 		} else {
-			cms = 0; /* G_TX_NOMIRROR */
+			cms = 0;
 		}
 
 		if (flags & ML_VMIRROR) {
-			cmt = 1; /* G_TX_MIRROR */
+			cmt = 1;
 		} else {
-			cmt = 0; /* G_TX_NOMIRROR */
+			cmt = 0;
 		}
 
 		if ((texture != globallump) || (globalcm != (cms | cmt))) {
@@ -1041,7 +858,7 @@ void R_RenderWall(seg_t *seg, int flags, int texture, int topHeight, int bottomH
 		v1 = seg->v1;
 		v2 = seg->v2;
 
-#if 0
+#if INTEGER_VERT
 		signed short sx1 = (signed short)(v1->x >> 16);
 		signed short sx2 = (signed short)(v2->x >> 16);
 		signed short sy1 = -((signed short)(v1->y >> 16));
@@ -1103,7 +920,7 @@ void R_RenderWall(seg_t *seg, int flags, int texture, int topHeight, int bottomH
 int last_sw;
 int last_sh;
 
-void R_RenderSwitch(seg_t *seg, int texture, int topOffset, int color) // 80027654
+void R_RenderSwitch(seg_t *seg, int texture, int topOffset, int color)
 {
 	byte *data;
 	vertex_t *v1;
@@ -1132,12 +949,6 @@ void R_RenderSwitch(seg_t *seg, int texture, int topOffset, int color) // 800276
 		globallump = texture;
 	}
 
-#if 0
-	gSPTexture(GFX1++, (512 << 6), (512 << 6), 0, 0, 1);
-	gSPVertex(GFX1++, VTX1, 4, 0);
-	gSP1Quadrangle(GFX1++, 0, 1, 2, 3, 1);
-#endif
-
 	v1 = seg->linedef->v1;
 	v2 = seg->linedef->v2;
 
@@ -1160,7 +971,7 @@ void R_RenderSwitch(seg_t *seg, int texture, int topOffset, int color) // 800276
 	float y1 = (float)topOffset;
 	float y2 = y1 - 32.0f;
 
-#if 0
+#if INTEGER_VERT
 	float x1 = (float)(((x) - (cos << 3) + sin) >> 16);
 	float x2 = (float)(((x) + (cos << 3) + sin) >> 16);
 	float z1 = (float)(((-y) + (sin << 3) + cos) >> 16);
@@ -1251,7 +1062,7 @@ void R_RenderPlane(leaf_t *leaf, int numverts, int zpos, int texture, int xpos, 
 	if (numverts >= 32)
 		numverts = 32;
 
-	/* this is the origin vertex for a bunch of the triangles, this is a special case */
+	// this is the origin vertex for a bunch of the triangles, this is a special case
 	dVTX[0] = &(dv0);
 		
 	dVTX[1] = &(dT1.dVerts[0]);
@@ -1259,7 +1070,7 @@ void R_RenderPlane(leaf_t *leaf, int numverts, int zpos, int texture, int xpos, 
 	dVTX[3] = &(dT1.dVerts[2]);
 
 	vrt = lf[0].vertex;
-#if 0
+#if INTEGER_VERT
 	dVTX[0]->v.x = ((float)(vrt->x >> 16));
 	dVTX[0]->v.y = (float)(zpos);
 	dVTX[0]->v.z = -((float)(vrt->y >> 16));
@@ -1290,7 +1101,7 @@ void R_RenderPlane(leaf_t *leaf, int numverts, int zpos, int texture, int xpos, 
 
 		vrt1 = lf[1].vertex;
 
-#if 0
+#if INTEGER_VERT
 		dVTX[1]->v.x = ((float)(vrt1->x >> 16));
 		dVTX[1]->v.y = (float)(zpos);
 		dVTX[1]->v.z = -((float)(vrt1->y >> 16));
@@ -1309,7 +1120,7 @@ void R_RenderPlane(leaf_t *leaf, int numverts, int zpos, int texture, int xpos, 
 
 		vrt2 = lf[2].vertex;
 
-#if 0
+#if INTEGER_VERT
 		dVTX[2]->v.x = ((float)(vrt2->x >> 16));
 		dVTX[2]->v.y = (float)(zpos);
 		dVTX[2]->v.z = -((float)(vrt2->y >> 16));
@@ -1377,7 +1188,7 @@ void R_RenderPlane(leaf_t *leaf, int numverts, int zpos, int texture, int xpos, 
 			stv = -(((vrt1->y + ypos) >> FRACBITS) - y);
 			tu = (float)stu * inv64;
 			tv = (float)stv * inv64;
-#if 0
+#if INTEGER_VERT
 			dVTX[1]->v.x = ((float)(vrt1->x >> 16));
 			dVTX[1]->v.y = (float)(zpos);
 			dVTX[1]->v.z = -((float)(vrt1->y >> 16));
@@ -1393,7 +1204,7 @@ void R_RenderPlane(leaf_t *leaf, int numverts, int zpos, int texture, int xpos, 
 			stv = -(((vrt2->y + ypos) >> FRACBITS) - y);
 			tu = (float)stu * inv64;
 			tv = (float)stv * inv64;
-#if 0
+#if INTEGER_VERT
 			dVTX[2]->v.x = ((float)(vrt2->x >> 16));
 			dVTX[2]->v.y = (float)(zpos);
 			dVTX[2]->v.z = -((float)(vrt2->y >> 16));
@@ -1410,7 +1221,7 @@ void R_RenderPlane(leaf_t *leaf, int numverts, int zpos, int texture, int xpos, 
 			stv = -(((vrt3->y + ypos) >> FRACBITS) - y);
 			tu = (float)stu * inv64;
 			tv = (float)stv * inv64;
-#if 0
+#if INTEGER_VERT
 			dVTX[3]->v.x = ((float)(vrt3->x >> 16));
 			dVTX[3]->v.y = (float)(zpos);
 			dVTX[3]->v.z = -((float)(vrt3->y >> 16));
@@ -1505,6 +1316,8 @@ void R_RenderThings(subsector_t *sub)
 
 	int external_pal;
 
+	pvr_poly_hdr_t *theheader;
+
 	dVTX[0] = &(dT1.dVerts[0]);
 	dVTX[1] = &(dT1.dVerts[1]);
 	dVTX[2] = &(dT1.dVerts[2]);
@@ -1513,10 +1326,6 @@ void R_RenderThings(subsector_t *sub)
 	vissprite_p = sub->vissprite;
 	if (vissprite_p) {
 		if (vissprite_p->thing->flags & MF_RENDERLASER) {
-#if 0
-			gDPSetRenderMode(GFX1++, G_RM_FOG_SHADE_A, G_RM_RA_OPA_SURF2);
-			gDPSetCombineMode(GFX1++, G_CC_D64COMB15, G_CC_D64COMB16);
-#endif
 			do {
 				R_RenderLaser(vissprite_p->thing);
 				vissprite_p = vissprite_p->next;
@@ -1525,21 +1334,11 @@ void R_RenderThings(subsector_t *sub)
 				}
 			} while(vissprite_p->thing->flags & MF_RENDERLASER);
 
-#if 0
-			gDPPipeSync(GFX1++);
-			gDPSetCombineMode(GFX1++, G_CC_D64COMB07, G_CC_D64COMB08);
-#endif
 			if (vissprite_p == NULL) {
-#if 0
-				gDPSetRenderMode(GFX1++, G_RM_FOG_SHADE_A, G_RM_TEX_EDGE2);
-#endif
 				return;
 			}
 		}
 
-#if 0
-		gDPSetRenderMode(GFX1++, G_RM_FOG_SHADE_A, G_RM_XLU_SURF2_CLAMP);
-#endif
 		while (vissprite_p) {
 			thing = vissprite_p->thing;
 			lump = vissprite_p->lump;
@@ -1550,16 +1349,14 @@ void R_RenderThings(subsector_t *sub)
 			} else {
 				color = lights[vissprite_p->sector->colors[2]].rgba;
 			}
-#if 0
-			gDPSetPrimColorD64(GFX1++, 0, vissprite_p->sector->lightlevel, thing->alpha);
-#endif
+
 			color = (color & 0xffffff00) | thing->alpha;
 
 			data = W_CacheLumpNum(lump, PU_CACHE, dec_jag);
 			src = data + sizeof(spriteN64_t);
-			compressed = SwapShort( ((spriteN64_t*)data)->compressed );
-			width = SwapShort( ((spriteN64_t*)data)->width );
-			height = SwapShort( ((spriteN64_t*)data)->height );
+			compressed = SwapShort(((spriteN64_t*)data)->compressed);
+			width = SwapShort(((spriteN64_t*)data)->width);
+			height = SwapShort(((spriteN64_t*)data)->height);
 
 			spos = width;
 
@@ -1591,10 +1388,11 @@ void R_RenderThings(subsector_t *sub)
 			}
 
 			ypos = (thing->z >> 16) + SwapShort(((spriteN64_t*)data)->yoffs);
-			pvr_poly_hdr_t *theheader;
+
 			if ((lump <= 348) || ((lump >= 924) && (lump <= 965))) {
 				nosprite = 0;
-				// pull in each side of sprite by one pixel
+
+				// pull in each side of sprite by half pixel
 				// fix for filtering 'crud' around the edge due to lack of padding
 				if(!flip) {
 					dVTX[0]->v.u = dVTX[3]->v.u = all_u[lump] + halfinv1024;
@@ -1662,9 +1460,19 @@ void R_RenderThings(subsector_t *sub)
 					lumpoff = 574 + newlumpnum;
 				}
 
-				if (force_filter_flush || vram_low || (last_flush_frame && ((NextFrameIdx - last_flush_frame) > (2*30)) && 
+				// cache flush conditions
+				// 1) explicit flags
+				// 2) wasn't enough VRAM for last caching attempt
+				// 3) this code has run before, it has been more than 2 seconds since the last time the cache code was called
+				//      and more than 3/4 of the cache slots are used
+				// with these conditions, the caching code works well, handles the worst scenes (Absolution) without slowdown
+				if (force_filter_flush || vram_low || 
+					(last_flush_frame && ((NextFrameIdx - last_flush_frame) > (2*30)) && 
 					(used_lump_idx > (MAX_CACHED_SPRITES * 3 / 4)))) {
-					if(force_filter_flush) force_filter_flush = 0;
+
+					force_filter_flush = 0;
+					vram_low = 0;
+
 					for (int i=0;i<(575+310);i++) {
 						if (used_lumps[i] != -1) {
 							pvr_mem_free(pvr_troo[used_lumps[i]]);
@@ -1672,10 +1480,11 @@ void R_RenderThings(subsector_t *sub)
 					}
 					memset(used_lumps, 0xff, sizeof(int)*(575+310));
 					memset(lump_frame, 0xff, sizeof(int)*(575+310));
+
 					used_lump_idx = 0;
 					del_idx = 0;
+
 					last_flush_frame = NextFrameIdx;
-					vram_low = 0;
 				}
 
 				if (used_lumps[lumpoff] != -1) {
@@ -1692,20 +1501,18 @@ void R_RenderThings(subsector_t *sub)
 					used_lumps[lumpoff] = used_lump_idx;
 					lump_frame[lumpoff] = NextFrameIdx;
 					cached_index = used_lump_idx;
-					if (lumpoff < 575) {
-						dbgio_printf("caching lump %d at index %d\n", lump, cached_index);
-					} else {
-						dbgio_printf("caching alternate lump %d at index %d\n", lump, cached_index);
-					}
 					used_lump_idx += 1;
+//					if (lumpoff < 575) {
+//						dbgio_printf("caching lump %d at index %d\n", lump, cached_index);
+//					} else {
+//						dbgio_printf("caching alternate lump %d at index %d\n", lump, cached_index);
+//					}
 				} else {
 					nosprite = 1;
-#if 1
+
 					// here it gets complicated
 					// find if any of the lumps have the del_idx as their index
 					// if so, set their index to -1
-					//dbgio_printf("all lump cache slots used, find one to evict\n");
-					//"caching lump %d at index %d\n", lump, cached_index);
 
 					// this gets incremented if all possible cache indices are used in a single frame
 					// and nothing can be evicted
@@ -1714,17 +1521,19 @@ void R_RenderThings(subsector_t *sub)
 					int start_del_idx = del_idx;
 					int next_del_idx_lump = -1;
 
+					//dbgio_printf("all lump cache slots used, find one to evict\n");
+
 					// for every possible enemy sprite lump number
 					for (int i=0;i<(575+310);i++) {
 						if (passes) {
 							nosprite = 1;
-							dbgio_printf("\t\t nothing was evictable");
+//							dbgio_printf("\t\t nothing was evictable");
 							goto bail_evict;
 						}
 
 						// try to help this along by noting if we found the next del idx along the way
 						if (used_lumps[i] == (del_idx + 1)) {
-							dbgio_printf("\t\thaven't found del_idx yet, found next_del_idx though\n");
+//							dbgio_printf("\t\thaven't found del_idx yet, found next_del_idx though\n");
 							next_del_idx_lump = i;
 						}
 
@@ -1733,12 +1542,12 @@ void R_RenderThings(subsector_t *sub)
 						// we should attempt to evict this one first
 						if(used_lumps[i] == del_idx) {
 							if (lump_frame[i] == NextFrameIdx) {
-								dbgio_printf("\tlump %d at del_idx is used in this frame -- check more\n", i+349);
+//								dbgio_printf("\tlump %d at del_idx is used in this frame -- check more\n", i+349);
 
 								// this can help us skip more passes through the entire lump set
 								if (next_del_idx_lump != -1) {
 									if (lump_frame[next_del_idx_lump] != NextFrameIdx) {
-										dbgio_printf("\t\tevicted %d by way of next_del_idx_lump\n", next_del_idx_lump);
+//										dbgio_printf("\t\tevicted %d by way of next_del_idx_lump\n", next_del_idx_lump);
 										del_idx = used_lumps[next_del_idx_lump];
 										pvr_mem_free(pvr_troo[del_idx]);
 										used_lumps[i] = -1;
@@ -1757,13 +1566,13 @@ void R_RenderThings(subsector_t *sub)
 
 								// if after increment and/or wrap we are at the starting index, nothing was evictable
 								if (del_idx == start_del_idx) {
-									dbgio_printf("\t\t del_idx wrapped back to start, about to fail things\n");
+//									dbgio_printf("\t\t del_idx wrapped back to start, about to fail things\n");
 									passes = 1;
 								}
 
 								continue;
 							} else {
-								dbgio_printf("\t\tevicted %d from old frame\n", i);
+//								dbgio_printf("\t\tevicted %d from old frame\n", i);
 								pvr_mem_free(pvr_troo[del_idx]);
 								used_lumps[i] = -1;
 								lump_frame[i] = -1;
@@ -1782,31 +1591,14 @@ done_evicting:
 					if (del_idx == MAX_CACHED_SPRITES) {
 						del_idx = 0;
 					}
-
-#if 0
-					// try to evict some lumps not recently used
-					int found = 0;
-
-					for (int i=0;i<(575+310);i++) {
-						if (lump_frame[i] < NextFrameIdx) {
-							int oldlumpidx = used_lumps[i];
-							pvr_mem_free(pvr_troo[oldlumpidx]);
-							used_lumps[i] = -1;
-							lump_frame[i] = -1;
-							found += 1;
-							if (found == 8) {
-								break;
-							}
-						}
-					}           // for i [0,575+310)
-#endif
-#endif
 				}
 bail_evict:
-				if (nosprite) {
-					dbgio_printf("could not cache lump %d\n", lumpoff);
-				} else {
-					if ((wp2*hp2) > (pvr_mem_available()*4)) {
+//				if (nosprite) {
+//					dbgio_printf("could not cache lump %d\n", lumpoff);
+//				} else {
+				if (!nosprite) {
+					// vram_low gets set if the sprite will use more than 1/4 of the available VRAM
+					if (((wp2*hp2) * 4) > pvr_mem_available()) {
 						nosprite = 1;
 						lump_frame[lumpoff] = -1;
 						used_lumps[lumpoff] = -1;
@@ -1827,17 +1619,17 @@ bail_evict:
 					pvr_poly_compile(&hdr_troo[cached_index], &cxt_troo[cached_index]);
 
 					pvr_txr_load(src, pvr_troo[cached_index], wp2*hp2);
-skip_cached_setup:
 
+skip_cached_setup:
 					if (!flip) {
-						dVTX[0]->v.u = dVTX[3]->v.u = 0.0f; // (1.0f / (float)wp2);
-						dVTX[1]->v.u = dVTX[2]->v.u = ((float)troowid / (float)wp2); // - (1.0f / (float)wp2);
+						dVTX[0]->v.u = dVTX[3]->v.u = 0.0f;
+						dVTX[1]->v.u = dVTX[2]->v.u = ((float)troowid / (float)wp2);
 					} else {
-						dVTX[1]->v.u = dVTX[2]->v.u = 0.0f; // (1.0f / (float)wp2);
-						dVTX[0]->v.u = dVTX[3]->v.u = ((float)troowid / (float)wp2); // - (1.0f / (float)wp2);
+						dVTX[1]->v.u = dVTX[2]->v.u = 0.0f;
+						dVTX[0]->v.u = dVTX[3]->v.u = ((float)troowid / (float)wp2);
 					}
-					dVTX[0]->v.v = dVTX[1]->v.v = 0.0f; // (1.0f / (float)hp2);
-					dVTX[2]->v.v = dVTX[3]->v.v = ((float)height / (float)hp2); // - (1.0f / (float)hp2);
+					dVTX[0]->v.v = dVTX[1]->v.v = 0.0f;
+					dVTX[2]->v.v = dVTX[3]->v.v = ((float)height / (float)hp2);
 					theheader = &hdr_troo[cached_index];
 				}
 			}
@@ -1953,9 +1745,6 @@ void R_RenderPSprites(void)
 {
 	int				i;
 	pspdef_t		*psp;
-#if 0
-	pspdef_t		*psptmp;
-#endif
 	state_t			*state;
 	spritedef_t		*sprdef;
 	spriteframe_t	*sprframe;
@@ -1976,29 +1765,20 @@ void R_RenderPSprites(void)
 	}
 	quad2[3].flags = PVR_CMD_VERTEX_EOL;
 
-#if 0
-	gDPPipeSync(GFX1++);
-	gDPSetTexturePersp(GFX1++, G_TP_NONE);
-	gDPSetCombineMode(GFX1++, G_CC_D64COMB17, G_CC_D64COMB18);
-#endif
-
 	psp = &viewplayer->psprites[0];
 
 	flagtranslucent = (viewplayer->mo->flags & MF_SHADOW) != 0;
 
-#if 0
-	psptmp = psp;
-	for (i = 0; i < NUMPSPRITES; i++, psptmp++) {
-		if(flagtranslucent || ((psptmp->state != 0) && (psptmp->alpha < 255))) {
-			gDPSetRenderMode(GFX1++, G_RM_FOG_SHADE_A, G_RM_XLU_SURF2_CLAMP);
-			break;
-		}
-	}
-#endif
-
 	for (i = 0; i < NUMPSPRITES; i++, psp++) {
 		/* a null state means not active */
 		if ((state = psp->state) != 0) {
+			pvr_vertex_t *vert = quad2;
+			float u1,v1,u2,v2;
+			float x1,y1,x2,y2;
+			uint8_t a1;
+			uint32_t quad_color;
+			uint32_t quad_light_color = 0;
+
 			sprdef = &sprites[state->sprite];
 			sprframe = &sprdef->spriteframes[state->frame & FF_FRAMEMASK];
 			lump = sprframe->lump[0];
@@ -2008,58 +1788,27 @@ void R_RenderPSprites(void)
 			width2 = (width + 7) & ~7;
 			height = SwapShort(((spriteN64_t*)data)->height);
 
-#if 0
-			if (psp->state->frame & FF_FULLBRIGHT) {
-				gDPSetPrimColorD64(GFX1, 0, 0, PACKRGBA(255,255,255,0));//0xffffff00
-			} else {
-				gDPSetPrimColorD64(GFX1, 0, frontsector->lightlevel,
-				lights[frontsector->colors[2]].rgba & ~255); // remove alpha value
-			}
+			u1 = all_u[lump];
+			v1 = all_v[lump];
+			u2 = all_u2[lump];
+			v2 = all_v2[lump];
 
-			// apply alpha value
-			if (flagtranslucent) {
-				GFX1->words.w1 |= 144;
-			} else {
-				GFX1->words.w1 |= psp->alpha;
-			}
-#endif
-			pvr_vertex_t *vert = quad2;
-			float u1 = all_u[lump];
-			float v1 = all_v[lump];
-			float u2 = all_u2[lump];
-			float v2 = all_v2[lump];
+			if (flagtranslucent)
+				a1 = 144;
+			else
+				a1 = psp->alpha;
 
 			if (psp->state->frame & FF_FULLBRIGHT) {
-				uint8_t a1;
-
-				if(flagtranslucent)
-					a1 = 144;
-				else
-					a1 = psp->alpha;
-
-				for(int i = 0; i < 4; i++) {
-					quad2[i].argb = D64_PVR_REPACK_COLOR_ALPHA(0xffffffff, a1);
-					quad2[i].oargb = 0;
-				}
+				quad_color = D64_PVR_REPACK_COLOR_ALPHA(0xffffffff, a1);
 			} else {
 				uint32_t color = lights[frontsector->colors[2]].rgba;
-				//float lightc = (float)frontsector->lightlevel * inv255;
-				uint32_t pspr_color;
-				uint8_t a1;
+				quad_color = D64_PVR_REPACK_COLOR_ALPHA(color, a1);
+				quad_light_color = lighted_color(D64_PVR_REPACK_COLOR_ALPHA(color, a1), frontsector->lightlevel);
+			}
 
-				if(flagtranslucent)
-					a1 = 144;
-				else
-					a1 = psp->alpha;
-
-				// hi Immorpher -- fixed the dynamic lighting of weapons
-				pspr_color = lighted_color(D64_PVR_REPACK_COLOR_ALPHA(color, a1), frontsector->lightlevel);
-				//lighted_color(D64_PVR_REPACK_COLOR_ALPHA(color, a1), lightc);
-
-				for(int i = 0; i < 4; i++) {
-					quad2[i].argb = D64_PVR_REPACK_COLOR_ALPHA(color, a1);
-					quad2[i].oargb = pspr_color;
-				}
+			for(int i = 0; i < 4; i++) {
+				quad2[i].argb = quad_color;
+				quad2[i].oargb = quad_light_color;
 			}
 
 			x = (((psp->sx >> 16) - SwapShort(((spriteN64_t*)data)->xoffs)) + 160);
@@ -2070,12 +1819,12 @@ void R_RenderPSprites(void)
 				y += (quakeviewy >> 16);
 			}
 
-			float x1 = (float)x * RES_RATIO;
-			float y1 = (float)y * RES_RATIO;
-			float x2 = x1 + ((float)width2 * RES_RATIO);
-			float y2 = y1 + ((float)height * RES_RATIO);
+			x1 = (float)x * RES_RATIO;
+			y1 = (float)y * RES_RATIO;
+			x2 = x1 + ((float)width2 * RES_RATIO);
+			y2 = y1 + ((float)height * RES_RATIO);
 
-			// pull in each side of sprite by one pixel
+			// pull in each side of sprite by half pixel
 			// fix for filtering 'crud' around the edge due to lack of padding
 			vert->x = x1;
 			vert->y = y2;
