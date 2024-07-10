@@ -95,7 +95,7 @@ void P_DropWeapon (player_t *player);
 */
 
 void	P_PlayerThink (player_t *player);
-
+void P_CheckCheats(void);
 
 /*
 ===============================================================================
@@ -222,7 +222,6 @@ boolean P_CheckPosition (mobj_t *thing, fixed_t x, fixed_t y);
 boolean P_TryMove (mobj_t *thing, fixed_t x, fixed_t y);
 boolean P_CheckSight (mobj_t *t1, mobj_t *t2);
 void 	P_UseLines (player_t *player);
-
 boolean P_ChangeSector (sector_t *sector, boolean crunch);
 
 extern	mobj_t		*linetarget;			/* who got hit (or NULL) */
