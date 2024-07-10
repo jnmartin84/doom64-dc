@@ -31,25 +31,17 @@ extern int globalcm;
 kthread_t *sys_ticker_thread;
 kthread_attr_t sys_ticker_attr;
 
-//u32 vid_side;
-u8 gamepad_bit_pattern; // 800A5260 // one bit for each controller
+boolean disabledrawing = false;
 
-s32 File_Num;   // 800A54D8
-s32 Pak_Size;   // 800A54DC
-u8 *Pak_Data;   // 800A54E0
-s32 Pak_Memory; // 800A54E4
+s32 vsync = 0;
+s32 drawsync2 = 0;
+s32 drawsync1 = 0;
+u32 NextFrameIdx = 0;
 
-boolean disabledrawing = false; // 8005A720
-
-s32 vsync = 0;      // 8005A724
-s32 drawsync2 = 0;  // 8005A728
-s32 drawsync1 = 0;  // 8005A72C
-u32 NextFrameIdx = 0;       // 8005A730
-
-s32 ControllerPakStatus = 1; // 8005A738
-s32 gamepad_system_busy = 0; // 8005A73C
-s32 FilesUsed = -1; // 8005A740
-u32 SystemTickerStatus = 0;  // 8005a744
+s32 ControllerPakStatus = 1;
+s32 gamepad_system_busy = 0;
+s32 FilesUsed = -1;
+u32 SystemTickerStatus = 0;
 
 int vsinternal = 0;
 
@@ -61,17 +53,22 @@ void vblfunc(uint32_t c, void *d)
 int __attribute__((noreturn)) main(int argc, char **argv)
 {
 	dbgio_dev_select("serial");
-//	dbgio_dev_select("fb");
+
 #if REAL_SCREEN_WD == 640
 	vid_set_mode(DM_640x480, PM_RGB565);
 #else
 	vid_set_mode(DM_320x240, PM_RGB565);
 #endif
+
 	pvr_init(&pvr_params);
 
 	vblank_handler_add(&vblfunc, NULL);
+
 	I_Main(NULL);
-	while(1) {}
+
+	while(1) {
+		;
+	}
 }
 
 void *I_Main(void *arg);
@@ -85,9 +82,6 @@ void *I_Main(void *arg)
 
 uint64_t running = 0;
 
-extern int dc_fb;
-extern int dc_next_fb;
-
 void *I_SystemTicker(void *arg)
 {
 	while(!running) {
@@ -95,36 +89,27 @@ void *I_SystemTicker(void *arg)
 	}
 
 	while(true) {
-		 
-		{		
-			if (side & 1) {
-				if (gamepad_system_busy) {
-					gamepad_system_busy = 0;
-				}
+		if (SystemTickerStatus & 16) {
+			if ((u32)(vsync - drawsync2) < 2) {
+				thd_pass();
+				continue;
 			}
 
-			side++;
-
-			if (SystemTickerStatus & 16) {
-				if ((u32)(vsync - drawsync2) < 2) {
-					thd_pass();
-					continue;
-				}
-				if(vsync & 1) {
-					thd_pass();
-					continue;
-				}
+			if(vsync & 1) {
+				thd_pass();
+				continue;
+			}
 				
-				SystemTickerStatus &= ~16;
+			SystemTickerStatus &= ~16;
 
-				if (demoplayback || demorecording) {
-					vsync = drawsync2 + 2;
-				}
-
-				drawsync1 = vsync - drawsync2;
-				drawsync2 = vsync;
+			if (demoplayback) {
+				vsync = drawsync2 + 2;
 			}
+
+			drawsync1 = vsync - drawsync2;
+			drawsync2 = vsync;
 		}
+
 		thd_pass();
 	}
 
