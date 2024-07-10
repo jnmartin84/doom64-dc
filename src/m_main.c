@@ -591,7 +591,7 @@ int M_ControllerPak(void) // 80007724
     return ga_exit;
 }
 
-#define MAXSENSIVITY    20
+#define MAXSENSITIVITY    20
 
 int M_ButtonResponder(int buttons) // 80007960
 {
@@ -604,17 +604,17 @@ int M_ButtonResponder(int buttons) // 80007960
     /* Analyze Analog Stick (up / down) */
     sensitivity = (int)((buttons) << 24) >> 24;
 
-    if (sensitivity <= -MAXSENSIVITY)
+    if (sensitivity <= -MAXSENSITIVITY)
         NewButtons |= PAD_DOWN;
-    else if (sensitivity >= MAXSENSIVITY)
+    else if (sensitivity >= MAXSENSITIVITY)
         NewButtons |= PAD_UP;
 
     /* Analyze Analog Stick (left / right) */
     sensitivity = (int)(((buttons & 0xff00) >> 8) << 24) >> 24;
 
-    if (sensitivity <= -MAXSENSIVITY)
+    if (sensitivity <= -MAXSENSITIVITY)
         NewButtons |= PAD_LEFT;
-    else if (sensitivity >= MAXSENSIVITY)
+    else if (sensitivity >= MAXSENSITIVITY)
         NewButtons |= PAD_RIGHT;
 
     return NewButtons & 0xffff0000;
@@ -3171,7 +3171,7 @@ void M_SavePakDrawer(void) // 8000AB44
 
 void M_LoadPakStart(void) // 8000AEEC
 {
-#if 1
+#if 0
     int i;
     int size;
 

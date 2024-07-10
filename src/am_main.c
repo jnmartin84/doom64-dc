@@ -59,7 +59,7 @@ void AM_Start(void) // 800004D8
 ==================
 */
 
-#define MAXSENSIVITY    10
+#define MAXSENSITIVITY    10
 extern int last_joyx,last_joyy;
 void AM_Control (player_t *player) // 800004F4
 {
@@ -166,7 +166,7 @@ void AM_Control (player_t *player) // 800004F4
 	/* Analyze analog stick movement (left / right) */
 	sensitivity = last_joyx;//(int)(((buttons & 0xff00) >> 8) << 24) >> 24;
 
-	if(sensitivity >= MAXSENSIVITY || sensitivity <= -MAXSENSIVITY)
+	if(sensitivity >= MAXSENSITIVITY || sensitivity <= -MAXSENSITIVITY)
 	{
 		player->automapx += (sensitivity * scale) / 80;
 	}
@@ -174,7 +174,7 @@ void AM_Control (player_t *player) // 800004F4
 	/* Analyze analog stick movement (up / down) */
 	sensitivity = last_joyy;//(int)((buttons) << 24) >> 24;
 
-	if(sensitivity >= MAXSENSIVITY || sensitivity <= -MAXSENSIVITY)
+	if(sensitivity >= MAXSENSITIVITY || sensitivity <= -MAXSENSITIVITY)
 	{
 		player->automapy += (sensitivity * scale) / 80;
 	}
