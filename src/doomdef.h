@@ -258,7 +258,7 @@ int D_abs(int v);
 //fixed_t finesine(int angle);
 //fixed_t finecosine(int angle);
 
-extern	const fixed_t		finesine[5*FINEANGLES/4];
+extern	fixed_t		finesine[5*FINEANGLES/4];
 extern	fixed_t		*finecosine;
 
 //angle_t tantoangle(int tan);
