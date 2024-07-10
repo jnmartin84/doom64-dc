@@ -243,8 +243,12 @@ boolean R_CheckBBox(fixed_t bspcoord[4])
 	fixed_t vxovery1 = FixedDiv2(vx1, vy1);
 	fixed_t vxovery2 = FixedDiv2(vx2, vy2);
 
-	Xstart = (((vxovery1 << 7) + (vxovery1 << 5)) >> 16) + 160;
-	Xend   = (((vxovery2 << 7) + (vxovery2 << 5)) >> 16) + 160;
+//	Xstart = (((vxovery1 << 7) + (vxovery1 << 5)) >> 16) + 160;
+//	Xend   = (((vxovery2 << 7) + (vxovery2 << 5)) >> 16) + 160;
+
+	Xstart = (((vxovery1 >> 9) + (vxovery1 >> 11))) + 160;
+	Xend   = (((vxovery2 >> 9) + (vxovery2 >> 11))) + 160;
+
 
 	if (Xstart < 0)
 		Xstart = 0;
@@ -381,8 +385,11 @@ void R_AddLine(seg_t *line)
 	fixed_t xovery1 = FixedDiv2(x1, y1);
 	fixed_t xovery2 = FixedDiv2(x2, y2);
 
-	Xstart = (((xovery1 << 7) + (xovery1 << 5)) >> 16) + 160;
-	Xend   = (((xovery2 << 7) + (xovery2 << 5)) >> 16) + 160;
+//	Xstart = (((xovery1 << 7) + (xovery1 << 5)) >> 16) + 160;
+//	Xend   = (((xovery2 << 7) + (xovery2 << 5)) >> 16) + 160;
+
+	Xstart = (((xovery1 >> 9) + (xovery1 >> 11))) + 160;
+	Xend   = (((xovery2 >> 9) + (xovery2 >> 11))) + 160;
 	
 	if (Xstart < 0)
 		Xstart = 0;
