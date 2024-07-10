@@ -7,6 +7,12 @@
 
 extern int DefaultConfiguration[6][13];
 
+static uint32 Swap32(uint32_t val) {
+	return ((((val) & 0xff000000) >> 24)|
+      (((val) & 0x00ff0000) >>  8) |
+      (((val) & 0x0000ff00) <<  8) |
+      (((val) & 0x000000ff) << 24));
+}
 int D_RunDemo(char *name, skill_t skill, int map)
 {
 	int lump;
@@ -18,13 +24,18 @@ int D_RunDemo(char *name, skill_t skill, int map)
 	lump = W_GetNumForName(name);
 	W_ReadLump(lump, demo_p, dec_d64);
 
+#if 1
 	// wtf is wrong with DEMO1?
 	if (!memcmp(name, "DEMO1LMP", 8)) {
 		int *demo_buttons = demo_p + 14;
 		for (int i=0;i<4000 - 14;i++) {
+			//printf("%04x: %08x\n", i, demo_buttons[i]);
+			// first 1226 entries have PAD_START bit set
+			// why?
 			demo_buttons[i] &= ~PAD_START;
 		}
 	}
+#endif
 	
 	exit = G_PlayDemoPtr(skill, map);
 	Z_Free(demo_p);
@@ -41,7 +52,11 @@ int D_TitleMap(void)
 	demo_p = Z_Alloc(16000, PU_STATIC, NULL);
 	D_memset(demo_p, 0, 16000);
 	D_memcpy(demo_p, DefaultConfiguration[0], 13*sizeof(int));
+#if 0
 	exit = G_PlayDemoPtr(2*(I_Random()%3), 33); // [Immorpher] Randomize the intro fun a bit!
+#else
+	exit = G_PlayDemoPtr(sk_medium, 33);
+#endif
 	Z_Free(demo_p);
 
 	return exit;

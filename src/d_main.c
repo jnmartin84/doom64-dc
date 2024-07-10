@@ -42,11 +42,11 @@ void D_DoomMain(void)
         exit = D_TitleMap();
 
         if (exit != ga_exit) {
-            exit = D_RunDemo("DEMO1LMP", sk_easy, 3);
+            exit = D_RunDemo("DEMO1LMP", sk_medium, 3);
             if (exit != ga_exit) {
-                exit = D_RunDemo("DEMO2LMP", sk_easy, 9);
+                exit = D_RunDemo("DEMO2LMP", sk_medium, 9);
                 if (exit != ga_exit) {
-                    exit = D_RunDemo("DEMO3LMP", sk_easy, 17);
+                    exit = D_RunDemo("DEMO3LMP", sk_medium, 17);
                     if (exit != ga_exit) {
                         if (run_hectic_demo) {
                             run_hectic_demo = false;
