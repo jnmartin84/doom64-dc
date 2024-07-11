@@ -91,9 +91,7 @@ mobj_t          *slidething;    //80077D04, pmGp000008f4
 extern	fixed_t	slidex, slidey; //80077dbc || 80077dc0
 extern	line_t	*specialline;   //80077dc8
 
-extern int last_joyx,last_joyy;
 extern int last_Ltrig,last_Rtrig;
-
 
 void P_SlideMove (mobj_t *mo);
 
@@ -346,7 +344,7 @@ void P_BuildMove (player_t *player) // 80022154
     else
     {
         /* Analyze analog stick movement (up / down) */
-        sensitivity = last_joyy;//(int)((buttons) << 24) >> 24;
+        sensitivity = (int)((buttons) << 24) >> 24;
 
         if(sensitivity >= MAXSENSITIVITY || sensitivity <= -MAXSENSITIVITY)
         {
@@ -372,11 +370,17 @@ void P_BuildMove (player_t *player) // 80022154
 	/*  */
 	if (buttons & cbutton->BT_STRAFELEFT)
 	{
-	    player->sidemove -= (sidemove[speed] * last_Ltrig) / 255;
+		if (demoplayback)
+			player->sidemove -= sidemove[speed];
+		else
+			player->sidemove -= (sidemove[speed] * last_Ltrig) / 255;
 	}
 	if (buttons & cbutton->BT_STRAFERIGHT)
 	{
-		player->sidemove += (sidemove[speed] * last_Rtrig) / 255;
+		if (demoplayback)
+			player->sidemove += sidemove[speed];
+		else
+			player->sidemove += (sidemove[speed] * last_Rtrig) / 255;
 	}
 
     if (buttons & cbutton->BT_STRAFE)
@@ -392,7 +396,7 @@ void P_BuildMove (player_t *player) // 80022154
 		else
         {
             /* Analyze analog stick movement (left / right) */
-            sensitivity = last_joyx;//(int)(((buttons & 0xff00) >> 8) << 24) >> 24;
+            sensitivity = (int)(((buttons & 0xff00) >> 8) << 24) >> 24;
 
             if(sensitivity >= MAXSENSITIVITY || sensitivity <= -MAXSENSITIVITY)
             {
@@ -416,7 +420,7 @@ void P_BuildMove (player_t *player) // 80022154
         else
         {
             /* Analyze analog stick movement (left / right) */
-            sensitivity = last_joyx;//(int)(((buttons & 0xff00) >> 8) << 24) >> 24;
+            sensitivity = (int)(((buttons & 0xff00) >> 8) << 24) >> 24;
             sensitivity = -sensitivity;
 
             if(sensitivity >= MAXSENSITIVITY || sensitivity <= -MAXSENSITIVITY)
@@ -611,12 +615,12 @@ void P_DeathThink (player_t *player) // 80022914
 	/* mocking text */
     if ((ticon - deathmocktics) > MAXMOCKTIME)
     {
-		do { // [Immorpher] Prevent mock string from repeating twice
-			mockrandom = (I_Random()+ticon) % 51; // Updated randomizer for more fun
-		} while(player->message1 == mockstrings1[mockrandom]);
+//		do { // [Immorpher] Prevent mock string from repeating twice
+//			mockrandom = (I_Random()+ticon) % 51; // Updated randomizer for more fun
+//		} while(player->message1 == mockstrings1[mockrandom]);
 		
-        player->messagetic = 2*MSGTICS; // [Immorpher] Doubled message time to read them!
-        player->message = mockstrings1[mockrandom];
+        player->messagetic = MSGTICS;//2*MSGTICS; // [Immorpher] Doubled message time to read them!
+        player->message = mockstrings1[P_Random() % 12];//mockrandom];
 		player->messagecolor = 0xff200000;
         deathmocktics = ticon;
     }

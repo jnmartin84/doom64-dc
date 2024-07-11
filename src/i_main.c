@@ -187,6 +187,9 @@ int I_GetControllerData(void)
 		last_Ltrig = cont->ltrig;
 		last_Rtrig = cont->rtrig;
 		
+		ret |= (last_joyy & 0xff);
+		ret |= ((last_joyx & 0xff) << 8);
+
 		// ATTACK
 		ret |= (cont->buttons & CONT_A) ? PAD_Z_TRIG : 0;
 		// USE

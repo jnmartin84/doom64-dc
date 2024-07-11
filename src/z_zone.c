@@ -26,7 +26,7 @@ memzone_t	*mainzone;
 
 void *mem_heap;
 
-#define MEM_HEAP_SIZE 0x500020 
+#define MEM_HEAP_SIZE 0x400020 
 
 /*
 ========================
@@ -46,9 +46,6 @@ void Z_Init (void) // 8002C8F0
 
 	/* mars doesn't have a refzone */
 	mainzone = Z_InitZone(mem, size);
-
-	//PRINTF_D2(WHITE, 0, 25, "%d", (u32)size);
-    //while(1){}
 }
 
 /*

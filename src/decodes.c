@@ -46,7 +46,7 @@ static short array01[1258];     // 800B3660
 static buffers_t buffers;       // 800B4034
 //static byte* window;            // 800B4054
 
-static u64 windowBuf[8192];
+static u64 __attribute__((aligned(32))) windowBuf[8192];
 static byte *window = (byte*)windowBuf;          // 800B4054
 
 static int OVERFLOW_READ;       // 800B4058
@@ -759,12 +759,13 @@ void DecodeJaguar(unsigned char *input, unsigned char *output) // 8002E1f4
 			len = (*input++ & 0xf) + 1;
 			if (len == 1) break;
 
-			//for (i = 0; i<len; i++)
-				//*output++ = *source++;
-
             i = 0;
             if (len > 0)
             {
+#if 0
+				uint32_t *outword;
+				uint32_t *sourceword;
+
                 if ((len & 3))
                 {
                     while(i != (len & 3))
@@ -773,16 +774,36 @@ void DecodeJaguar(unsigned char *input, unsigned char *output) // 8002E1f4
                         i++;
                     }
                 }
-                while(i != len)
-                {
-                    output[0] = source[0];
-                    output[1] = source[1];
-                    output[2] = source[2];
-                    output[3] = source[3];
-                    output += 4;
-                    source += 4;
-                    i += 4;
-                }
+				
+				if ((!((uintptr_t)output&3)) && (!((uintptr_t)source&3))) {
+					outword = (uint32_t *)output;
+					sourceword = (uint32_t *)source;
+
+					while (i != len) {
+						*outword++ = *sourceword++;
+						i += 4;
+					}
+					
+					output = (unsigned char *)outword;
+					source = (unsigned char *)sourceword;
+				} else {
+					while(i != len)
+					{
+
+						
+						output[0] = source[0];
+						output[1] = source[1];
+						output[2] = source[2];
+						output[3] = source[3];
+						output += 4;
+						source += 4;
+						i += 4;
+					}
+				}
+#endif
+				while (i++ != len) {
+					*output++ = *source++;
+				}
             }
 		}
 		else

@@ -42,7 +42,7 @@ void D_DoomMain(void)
         exit = D_TitleMap();
 
         if (exit != ga_exit) {
-            exit = D_RunDemo("DEMO1LMP", sk_medium, 3);
+		    exit = D_RunDemo("DEMO1LMP", sk_medium, 3);
             if (exit != ga_exit) {
                 exit = D_RunDemo("DEMO2LMP", sk_medium, 9);
                 if (exit != ga_exit) {
@@ -73,7 +73,7 @@ void D_DoomMain(void)
 
 // M_Random
 // Returns a 0-255 number
-unsigned char rndtable[256] = 
+const unsigned char rndtable[256] = 
 {
 	0, 8, 109, 220, 222, 241, 149, 107, 75, 248, 254, 140, 16, 66,
 	74, 21, 211, 47, 80, 242, 154, 27, 205, 128, 161, 89, 77, 36,
@@ -96,7 +96,7 @@ unsigned char rndtable[256] =
 	120, 163, 236, 249
 };
 
-int	rndindex = 0;
+int rndindex = 0;
 int prndindex = 0;
 int irndindex = 0; // [Immorpher] New random index
 
@@ -130,12 +130,13 @@ extern uint8_t __attribute__((aligned(32))) tr_buf[VERTBUF_SIZE];
 extern int last_Ltrig;
 extern int last_Rtrig;
 
+static uint64_t start_time, end_time;
+
 int MiniLoop(void(*start)(void), void(*stop)(),
              int(*ticker)(void), void(*drawer)(void))
 {
 	int exit;
 	int buttons;
-	uint64_t start_time, end_time;
 
 	gameaction = ga_nothing;
 	gamevbls = 0;
@@ -162,20 +163,22 @@ int MiniLoop(void(*start)(void), void(*stop)(),
 
 		// Read|Write demos
 		if (demoplayback) {
-			last_Ltrig = 255;
-			last_Rtrig = 255;
+			//last_Ltrig = 255;
+			//last_Rtrig = 255;
+
 			if (buttons & (ALL_JPAD|ALL_BUTTONS)) {
 				exit = ga_exit;
 				break;
 			}
 
 			buttons = *demobuffer++;
-			ticbuttons[0] = buttons;
 
 			if ((buttons & PAD_START) || (((uintptr_t)demobuffer - (uintptr_t)demo_p) >= 16000)) {
 				exit = ga_exitdemo;
 				break;
 			}
+
+			ticbuttons[0] = buttons;
 		}
 
 		ticon += vblsinframe[0];
@@ -211,6 +214,8 @@ int MiniLoop(void(*start)(void), void(*stop)(),
 
 		framecount += 1;
 	}
+
+	I_GetScreenGrab();
 
 	if (stop)
 		stop(exit);

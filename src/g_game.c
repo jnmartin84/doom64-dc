@@ -40,8 +40,8 @@ mapthing_t	playerstarts[MAXPLAYERS];   // 800a8c60
 
 void G_DoLoadLevel (void) // 80004530
 {
-    if (((gameaction == 7) || (gameaction == 4)) || (players[0].playerstate == PST_DEAD))
-        players[0].playerstate = PST_REBORN;
+	if (((gameaction == 7) || (gameaction == 4)) || (players[0].playerstate == PST_DEAD))
+		players[0].playerstate = PST_REBORN;
 
 	P_SetupLevel(gamemap, gameskill);
 	gameaction = ga_nothing;
@@ -148,12 +148,10 @@ mobj_t emptymobj; // 80063158
 
 void G_InitNew (skill_t skill, int map, gametype_t gametype) // 800046F4
 {
-	//printf ("G_InitNew, skill %d, map %d\n", skill, map);
-
 	/* free all tags except the PU_STATIC tag */
 	Z_FreeTags(mainzone, ~PU_STATIC); // (PU_LEVEL | PU_LEVSPEC | PU_CACHE)
 
-	M_ClearRandom ();
+	M_ClearRandom();
 
 /* force players to be initialized upon first level load          */
     players[0].playerstate = PST_REBORN;
@@ -170,13 +168,47 @@ void G_InitNew (skill_t skill, int map, gametype_t gametype) // 800046F4
 
 	BT_DATA[0] = (buttons_t *)ActualConfiguration;
 
+#if 0
+	#if ENABLE_NIGHTMARE == 1
+	if (skill == sk_nightmare)
+	{
+		states[S_054].tics = 4; // S_SARG_ATK1
+		states[S_055].tics = 4; // S_SARG_ATK2
+		states[S_056].tics = 4; // S_SARG_ATK3
+		mobjinfo[MT_DEMON1].speed = 17; // MT_SERGEANT
+		mobjinfo[MT_DEMON2].speed = 17; // MT_SERGEANT2
+
+		mobjinfo[MT_PROJ_BRUISER1].speed = 20; // MT_BRUISERSHOT
+		mobjinfo[MT_PROJ_BRUISER2].speed = 20; // MT_BRUISERSHOT2
+		mobjinfo[MT_PROJ_HEAD].speed = 30; // MT_HEADSHOT value like Doom 64 Ex
+		mobjinfo[MT_PROJ_IMP1].speed = 20; // MT_TROOPSHOT
+		mobjinfo[MT_PROJ_IMP2].speed = 35; // MT_TROOPSHOT2 value like Doom 64 Ex
+	}
+	else
+	{
+		states[S_054].tics = 8; // S_SARG_ATK1
+		states[S_055].tics = 8; // S_SARG_ATK2
+		states[S_056].tics = 8; // S_SARG_ATK3
+		mobjinfo[MT_DEMON1].speed = 12; // MT_SERGEANT
+		mobjinfo[MT_DEMON2].speed = 12; // MT_SERGEANT2
+
+		mobjinfo[MT_PROJ_BRUISER1].speed = 15; // MT_BRUISERSHOT
+		mobjinfo[MT_PROJ_BRUISER2].speed = 15; // MT_BRUISERSHOT2
+		mobjinfo[MT_PROJ_HEAD].speed = 20; // MT_HEADSHOT
+		mobjinfo[MT_PROJ_IMP1].speed = 10; // MT_TROOPSHOT
+		mobjinfo[MT_PROJ_IMP2].speed = 20; // MT_TROOPSHOT2
+	}
+	#endif // ENABLE_NIGHTMARE
+#endif
 	G_InitSkill (skill);
 }
 
+static int ever_nightmared = 0;
 void G_InitSkill (skill_t skill) // [Immorpher] initialize skill
 {
 	if (skill >= sk_nightmare)
 	{
+		ever_nightmared = 1;
 		// Faster enemies
 		states[S_054].tics = 4; // S_SARG_ATK1
 		states[S_055].tics = 4; // S_SARG_ATK2
@@ -253,7 +285,7 @@ void G_InitSkill (skill_t skill) // [Immorpher] initialize skill
 		mobjinfo[MT_PAIN].painchance = 64;
 		mobjinfo[MT_RESURRECTOR].painchance = 25;
 	}
-	else
+	else if (ever_nightmared)
 	{
 		// Restore enemy speeds
 		states[S_054].tics = 8; // S_SARG_ATK1
@@ -372,11 +404,11 @@ void G_RunGame (void) // 80004794
         /* run a stats intermission - [Immorpher] Removed Hectic exception */
 		MiniLoop(IN_Start, IN_Stop, IN_Ticker, IN_Drawer);
 
-        if(((gamemap ==  8) && (nextmap ==  9)) ||
+        if((((gamemap ==  8) && (nextmap ==  9)) ||
            ((gamemap ==  4) && (nextmap == 29)) ||
            ((gamemap == 12) && (nextmap == 30)) ||
            ((gamemap == 18) && (nextmap == 31)) ||
-           ((gamemap ==  1) && (nextmap == 32)) && StoryText == true) {
+           ((gamemap ==  1) && (nextmap == 32))) && StoryText == true) {
             /* run the intermission if needed */
             MiniLoop(F_StartIntermission, F_StopIntermission, F_TickerIntermission, F_DrawerIntermission);
 

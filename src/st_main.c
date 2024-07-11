@@ -344,10 +344,11 @@ void ST_Ticker (void) // 80029C88
 	if (cameratarget == player->mo) {
 		ST_UpdateFlash(); // ST_doPaletteStuff();
 	}
-		if (demoplayback == false) {
-	st_randomnumber = M_Random();
-	ST_updateFaceWidget();
-		}
+
+	if (demoplayback == false) {
+		st_randomnumber = I_Random();
+		ST_updateFaceWidget();
+	}
 }
 
 /*

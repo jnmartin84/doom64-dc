@@ -132,12 +132,6 @@ boolean PIT_ChangeSector (mobj_t *thing) // 80010234
             mo = P_SpawnMobj (thing->x, thing->y, thing->z + thing->height/2, MT_BLOOD);
             mo->momx = (P_Random() - P_Random())<<12;
             mo->momy = (P_Random() - P_Random())<<12;
-			#if ENABLE_REMASTER_SPRITES == 1
-            if (GreenBlood)
-            {
-                P_SetMobjState (mo, S_797);
-            }
-			#endif
         }
     }
 

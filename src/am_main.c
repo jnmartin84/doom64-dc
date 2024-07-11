@@ -60,7 +60,7 @@ void AM_Start(void) // 800004D8
 */
 
 #define MAXSENSITIVITY    10
-extern int last_joyx,last_joyy;
+
 void AM_Control (player_t *player) // 800004F4
 {
 	int buttons, oldbuttons;
@@ -164,7 +164,7 @@ void AM_Control (player_t *player) // 800004F4
 	scale = (scale / 1500) << 8;
 
 	/* Analyze analog stick movement (left / right) */
-	sensitivity = last_joyx;//(int)(((buttons & 0xff00) >> 8) << 24) >> 24;
+	sensitivity = (int)(((buttons & 0xff00) >> 8) << 24) >> 24;
 
 	if(sensitivity >= MAXSENSITIVITY || sensitivity <= -MAXSENSITIVITY)
 	{
@@ -172,7 +172,7 @@ void AM_Control (player_t *player) // 800004F4
 	}
 
 	/* Analyze analog stick movement (up / down) */
-	sensitivity = last_joyy;//(int)((buttons) << 24) >> 24;
+	sensitivity = (int)((buttons) << 24) >> 24;
 
 	if(sensitivity >= MAXSENSITIVITY || sensitivity <= -MAXSENSITIVITY)
 	{

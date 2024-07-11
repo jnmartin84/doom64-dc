@@ -1128,7 +1128,7 @@ typedef struct
 
 extern mapinfo_t MapInfo[];
 
-extern unsigned char rndtable[256];
+extern const unsigned char rndtable[256];
 int M_Random (void);
 int P_Random (void);
 int I_Random (void); // [Immorpher] new random table
@@ -1178,18 +1178,6 @@ enum VID_MSG {
 
 //extern OSTask *vid_task;   // 800A5244
 extern u32 vid_side;       // 800A5248
-
-extern u8 gamepad_bit_pattern; // 800A5260 // one bit for each controller
-
-// Controller Pak
-//extern OSPfsState FileState[16];    // 800A52D8
-extern s32 File_Num;   // 800A54D8
-extern s32 Pak_Size;   // 800A54DC
-extern u8 *Pak_Data;   // 800A54E0
-extern s32 Pak_Memory; // 800A54E4
-
-extern char Pak_Table[256]; // 8005A620
-extern char Game_Name[16]; // 8005A790
 
 extern boolean disabledrawing; // 8005A720
 extern s32 vsync;              // 8005A724
