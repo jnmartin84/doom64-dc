@@ -676,7 +676,7 @@ void R_CloudThunder(void) // 80026418
 			} else if(!(LightningCounter < 6)) {
 				// Reset loop after 6 lightning flickers
 				rand = (M_Random() & 7);
-				ThunderCounter = (((rand << 4) - rand << 2) + 60) << 1;
+				ThunderCounter = ((((rand << 4) - rand) << 2) + 60) << 1;
 				//(x*16 - x)*4 == x*15*4 = 60*x
 				//ThunderCounter = (rand * 60) + 60;
 				LightningCounter = 0;
