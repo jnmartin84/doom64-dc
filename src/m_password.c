@@ -741,7 +741,7 @@ void M_PasswordDrawer(void) // 8000CAF0
                 pass[0] = '.';
             }
 
-            ST_DrawString(xpos, 160, pass, text_alpha | 0xc0000000);
+            ST_DrawString(xpos, 160, (char *)pass, text_alpha | 0xc0000000);
 
             xpos += 13;
             cnt += 1;

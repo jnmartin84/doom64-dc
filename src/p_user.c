@@ -4,8 +4,8 @@
 #include "p_local.h"
 #include "st_main.h"
 
-#define MAXMOCKTIME     900 // [Immorpher] Reduced this by half for the fun!
-int deathmocktics; // 800A56A0
+#define MAXMOCKTIME 900 // [Immorpher] Reduced this by half for the fun!
+int deathmocktics;
 
 // Bonus mock texts from the Doom 64 community!
 #define MK_TXT01t1	"MOTHER DEMON: HAHAHAHA!"
@@ -60,9 +60,9 @@ int deathmocktics; // 800A56A0
 #define MK_TXT50t1	"ZELLLOOO: WE HAVE PINKY,\nBUT WHERE'S THE BRAIN?"
 #define MK_TXT51t1	"PEACHES: THIS ACTION TO DEFY THE\nEVIL ONE IS NOT WITHOUT RISK.\nCONFRONTATION IS OFTEN BEST\nAVOIDED..."
 
-char *mockstrings1[] =   // 8005A290
+char *mockstrings1[] =
 {
-    MK_TXT01t1, MK_TXT02t1, MK_TXT03t1, MK_TXT04t1,
+	MK_TXT01t1, MK_TXT02t1, MK_TXT03t1, MK_TXT04t1,
 	MK_TXT05t1, MK_TXT06t1, MK_TXT07t1, MK_TXT08t1,
 	MK_TXT09t1, MK_TXT10t1, MK_TXT11t1, MK_TXT12t1,
 	MK_TXT13t1, MK_TXT14t1, MK_TXT15t1, MK_TXT16t1,
@@ -77,87 +77,23 @@ char *mockstrings1[] =   // 8005A290
 	MK_TXT49t1, MK_TXT50t1, MK_TXT51t1,
 };
 
-fixed_t 		forwardmove[2] = {0xE000, 0x16000}; // 8005B060
-fixed_t 		sidemove[2] = {0xE000, 0x16000};    // 8005B068
+fixed_t forwardmove[2] = {0xE000, 0x16000};
+fixed_t sidemove[2] = {0xE000, 0x16000};
 
 #define SLOWTURNTICS    10
-fixed_t			angleturn[] =       // 8005B070
+fixed_t angleturn[] =
 	{50,50,83,83,100,116,133,150,150,166,
 	133,133,150,166,166,200,200,216,216,233}; // fastangleturn
 
 /*============================================================================= */
 
-mobj_t          *slidething;    //80077D04, pmGp000008f4
-extern	fixed_t	slidex, slidey; //80077dbc || 80077dc0
-extern	line_t	*specialline;   //80077dc8
+mobj_t *slidething;
+extern fixed_t slidex, slidey;
+extern line_t *specialline;
 
-extern int last_Ltrig,last_Rtrig;
+extern int last_Ltrig, last_Rtrig;
 
 void P_SlideMove (mobj_t *mo);
-
-#if 0
-void P_PlayerMove (mobj_t *mo)//L80029CB8()
-{
-	fixed_t		momx, momy;
-	line_t		*latchedline;
-	fixed_t		latchedx, latchedy;
-
-	//momx = vblsinframe[playernum] * (mo->momx>>2);
-	//momy = vblsinframe[playernum] * (mo->momy>>2);
-
-	// Change on Final Doom
-	momx = mo->momx;
-	momy = mo->momy;
-
-	slidething = mo;
-
-	P_SlideMove ();
-
-	latchedline = (line_t *)specialline;
-	latchedx = slidex;
-	latchedy = slidey;
-
-	if ((latchedx == mo->x) && (latchedy == mo->y))
-		goto stairstep;
-
-	if (P_TryMove (mo, latchedx, latchedy))
-		goto dospecial;
-
-stairstep:
-
-	if (momx > MAXMOVE)
-		momx = MAXMOVE;
-	else if (momx < -MAXMOVE)
-		momx = -MAXMOVE;
-
-	if (momy > MAXMOVE)
-		momy = MAXMOVE;
-	else if (momy < -MAXMOVE)
-		momy = -MAXMOVE;
-
-	/* something fucked up in slidemove, so stairstep */
-
-	if (P_TryMove (mo, mo->x, mo->y + momy))
-	{
-		mo->momx = 0;
-		mo->momy = momy;
-		goto dospecial;
-	}
-
-	if (P_TryMove (mo, mo->x + momx, mo->y))
-	{
-		mo->momx = momx;
-		mo->momy = 0;
-		goto dospecial;
-	}
-
-	mo->momx = mo->momy = 0;
-
-dospecial:
-	if (latchedline)
-		P_CrossSpecialLine (latchedline, mo);
-}
-#endif // 0
 
 /*
 ===================
@@ -170,7 +106,7 @@ dospecial:
 #define	STOPSPEED		0x1000
 #define	FRICTION		0xd200  //Jag 0xd240
 
-void P_PlayerXYMovement (mobj_t *mo) // 80021E20
+void P_PlayerXYMovement (mobj_t *mo)
 {
 	/* try to slide along a blocked move */
 	if (!P_TryMove(mo, mo->x + mo->momx, mo->y + mo->momy))
@@ -271,7 +207,7 @@ void P_PlayerMobjThink (mobj_t *mobj) // 80022060
 	if (mobj->momx || mobj->momy)
 		P_PlayerXYMovement (mobj);
 
-    mobj->player->onground = (mobj->z <= mobj->floorz);
+	mobj->player->onground = (mobj->z <= mobj->floorz);
 
 	if ( (mobj->z != mobj->floorz) || mobj->momz)
 		P_PlayerZMovement (mobj);
@@ -320,7 +256,7 @@ void P_BuildMove (player_t *player) // 80022154
 	buttons = ticbuttons[0];
 	oldbuttons = oldticbuttons[0];
 
-    player->forwardmove = player->sidemove = player->angleturn = 0;
+	player->forwardmove = player->sidemove = player->angleturn = 0;
 	
 	if(Autorun == true && demoplayback == false) { // [Immorpher] New autorun option
 		speed = (buttons & cbutton->BT_SPEED) < 1;	
@@ -334,30 +270,30 @@ void P_BuildMove (player_t *player) // 80022154
 	/* forward and backward movement  */
 	/*  */
 	if (cbutton->BT_FORWARD & buttons)
-    {
-        player->forwardmove = forwardmove[speed];
-    }
-    else if (cbutton->BT_BACK & buttons)
-    {
-        player->forwardmove = -forwardmove[speed];
-    }
-    else
-    {
-        /* Analyze analog stick movement (up / down) */
-        sensitivity = (int)((buttons) << 24) >> 24;
+	{
+		player->forwardmove = forwardmove[speed];
+	}
+	else if (cbutton->BT_BACK & buttons)
+	{
+		player->forwardmove = -forwardmove[speed];
+	}
+	else
+	{
+		/* Analyze analog stick movement (up / down) */
+		sensitivity = (int)((buttons) << 24) >> 24;
 
-        if(sensitivity >= MAXSENSITIVITY || sensitivity <= -MAXSENSITIVITY)
-        {
-            player->forwardmove += (forwardmove[1] * sensitivity) / 80;
-        }
-    }
+		if(sensitivity >= MAXSENSITIVITY || sensitivity <= -MAXSENSITIVITY)
+		{
+			player->forwardmove += (forwardmove[1] * sensitivity) / 80;
+		}
+	}
 
 	/*  */
 	/* use two stage accelerative turning on the joypad  */
 	/*  */
 	if (((buttons & cbutton->BT_LEFT) && (oldbuttons & cbutton->BT_LEFT)))
 		player->turnheld++;
-    else if (((buttons & cbutton->BT_RIGHT) && (oldbuttons & cbutton->BT_RIGHT)))
+	else if (((buttons & cbutton->BT_RIGHT) && (oldbuttons & cbutton->BT_RIGHT)))
 		player->turnheld++;
 	else
 		player->turnheld = 0;
@@ -365,7 +301,7 @@ void P_BuildMove (player_t *player) // 80022154
 	if (player->turnheld >= SLOWTURNTICS)
 		player->turnheld = SLOWTURNTICS-1;
 
-    /*  */
+	/*  */
 	/* strafe movement  */
 	/*  */
 	if (buttons & cbutton->BT_STRAFELEFT)
@@ -383,52 +319,52 @@ void P_BuildMove (player_t *player) // 80022154
 			player->sidemove += (sidemove[speed] * last_Rtrig) / 255;
 	}
 
-    if (buttons & cbutton->BT_STRAFE)
+	if (buttons & cbutton->BT_STRAFE)
 	{
 		if (buttons & cbutton->BT_LEFT)
 		{
-            player->sidemove = -sidemove[speed];
+			player->sidemove = -sidemove[speed];
 		}
 		else if (buttons & cbutton->BT_RIGHT)
 		{
-            player->sidemove = sidemove[speed];
+			player->sidemove = sidemove[speed];
 		}
 		else
-        {
-            /* Analyze analog stick movement (left / right) */
-            sensitivity = (int)(((buttons & 0xff00) >> 8) << 24) >> 24;
+		{
+			/* Analyze analog stick movement (left / right) */
+			sensitivity = (int)(((buttons & 0xff00) >> 8) << 24) >> 24;
 
-            if(sensitivity >= MAXSENSITIVITY || sensitivity <= -MAXSENSITIVITY)
-            {
-                player->sidemove += (sidemove[1] * sensitivity) / 80;
-            }
-        }
+			if(sensitivity >= MAXSENSITIVITY || sensitivity <= -MAXSENSITIVITY)
+			{
+				player->sidemove += (sidemove[1] * sensitivity) / 80;
+			}
+		}
 	}
 	else
 	{
-        if (sensitivity == 0)
-            speed = 0;
+		if (sensitivity == 0)
+			speed = 0;
 
-        if (cbutton->BT_LEFT & buttons)
-        {
-            player->angleturn =  angleturn[player->turnheld + (speed * SLOWTURNTICS)] << 17;
-        }
-        else if (cbutton->BT_RIGHT & buttons)
-        {
-            player->angleturn = -angleturn[player->turnheld + (speed * SLOWTURNTICS)] << 17;
-        }
-        else
-        {
-            /* Analyze analog stick movement (left / right) */
-            sensitivity = (int)(((buttons & 0xff00) >> 8) << 24) >> 24;
-            sensitivity = -sensitivity;
+		if (cbutton->BT_LEFT & buttons)
+		{
+			player->angleturn =  angleturn[player->turnheld + (speed * SLOWTURNTICS)] << 17;
+		}
+		else if (cbutton->BT_RIGHT & buttons)
+		{
+			player->angleturn = -angleturn[player->turnheld + (speed * SLOWTURNTICS)] << 17;
+		}
+		else
+		{
+			/* Analyze analog stick movement (left / right) */
+			sensitivity = (int)(((buttons & 0xff00) >> 8) << 24) >> 24;
+			sensitivity = -sensitivity;
 
-            if(sensitivity >= MAXSENSITIVITY || sensitivity <= -MAXSENSITIVITY)
-            {
-                sensitivity = ((M_SENSITIVITY << 3) + 233) * sensitivity;
-                player->angleturn += (sensitivity / 80) << 17;
-            }
-        }
+			if(sensitivity >= MAXSENSITIVITY || sensitivity <= -MAXSENSITIVITY)
+			{
+				sensitivity = ((M_SENSITIVITY << 3) + 233) * sensitivity;
+				player->angleturn += (sensitivity / 80) << 17;
+			}
+		}
 	}
 
 	/* */
@@ -466,7 +402,7 @@ void P_BuildMove (player_t *player) // 80022154
 
 void P_Thrust (player_t *player, angle_t angle, fixed_t move) // 800225BC
 {
-    angle >>= ANGLETOFINESHIFT;
+	angle >>= ANGLETOFINESHIFT;
 	player->mo->momx += FixedMul(vblsinframe[0] * move, finecosine[angle]);
 	player->mo->momy += FixedMul(vblsinframe[0] * move, finesine[angle]);
 }
@@ -559,12 +495,12 @@ void P_MovePlayer (player_t *player) // 8002282C
 	player->mo->angle += vblsinframe[0] * player->angleturn;
 
 	if(player->onground)
-    {
-        if (player->forwardmove)
-            P_Thrust (player, player->mo->angle, player->forwardmove);
-        if (player->sidemove)
-            P_Thrust (player, player->mo->angle-ANG90, player->sidemove);
-    }
+	{
+		if (player->forwardmove)
+			P_Thrust (player, player->mo->angle, player->forwardmove);
+		if (player->sidemove)
+			P_Thrust (player, player->mo->angle-ANG90, player->sidemove);
+	}
 
 	if ((player->forwardmove || player->sidemove) && player->mo->state == &states[S_001])//S_PLAY
 		P_SetMobjState (player->mo, S_002);//S_PLAY_RUN1
@@ -579,9 +515,9 @@ void P_MovePlayer (player_t *player) // 8002282C
 =================
 */
 
-void P_DeathThink (player_t *player) // 80022914
+void P_DeathThink (player_t *player)
 {
-	angle_t		angle, delta;
+	angle_t angle, delta;
 	int mockrandom; // [Immorpher] store mock text randomizer
 
 	P_MovePsprites (player);
@@ -594,12 +530,11 @@ void P_DeathThink (player_t *player) // 80022914
 
 	P_CalcHeight (player);
 
-	if (player->attacker && player->attacker != player->mo)
-	{
+	if (player->attacker && player->attacker != player->mo) {
 		angle = R_PointToAngle2 (player->mo->x, player->mo->y, player->attacker->x, player->attacker->y);
 		delta = angle - player->mo->angle;
-		if (delta < ANG5 || delta > (unsigned)-ANG5)
-		{	/* looking at killer, so fade damage flash down */
+		if (delta < ANG5 || delta > (unsigned)-ANG5) {
+			/* looking at killer, so fade damage flash down */
 			player->mo->angle = angle;
 			if (player->damagecount)
 				player->damagecount--;
@@ -613,38 +548,35 @@ void P_DeathThink (player_t *player) // 80022914
 		player->damagecount--;
 
 	/* mocking text */
-    if ((ticon - deathmocktics) > MAXMOCKTIME)
-    {
-//		do { // [Immorpher] Prevent mock string from repeating twice
-//			mockrandom = (I_Random()+ticon) % 51; // Updated randomizer for more fun
-//		} while(player->message1 == mockstrings1[mockrandom]);
-		
-        player->messagetic = MSGTICS;//2*MSGTICS; // [Immorpher] Doubled message time to read them!
-        player->message = mockstrings1[P_Random() % 12];//mockrandom];
+	if ((ticon - deathmocktics) > MAXMOCKTIME) {
+		do { // [Immorpher] Prevent mock string from repeating twice
+			mockrandom = (I_Random()+ticon) % 51; // Updated randomizer for more fun
+		} while(player->message1 == mockstrings1[mockrandom]);
+
+		player->messagetic = 2*MSGTICS; // [Immorpher] Doubled message time to read them!
+		player->message = mockstrings1[mockrandom];
 		player->messagecolor = 0xff200000;
-        deathmocktics = ticon;
-    }
+		deathmocktics = ticon;
+	}
 
 	if (((ticbuttons[0] & (PAD_A|PAD_B|ALL_TRIG|ALL_CBUTTONS)) != 0) &&
-        (player->viewheight <= 8*FRACUNIT))
-    {
+		(player->viewheight <= 8*FRACUNIT)) {
 		player->playerstate = PST_REBORN;
-    }
+	}
 
-    if (player->bonuscount)
-        player->bonuscount -= 1;
+	if (player->bonuscount)
+		player->bonuscount -= 1;
 
-    // [d64] - recoil pitch from weapons
-    if (player->recoilpitch)
-        player->recoilpitch = (((player->recoilpitch << 2) - player->recoilpitch) >> 2);
+	// [d64] - recoil pitch from weapons
+	if (player->recoilpitch)
+		player->recoilpitch = (((player->recoilpitch << 2) - player->recoilpitch) >> 2);
 
-    if(player->bfgcount)
-    {
-        player->bfgcount -= 6;
+	if(player->bfgcount) {
+		player->bfgcount -= 6;
 
-        if(player->bfgcount < 0)
-            player->bfgcount = 0;
-    }
+		if(player->bfgcount < 0)
+			player->bfgcount = 0;
+	}
 }
 
 /*
@@ -659,72 +591,72 @@ void P_DeathThink (player_t *player) // 80022914
 
 void P_PlayerInSpecialSector (player_t *player, sector_t *sec) // 80022B1C
 {
-    fixed_t speed;
+	fixed_t speed;
 
 	if (player->mo->z != sec->floorheight)
 		return;		/* not all the way down yet */
 
-    if(sec->flags & MS_SECRET)
-    {
-        player->secretcount++;
-        player->message = "You found a secret area!";
-        player->messagetic = MSGTICS;
+	if(sec->flags & MS_SECRET)
+	{
+		player->secretcount++;
+		player->message = "You found a secret area!";
+		player->messagetic = MSGTICS;
 		player->messagecolor = 0x00ffff00;
-        sec->flags &= ~MS_SECRET;
-    }
+		sec->flags &= ~MS_SECRET;
+	}
 
-    if(sec->flags & MS_DAMAGEX5)    /* NUKAGE DAMAGE */
-    {
-        if(!player->powers[pw_ironfeet])
-        {
-            if ((gamevbls < (int)gametic) && !(gametic & 31))
-                  P_DamageMobj(player->mo, NULL, NULL, 5);
-        }
-    }
+	if(sec->flags & MS_DAMAGEX5)    /* NUKAGE DAMAGE */
+	{
+		if(!player->powers[pw_ironfeet])
+		{
+			if ((gamevbls < (int)gametic) && !(gametic & 31))
+				  P_DamageMobj(player->mo, NULL, NULL, 5);
+		}
+	}
 
-    if(sec->flags & MS_DAMAGEX10)    /* HELLSLIME DAMAGE */
-    {
-        if(!player->powers[pw_ironfeet])
-        {
-            if ((gamevbls < (int)gametic) && !(gametic & 31))
-                  P_DamageMobj(player->mo, NULL, NULL, 10);
-        }
-    }
+	if(sec->flags & MS_DAMAGEX10)    /* HELLSLIME DAMAGE */
+	{
+		if(!player->powers[pw_ironfeet])
+		{
+			if ((gamevbls < (int)gametic) && !(gametic & 31))
+				  P_DamageMobj(player->mo, NULL, NULL, 10);
+		}
+	}
 
-    if(sec->flags & MS_DAMAGEX20)    /* SUPER HELLSLIME DAMAGE */
-    {
-        if(!player->powers[pw_ironfeet] || (P_Random() < 5))
-        {
-            if ((gamevbls < (int)gametic) && !(gametic & 31))
-                  P_DamageMobj(player->mo, NULL, NULL, 20);
-        }
-    }
+	if(sec->flags & MS_DAMAGEX20)    /* SUPER HELLSLIME DAMAGE */
+	{
+		if(!player->powers[pw_ironfeet] || (P_Random() < 5))
+		{
+			if ((gamevbls < (int)gametic) && !(gametic & 31))
+				  P_DamageMobj(player->mo, NULL, NULL, 20);
+		}
+	}
 
-    if(sec->flags & MS_SCROLLFLOOR)
-    {
-        if(sec->flags & MS_SCROLLFAST)
-            speed = 0x3000;
-        else
-            speed = 0x1000;
+	if(sec->flags & MS_SCROLLFLOOR)
+	{
+		if(sec->flags & MS_SCROLLFAST)
+			speed = 0x3000;
+		else
+			speed = 0x1000;
 
-        if(sec->flags & MS_SCROLLLEFT)
-        {
-            P_Thrust(player, ANG180, speed);
-        }
-        else if(sec->flags & MS_SCROLLRIGHT)
-        {
-            P_Thrust(player, 0, speed);
-        }
+		if(sec->flags & MS_SCROLLLEFT)
+		{
+			P_Thrust(player, ANG180, speed);
+		}
+		else if(sec->flags & MS_SCROLLRIGHT)
+		{
+			P_Thrust(player, 0, speed);
+		}
 
-        if(sec->flags & MS_SCROLLUP)
-        {
-            P_Thrust(player, ANG90, speed);
-        }
-        else if(sec->flags & MS_SCROLLDOWN)
-        {
-            P_Thrust(player, ANG270, speed);
-        }
-    }
+		if(sec->flags & MS_SCROLLUP)
+		{
+			P_Thrust(player, ANG90, speed);
+		}
+		else if(sec->flags & MS_SCROLLDOWN)
+		{
+			P_Thrust(player, ANG270, speed);
+		}
+	}
 }
 
 /*
@@ -768,12 +700,12 @@ void P_PlayerThink (player_t *player) // 80022D60
 		else if ((buttons & cbutton->BT_WEAPONFORWARD) && !(oldbuttons & cbutton->BT_WEAPONFORWARD))
 		{
 		    if((int)(weapon) < NUMWEAPONS)
-            {
-                while(++weapon < NUMWEAPONS && !player->weaponowned[weapon]);
-            }
+			{
+				while(++weapon < NUMWEAPONS && !player->weaponowned[weapon]);
+			}
 
-            if((int)weapon < NUMWEAPONS)
-                player->pendingweapon = weapon;
+			if((int)weapon < NUMWEAPONS)
+				player->pendingweapon = weapon;
 		}
 	}
 
@@ -782,9 +714,9 @@ void P_PlayerThink (player_t *player) // 80022D60
 		P_PlayerMobjThink(player->mo);
 		P_BuildMove(player);
 
-        sec = player->mo->subsector->sector;
-        if (sec->flags & (MS_SECRET | MS_DAMAGEX5 | MS_DAMAGEX10 | MS_DAMAGEX20 | MS_SCROLLFLOOR))
-            P_PlayerInSpecialSector(player, sec);
+		sec = player->mo->subsector->sector;
+		if (sec->flags & (MS_SECRET | MS_DAMAGEX5 | MS_DAMAGEX10 | MS_DAMAGEX20 | MS_SCROLLFLOOR))
+			P_PlayerInSpecialSector(player, sec);
 
 		if (player->playerstate == PST_DEAD)
 		{
@@ -829,9 +761,9 @@ void P_PlayerThink (player_t *player) // 80022D60
 			}
 		}
 		else
-        {
+		{
 			player->usedown = false;
-        }
+		}
 
 		if (buttons & cbutton->BT_ATTACK)
 		{
@@ -839,9 +771,9 @@ void P_PlayerThink (player_t *player) // 80022D60
 			player->attackdown++;
 		}
 		else
-        {
+		{
 			player->attackdown = 0;
-        }
+		}
 
 		/* */
 		/* cycle psprites */
@@ -869,34 +801,34 @@ void P_PlayerThink (player_t *player) // 80022D60
 					player->mo->flags &= ~MF_SHADOW;
 				}
 				else if ((player->powers[pw_invisibility] < 61) && !(player->powers[pw_invisibility] & 7))
-                {
-                    player->mo->flags ^= MF_SHADOW;
-                }
+				{
+					player->mo->flags ^= MF_SHADOW;
+				}
 			}
 
-            if (player->powers[pw_infrared])
-                player->powers[pw_infrared]--;
+			if (player->powers[pw_infrared])
+				player->powers[pw_infrared]--;
 
-            if (player->powers[pw_ironfeet])
-                player->powers[pw_ironfeet]--;
+			if (player->powers[pw_ironfeet])
+				player->powers[pw_ironfeet]--;
 
-            if (player->damagecount)
-                player->damagecount--;
+			if (player->damagecount)
+				player->damagecount--;
 
-            if (player->bonuscount)
-                player->bonuscount--;
+			if (player->bonuscount)
+				player->bonuscount--;
 
-            // [d64] - recoil pitch from weapons
-            if (player->recoilpitch)
-                player->recoilpitch = (((player->recoilpitch << 2) - player->recoilpitch) >> 2);
+			// [d64] - recoil pitch from weapons
+			if (player->recoilpitch)
+				player->recoilpitch = (((player->recoilpitch << 2) - player->recoilpitch) >> 2);
 
-            if(player->bfgcount)
-            {
-                player->bfgcount -= 6;
+			if(player->bfgcount)
+			{
+				player->bfgcount -= 6;
 
-                if(player->bfgcount < 0)
-                    player->bfgcount = 0;
-            }
+				if(player->bfgcount < 0)
+					player->bfgcount = 0;
+			}
 		}
 	}
 }

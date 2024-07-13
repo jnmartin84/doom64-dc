@@ -31,7 +31,7 @@ C_FILES := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
 # Object files
 O_FILES := $(foreach file,$(C_FILES),$(file:.c=.o))
 
-CFLAGS=${KOS_CFLAGS} -std=c11
+CFLAGS=${KOS_CFLAGS}
 
 # tools
 PRINT = printf
