@@ -24,6 +24,8 @@ The build has been done on the following platforms successfully:
 
 You will need a host/native GCC install and a full working Dreamcast/KallistiOS toolchain install (https://dreamcast.wiki/Getting_Started_with_Dreamcast_development).
 
+
+
 **Repo contents**
 
 Whatever the directory you cloned this github repo to is named and wherever it is located, it will be referred to in this document as
@@ -46,6 +48,7 @@ Under doom64-dc, you will find
     ---- ogg/ (all of the music tracks as 44khz mono OGG)
     ---- sfx/ (all of the game sfx as 22khz ADPCM WAV)
     ---- vq/ (where the sprite sheet for non enemy sprites ends up)
+
 
 
 **How to generate Doom 64 disc image**
