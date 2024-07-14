@@ -360,7 +360,7 @@ boolean enable_messages = true; // 8005A7B8
 int HUDopacity = 255;			// [Immorpher] HUD opacity
 int SfxVolume = 75;             // 8005A7C0
 int MusVolume = 85;             // 8005A7C4
-int brightness = 100;             // 8005A7C8
+int brightness = 150;             // 8005A7C8
 int M_SENSITIVITY = 0;          // 8005A7CC
 boolean FeaturesUnlocked = true; // 8005A7D0
 int MotionBob = 0x100000; // [Immorpher] Motion Bob works in hexadecimal
@@ -1054,7 +1054,7 @@ int M_MenuTicker(void) // 80007E0C
                     if (buttons & PAD_RIGHT)
                     {
                         brightness += 2; // [Immorpher] increments doubled for scroll speed
-                        if (brightness <= 200)
+                        if (brightness <= 300)
                         {
                             P_RefreshBrightness();
                             if (brightness & 2)
@@ -1065,7 +1065,7 @@ int M_MenuTicker(void) // 80007E0C
                         }
                         else
                         {
-                            brightness = 200;
+                            brightness = 300;
                         }
                     }
                     else if (buttons & PAD_LEFT)
@@ -2404,7 +2404,8 @@ void M_VideoDrawer(void) // 80009884
     }
 
     ST_DrawSymbol(82, 80, 68, text_alpha | 0xffffff00);
-    ST_DrawSymbol(brightness  / 2  + 83, 80, 69, text_alpha | 0xffffff00);
+//    ST_DrawSymbol(brightness  / 2  + 83, 80, 69, text_alpha | 0xffffff00);
+    ST_DrawSymbol(brightness / 3  + 83, 80, 69, text_alpha | 0xffffff00);
 
     ST_DrawSymbol(Menu_Video[0].x - 37, Menu_Video[cursorpos].y - 9, MenuAnimationTic + 70, text_alpha | 0xffffff00);
 }
