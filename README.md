@@ -40,6 +40,7 @@ Under doom64-dc, you will find
 
     doom64-dc/
     -- README.md (you're reading it right now)
+    -- Makefile, Makefile.kos (how it gets built)
     -- wadtool/ (the tool that builds texture and WAD files from Doom 64 ROM)
     -- selfboot/ (all files needed to make a bootable CD image)
     ---- ogg/ (all of the music tracks as 44khz mono OGG)
