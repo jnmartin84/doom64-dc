@@ -1,5 +1,6 @@
 # Makefile to build doom64
-
+.PHONY: wadtool
+ 
 TARGET_STRING := doom64.elf
 TARGET := $(TARGET_STRING)
 
@@ -31,7 +32,7 @@ C_FILES := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
 # Object files
 O_FILES := $(foreach file,$(C_FILES),$(file:.c=.o))
 
-CFLAGS=${KOS_CFLAGS}
+#CFLAGS=${KOS_CFLAGS}
 
 # tools
 PRINT = printf
@@ -59,11 +60,15 @@ all: $(TARGET)
 buildtarget:
 	mkdir -p $(BUILD_DIR)
 
-$(TARGET): $(O_FILES) | buildtarget
+$(TARGET): wadtool $(O_FILES) | buildtarget
 	${KOS_CC} ${KOS_CFLAGS} ${KOS_LDFLAGS} -o ${BUILD_DIR}/$@ ${KOS_START} $(O_FILES) -loggvorbisplay -lvorbis -logg ${KOS_LIBS} -lm
 
 clean:
 	$(RM) doom64.cdi d64isoldr.iso header.iso bootfile.bin $(O_FILES) $(BUILD_DIR)/$(TARGET)
+	wadtool/clean.sh
+
+wadtool:
+	wadtool/build.sh
 
 cdi: $(TARGET)
 	$(RM) doom64.cdi

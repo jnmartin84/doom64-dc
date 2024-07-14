@@ -47,7 +47,7 @@ Under doom64-dc, you will find
     ---- vq/ (where the sprite sheet for non enemy sprites ends up)
 
 
-**How to generate Dreamcast files**
+**How to generate Doom 64 disc image**
 
 Somehow acquire a Doom 64 ROM in Z64 format.
 
@@ -60,14 +60,20 @@ The below is the expected md5sum output
 
 Now place a copy of `doom64.z64` in the `wadtool` directory.
 
-Go to the `wadtool` directory in a terminal. Run the `build.sh` script. This builds the tool, runs it and copies the outputs to the correct location.
+Go to the repo directory and compile it like any other KallistiOS project. Make sure you source your KOS environment first.
 
-    cd ~/doom64-dc/wadtool
-    ./build.sh
+To build the source into an ELF file, run `make`.
+
+    source /opt/toolchains/dc/kos/environ.sh
+    cd ~/doom64-dc
+    make clean
+    make
+
+As part of the build, `Make` will automatically build and run `wadtool`.
 
 This should take a minute or less to run depending on your processor and disk speed.
 
-You should see terminal output that matches the following except for the time values:
+The first terminal output you see should match the following except for the time values (the first time you run `make`):
 
     Compiling wadtool
     Running wadtool
@@ -78,6 +84,8 @@ You should see terminal output that matches the following except for the time va
     Generated data files in specified selfboot directory.
     Done.
 
+Subsequent runs will not rebuild `wadtool` but start at `Running wadtool`.
+
 When it is complete, you will now have the following new files in the `~/doom64-dc/selfboot` directory:
 
     alt.wad
@@ -85,17 +93,6 @@ When it is complete, you will now have the following new files in the `~/doom64-
     vq/non_enemy.tex
 
 You now have all of the updated files required to run Doom 64 for Dreamcast in the places they need to be.
-
-**Building Doom 64 disc image**
-
-Go to the repo directory and compile it like any other KallistiOS project. Make sure you source your KOS environment first.
-
-To build the source into an ELF file, run `make`.
-
-    source /opt/toolchains/dc/kos/environ.sh
-    cd ~/doom64-dc
-    make clean
-    make
 
 If you have `mkdcdisc` installed, you can use the `cdi` build target to create a self-booting CDI.
 
@@ -107,4 +104,6 @@ If you have both `mksdiso` and `mkdcdisc` installed, you can use the `sdiso` bui
     cd ~/doom64-dc
     make sdiso
 
-Good luck.
+If you are trying to use any other tool, you are on your own.
+
+Good luck. :-)
