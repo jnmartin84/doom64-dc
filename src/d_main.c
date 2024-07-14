@@ -210,7 +210,7 @@ int MiniLoop(void(*start)(void), void(*stop)(),
 		// best effort 30fps cap when frame time is less than 1/30th of a second
 		end_time = timer_us_gettime64();
 		if((end_time - start_time) < 33333)
-			usleep(33333 - (end_time - start_time));
+			timer_spin_delay_us(33333 - (end_time - start_time));
 
 		framecount += 1;
 	}
