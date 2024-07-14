@@ -75,7 +75,7 @@ You should see terminal output that matches the following except for the time va
     real   0m20.368s
     user   0m19.836s
     sys    0m0.233s
-    Copying generated data files to selfboot directory
+    Generated data files in specified selfboot directory.
     Done.
 
 When it is complete, you will now have the following new files in the `~/doom64-dc/selfboot` directory:

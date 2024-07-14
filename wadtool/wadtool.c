@@ -153,8 +153,11 @@ PalettizedImage *allImages[966 + 355];
 spriteN64_t *allSprites[966 + 355];
 
 int main (int argc, char **argv) {
+	char output_paths[1024];
+	char *path_to_rom = argv[1];
+	char *output_directory = argv[2];
 
-	int z64_fd = open("doom64.z64", O_RDONLY);
+	int z64_fd = open(argv[1], O_RDONLY); // doom64.z64
 	init_gunpals();
 	memset(allImages, 0, sizeof(PalettizedImage *) * (966+355));
 
@@ -698,7 +701,9 @@ int main (int argc, char **argv) {
 	uint8_t *twid_sheet = (uint8_t *)malloc(1024*1024);
 	load_twid(twid_sheet, ne_sheet, 1024, 1024);
 	uint8_t junk[16];
-	int sheet_fd = open("non_enemy.tex", O_RDWR | O_CREAT, 0666);
+	sprintf(output_paths, "%s/vq/non_enemy.tex", output_directory);
+	int sheet_fd = open(output_paths, //"non_enemy.tex", 
+O_RDWR | O_CREAT, 0666);
 	write(sheet_fd, junk, 16);
 	write(sheet_fd, twid_sheet, 1024*1024);
 	close(sheet_fd);
@@ -708,7 +713,9 @@ int main (int argc, char **argv) {
 	/*
 	 * HERE BEGINS FIXWAD CODE adapted
 	 */
-	int fd = open("pow2.wad", O_RDWR | O_CREAT, 0666);
+	sprintf(output_paths, "%s/pow2.wad", output_directory);
+	int fd = open(output_paths, //"pow2.wad",
+O_RDWR | O_CREAT, 0666);
 
 	for(int i=0;i<4;i++) {
 		write(fd, &identifier[i], 1);
@@ -802,7 +809,9 @@ int main (int argc, char **argv) {
 
 #define NUMALTLUMPS 311
 	char pwad[4] = {'P','W','A','D'};
-	int alt_fd = open("alt.wad", O_RDWR | O_CREAT, 0666);
+	sprintf(output_paths, "%s/alt.wad", output_directory);
+	int alt_fd = open(output_paths, //"alt.wad", 
+O_RDWR | O_CREAT, 0666);
 	for(int i=0;i<4;i++) {
 		write(alt_fd, &pwad[i], 1);
 	}
