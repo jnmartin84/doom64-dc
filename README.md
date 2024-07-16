@@ -88,7 +88,7 @@ The first terminal output you see should match the following except for the time
     Generated data files in specified selfboot directory.
     Done.
 
-Subsequent runs will not rebuild `wadtool` but start at `Running wadtool`.
+Subsequent runs will not rebuild `wadtool` but start at `Running wadtool` or skip that too if the generated files already exist in `selfboot`.
 
 When it is complete, you will now have the following new files in the `~/doom64-dc/selfboot` directory:
 
