@@ -4,7 +4,7 @@
 #include "p_local.h"
 #include "st_main.h"
 
-#define MAXMOCKTIME 900 // [Immorpher] Reduced this by half for the fun!
+#define MAXMOCKTIME 1800 //900 // [Immorpher] Reduced this by half for the fun!
 int deathmocktics;
 
 // Bonus mock texts from the Doom 64 community!
@@ -518,7 +518,7 @@ void P_MovePlayer (player_t *player) // 8002282C
 void P_DeathThink (player_t *player)
 {
 	angle_t angle, delta;
-	int mockrandom; // [Immorpher] store mock text randomizer
+	//int mockrandom; // [Immorpher] store mock text randomizer
 
 	P_MovePsprites (player);
 
@@ -549,12 +549,12 @@ void P_DeathThink (player_t *player)
 
 	/* mocking text */
 	if ((ticon - deathmocktics) > MAXMOCKTIME) {
-		do { // [Immorpher] Prevent mock string from repeating twice
-			mockrandom = (I_Random()+ticon) % 51; // Updated randomizer for more fun
-		} while(player->message1 == mockstrings1[mockrandom]);
+		//do { // [Immorpher] Prevent mock string from repeating twice
+		//	mockrandom = (I_Random()+ticon) % 51; // Updated randomizer for more fun
+		//} while(player->message1 == mockstrings1[mockrandom]);
 
-		player->messagetic = 2*MSGTICS; // [Immorpher] Doubled message time to read them!
-		player->message = mockstrings1[mockrandom];
+		player->messagetic = MSGTICS;//2*MSGTICS; // [Immorpher] Doubled message time to read them!
+		player->message = mockstrings1[P_Random() % 12];//mockrandom];
 		player->messagecolor = 0xff200000;
 		deathmocktics = ticon;
 	}
