@@ -1054,7 +1054,7 @@ int M_MenuTicker(void) // 80007E0C
                     if (buttons & PAD_RIGHT)
                     {
                         brightness += 2; // [Immorpher] increments doubled for scroll speed
-                        if (brightness <= 300)
+                        if (brightness <= 200)
                         {
                             P_RefreshBrightness();
                             if (brightness & 2)
@@ -1065,7 +1065,7 @@ int M_MenuTicker(void) // 80007E0C
                         }
                         else
                         {
-                            brightness = 300;
+                            brightness = 200;
                         }
                     }
                     else if (buttons & PAD_LEFT)
