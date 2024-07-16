@@ -360,7 +360,8 @@ boolean enable_messages = true; // 8005A7B8
 int HUDopacity = 255;			// [Immorpher] HUD opacity
 int SfxVolume = 75;             // 8005A7C0
 int MusVolume = 85;             // 8005A7C4
-int brightness = 150;             // 8005A7C8
+#define MAX_BRIGHTNESS 200
+int brightness = (3*MAX_BRIGHTNESS) / 4;             // 8005A7C8
 int M_SENSITIVITY = 0;          // 8005A7CC
 boolean FeaturesUnlocked = true; // 8005A7D0
 int MotionBob = 0x100000; // [Immorpher] Motion Bob works in hexadecimal
@@ -1053,11 +1054,11 @@ int M_MenuTicker(void) // 80007E0C
                 case 9: // Brightness
                     if (buttons & PAD_RIGHT)
                     {
-                        brightness += 2; // [Immorpher] increments doubled for scroll speed
-                        if (brightness <= 200)
+                        brightness += (MAX_BRIGHTNESS / 100); // [Immorpher] increments doubled for scroll speed
+                        if (brightness <= MAX_BRIGHTNESS)
                         {
                             P_RefreshBrightness();
-                            if (brightness & 2)
+                            if (!(brightness & (MAX_BRIGHTNESS / 100)))
                             {
                                 S_StartSound(NULL, sfx_secmove);
                                 return ga_nothing;
@@ -1065,12 +1066,12 @@ int M_MenuTicker(void) // 80007E0C
                         }
                         else
                         {
-                            brightness = 200;
+                            brightness = MAX_BRIGHTNESS;
                         }
                     }
                     else if (buttons & PAD_LEFT)
                     {
-                        brightness -= 2; // [Immorpher] decrement speed doubled
+                        brightness -= (MAX_BRIGHTNESS / 100); // [Immorpher] decrement speed doubled
                         if (brightness < 0)
                         {
                             brightness = 0;
@@ -1078,7 +1079,7 @@ int M_MenuTicker(void) // 80007E0C
                         else
                         {
                             P_RefreshBrightness();
-                            if (brightness & 2)
+                            if (!(brightness & (MAX_BRIGHTNESS / 100)))
                             {
                                 S_StartSound(NULL, sfx_secmove);
                                 return ga_nothing;
@@ -2404,8 +2405,9 @@ void M_VideoDrawer(void) // 80009884
     }
 
     ST_DrawSymbol(82, 80, 68, text_alpha | 0xffffff00);
-//    ST_DrawSymbol(brightness  / 2  + 83, 80, 69, text_alpha | 0xffffff00);
-    ST_DrawSymbol(brightness / 3  + 83, 80, 69, text_alpha | 0xffffff00);
+    ST_DrawSymbol(brightness  / 2  + 83, 80, 69, text_alpha | 0xffffff00);
+// when I get 300 working
+//    ST_DrawSymbol(brightness / 3  + 83, 80, 69, text_alpha | 0xffffff00);
 
     ST_DrawSymbol(Menu_Video[0].x - 37, Menu_Video[cursorpos].y - 9, MenuAnimationTic + 70, text_alpha | 0xffffff00);
 }
