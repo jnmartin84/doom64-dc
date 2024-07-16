@@ -1,6 +1,6 @@
 # Makefile to build doom64
 .PHONY: wadtool
- 
+
 TARGET_STRING := doom64.elf
 TARGET := $(TARGET_STRING)
 
@@ -79,7 +79,6 @@ sdiso: cdi
 	mksdiso -h doom64.cdi d64isoldr.iso
 
 ALL_DIRS := $(BUILD_DIR) $(addprefix $(BUILD_DIR)/,$(SRC_DIRS))
-
 
 print-% : ; $(info $* is a $(flavor $*) variable set to [$($*)]) @true
 
