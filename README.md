@@ -19,7 +19,7 @@
 The build is only guaranteed to work on the following platform:
     Ubuntu 22.04
 
-It should work on most other Linux environments. It may or may not still be functional on Windows/Cygwin.
+It should work on most other Linux environments. The `wadtool` does not create working results on Cygwin anymore. Will look into that in the future.
     
 You will need a host/native GCC install and a full working Dreamcast/KallistiOS toolchain install (https://dreamcast.wiki/Getting_Started_with_Dreamcast_development).
 
