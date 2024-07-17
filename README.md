@@ -16,12 +16,11 @@
 
 **Pre-requisites**
 
-The build has been done on the following platforms successfully:
-
-    Windows 10/11 with Cygwin
+The build is only guaranteed to work on the following platform:
     Ubuntu 22.04
-    Debian (unknown version)
 
+It should work on most other Linux environments. It may or may not still be functional on Windows/Cygwin.
+    
 You will need a host/native GCC install and a full working Dreamcast/KallistiOS toolchain install (https://dreamcast.wiki/Getting_Started_with_Dreamcast_development).
 
 
