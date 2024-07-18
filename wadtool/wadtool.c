@@ -234,7 +234,6 @@ int main (int argc, char **argv) {
 		exit(-1);
 	}
 	z64_total_read += z64_wad_rv;
-	printf("read %d/%d of Doom 64 IWAD\n", z64_wad_rv, z64_total_read);
 	while (z64_total_read < ORIGINAL_DOOM64_WAD_SIZE) {
 		z64_wad_rv = fread(doom64wad + z64_total_read, 1, ORIGINAL_DOOM64_WAD_SIZE - z64_total_read, z64_fd);
 		if (-1 == z64_wad_rv) {
@@ -244,7 +243,6 @@ int main (int argc, char **argv) {
 			exit(-1);
 		}
 		z64_total_read += z64_wad_rv;
-	printf("read %d/%d of Doom 64 IWAD\n", z64_wad_rv, z64_total_read);
 	}
 	int z64_close = fclose(z64_fd);
 	if (0 != z64_close) {
@@ -256,7 +254,7 @@ int main (int argc, char **argv) {
 	memcpy(&wadfileptr, doom64wad, sizeof(wadinfo_t));
 
 	if (strncasecmp(wadfileptr.identification, "IWAD", 4)) {
-		printf("invalid iwad id %c %c %c %c\n",
+		fprintf(stderr, "invalid iwad id %c %c %c %c\n",
 			wadfileptr.identification[0],
 			wadfileptr.identification[1],
 			wadfileptr.identification[2],
@@ -935,7 +933,6 @@ int main (int argc, char **argv) {
 		exit(-1);
 	}
 	twidsheet_total += twidsheet_write;
-	printf("wrote %d/%d of twidsheet\n", twidsheet_write, twidsheet_total);
 	while(twidsheet_total < 1024*1024) {
 		twidsheet_write = fwrite(twid_sheet + twidsheet_total, 1, (1024*1024) - twidsheet_total, sheet_fd);
 		if (-1 == twidsheet_write) {
@@ -952,8 +949,6 @@ int main (int argc, char **argv) {
 			exit(-1);
 		}
 		twidsheet_total += twidsheet_write;
-	printf("wrote %d/%d of twidsheet\n", twidsheet_write, twidsheet_total);
-
 	}
 
 	int sheetclose = fclose(sheet_fd);
