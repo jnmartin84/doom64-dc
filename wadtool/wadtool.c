@@ -4,7 +4,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
-
+#include <errno.h>
 #include "imgtypes.h"
 
 #include "lumpinfo.h"
@@ -157,15 +157,101 @@ int main (int argc, char **argv) {
 	char *path_to_rom = argv[1];
 	char *output_directory = argv[2];
 
-	int z64_fd = open(argv[1], O_RDONLY); // doom64.z64
+	doom64wad = (uint8_t *)malloc(ORIGINAL_DOOM64_WAD_SIZE);
+	if (NULL == doom64wad) {
+		fprintf(stderr, "Could not allocate 6101168 bytes for original Doom 64 WAD.\n");
+		exit(-1);
+	}
+
+	FILE *z64_fd = fopen(argv[1], "rb"); // doom64.z64
+	if (NULL == z64_fd) {
+		fprintf(stderr, "Could not open Doom 64 ROM for reading.\n");
+		free(doom64wad);
+		exit(-1);
+	}
+
 	init_gunpals();
 	memset(allImages, 0, sizeof(PalettizedImage *) * (966+355));
 
-	doom64wad = (uint8_t *)malloc(ORIGINAL_DOOM64_WAD_SIZE);
+	RGBPalette *nonEnemyPal = (RGBPalette *)malloc(sizeof(RGBPalette));
+	if (NULL == nonEnemyPal) {
+		fprintf(stderr, "Could not allocate common non-enemy palette.\n");
+		free(doom64wad);
+		exit(-1);
+	}
+	nonEnemyPal->size = 256;
+	nonEnemyPal->table = (RGBTriple *)malloc(256 * sizeof(RGBTriple));
+	if (NULL == nonEnemyPal->table) {
+		fprintf(stderr, "Could not allocate color table for common non-enemy palette.\n");
+		free(nonEnemyPal);
+		free(doom64wad);
+		exit(-1);
+	}
+	for (int ci=0;ci<256;ci++) {
+		nonEnemyPal->table[ci].R = D64NONENEMY[ci][0];
+		nonEnemyPal->table[ci].G = D64NONENEMY[ci][1];
+		nonEnemyPal->table[ci].B = D64NONENEMY[ci][2];
+	}
 
-	lseek(z64_fd, 408848, SEEK_SET);
-	read(z64_fd, doom64wad, ORIGINAL_DOOM64_WAD_SIZE);
-	close(z64_fd);
+	RGBPalette *enemyPal = (RGBPalette *)malloc(sizeof(RGBPalette));
+	if (NULL == enemyPal) {
+		fprintf(stderr, "Could not allocate common enemy palette.\n");
+		free(nonEnemyPal->table);
+		free(nonEnemyPal);
+		free(doom64wad);
+		exit(-1);
+	}
+	enemyPal->size = 256;
+	enemyPal->table = (RGBTriple *)malloc(256 * sizeof(RGBTriple));
+	if (NULL == enemyPal->table) {
+		fprintf(stderr, "Could not allocate color table for common enemy palette.\n");
+		free(enemyPal);
+		free(nonEnemyPal->table);
+		free(nonEnemyPal);
+		free(doom64wad);
+		exit(-1);
+	}
+	for (int ci=0;ci<256;ci++) {
+		enemyPal->table[ci].R = D64MONSTER[ci][0];
+		enemyPal->table[ci].G = D64MONSTER[ci][1];
+		enemyPal->table[ci].B = D64MONSTER[ci][2];
+	}
+
+
+	int z64_seek_rv = fseek(z64_fd, 408848, SEEK_SET);
+	if (-1 == z64_seek_rv) {
+		fprintf(stderr, "Could not seek to IWAD in Doom 64 ROM: %s\n", strerror(errno));
+		free(doom64wad);
+		fclose(z64_fd);
+		exit(-1);
+	}
+	size_t z64_total_read = 0;
+	size_t z64_wad_rv = fread(doom64wad, 1, ORIGINAL_DOOM64_WAD_SIZE, z64_fd);
+	if (-1 == z64_wad_rv) {
+		fprintf(stderr, "Could not read IWAD from Doom 64 WAD: %s\n", strerror(errno));
+		free(doom64wad);
+		fclose(z64_fd);
+		exit(-1);
+	}
+	z64_total_read += z64_wad_rv;
+	printf("read %d/%d of Doom 64 IWAD\n", z64_wad_rv, z64_total_read);
+	while (z64_total_read < ORIGINAL_DOOM64_WAD_SIZE) {
+		z64_wad_rv = fread(doom64wad + z64_total_read, 1, ORIGINAL_DOOM64_WAD_SIZE - z64_total_read, z64_fd);
+		if (-1 == z64_wad_rv) {
+			fprintf(stderr, "Could not read IWAD from Doom 64 WAD: %s\n", strerror(errno));
+			free(doom64wad);
+			fclose(z64_fd);
+			exit(-1);
+		}
+		z64_total_read += z64_wad_rv;
+	printf("read %d/%d of Doom 64 IWAD\n", z64_wad_rv, z64_total_read);
+	}
+	int z64_close = fclose(z64_fd);
+	if (0 != z64_close) {
+		fprintf(stderr, "Error closing Doom 64 ROM: %s\n", strerror(errno));
+		free(doom64wad);
+		exit(-1);
+	}
 
 	memcpy(&wadfileptr, doom64wad, sizeof(wadinfo_t));
 
@@ -181,6 +267,10 @@ int main (int argc, char **argv) {
 
 	numlumps = wadfileptr.numlumps;
 	lumpinfo = (lumpinfo_t *)malloc(numlumps * sizeof(lumpinfo_t));
+	if (NULL == lumpinfo) {
+		fprintf(stderr, "Could not allocate lumpinfo.\n");
+		exit(-1);
+	}
 	infotableofs = wadfileptr.infotableofs;
 
 	memcpy((void*)lumpinfo, doom64wad + infotableofs, numlumps * sizeof(lumpinfo_t));
@@ -190,7 +280,6 @@ int main (int argc, char **argv) {
 		memset(name, 0, 9);
 		memcpy(name, lumpinfo[i].name, 8);
 		name[0] &= 0x7f;
-		//printf("%s\n", name);
 // 1 - 346 are mostly 16 color sprites I think
 // 347 - 905 are 256 color sprites or palettes
 // 906 - 947 are weapons I dont know if they're 16 or 256 color
@@ -212,16 +301,22 @@ int main (int argc, char **argv) {
 // CYBR one pal 818			16 + 1
 // RECT one pal 876			17 + 1 == 18
 
-		//printf("lump %d - %s\n", i, name);
-
-		//printf("%02x %02x %02x %02x\n", lumpinfo[i].name[0], lumpinfo[i].name[1], lumpinfo[i].name[2], lumpinfo[i].name[3]);
-
 		// EXTERNAL MONSTER PALETTES
 		if (name[0] == 'P' && name[1] == 'A' && name[2] == 'L') {
 			continue;
-		} else if ( (!(lumpinfo[i].name[0] & 0x80)) && ((i > 0) && (i < 347))) {
+		} else if ( (!(lumpinfo[i].name[0] & 0x80)) && ((i > 0) && (i < 347))) { // compressed bit not set in name
 			//printf("\tuncompressed lump %s\n", name);
 			uint8_t *tmpdata = malloc(lumpinfo[i].size);
+			if (NULL == tmpdata) {
+				fprintf(stderr, "Could not allocate tmpdata for lump %d.\n", i);
+				free(enemyPal->table);
+				free(enemyPal);
+				free(nonEnemyPal->table);
+				free(nonEnemyPal);
+				free(doom64wad);
+				free(lumpinfo);
+				exit(-1);
+			}
 			memcpy(tmpdata, doom64wad + lumpinfo[i].filepos, lumpinfo[i].size);
 
 			spriteN64_t *sprite = (spriteN64_t *)tmpdata;
@@ -252,38 +347,32 @@ int main (int argc, char **argv) {
 				free(expandedimg);
 			}
 
-			RGBPalette *comPal = (RGBPalette *)malloc(sizeof(RGBPalette));
-			comPal->size = 256;
-			comPal->table = (RGBTriple *)malloc(256 * sizeof(RGBTriple));
-			for (int ci=0;ci<256;ci++) {
-				comPal->table[ci].R = D64NONENEMY[ci][0];
-				comPal->table[ci].G = D64NONENEMY[ci][1];
-				comPal->table[ci].B = D64NONENEMY[ci][2];
-			}
-
 			PalettizedImage *palImg;
 			// 179 - 182 no dither
 //			if ((i >= 179 && i <= 182) || (i >= 216 && i <= 339)) {
 			if (i <= 346) {
-				palImg = Palettize(curImg, comPal);
+				palImg = Palettize(curImg, nonEnemyPal);
 			} else {
-				palImg = FloydSteinbergDither(curImg, comPal);
+				palImg = FloydSteinbergDither(curImg, nonEnemyPal);
 			}
-			//printf("\t\t\t\t\t%08x\n", palImg);
 			allImages[i] = palImg;
-//			free(palImg->pixels); free(palImg);
 			free(curImg->pixels); free(curImg);
 			free(curPal->table); free(curPal);
-			free(comPal->table); free(comPal);
-
 			free(tmpdata);
-		}
-		
-		else if (lumpinfo[i].name[0] & 0x80) {
+		} else if (lumpinfo[i].name[0] & 0x80) { // compressed bit set in name
 			//printf("\tcompressed lump\n");
 			if (i > 0 && i < 966) {
-				//printf("\t\tsprite\n");
 				uint8_t *tmpdata = malloc(lumpinfo[i+1].filepos - lumpinfo[i].filepos);
+				if (NULL == tmpdata) {
+					fprintf(stderr, "Could not allocate tmpdata for lump %d.\n", i);
+					free(enemyPal->table);
+					free(enemyPal);
+					free(nonEnemyPal->table);
+					free(nonEnemyPal);
+					free(doom64wad);
+					free(lumpinfo);
+					exit(-1);
+				}
 				memcpy(tmpdata, doom64wad + lumpinfo[i].filepos, lumpinfo[i+1].filepos - lumpinfo[i].filepos);
 				memset(lumpdata,0,LUMPDATASZ);
 				decode(tmpdata, lumpdata);
@@ -314,16 +403,97 @@ int main (int argc, char **argv) {
 						first4[0] &= 0x7f;
 
 						RGBPalette *curPal = (RGBPalette *)malloc(sizeof(RGBPalette));
+						if (NULL == curPal) {
+							fprintf(stderr, "Could not allocate curPal for lump %d.\n", i);
+							free(tmpdata);
+							free(enemyPal->table);
+							free(enemyPal);
+							free(nonEnemyPal->table);
+							free(nonEnemyPal);
+							free(doom64wad);
+							free(lumpinfo);
+							exit(-1);
+						}
 						curPal->size = 256;
 						curPal->table = (RGBTriple *)malloc(256 * sizeof(RGBTriple));
+						if (NULL == curPal->table) {
+							fprintf(stderr, "Could not allocate curPal color table for lump %d.\n", i);
+							free(curPal);
+							free(tmpdata);
+							free(enemyPal->table);
+							free(enemyPal);
+							free(nonEnemyPal->table);
+							free(nonEnemyPal);
+							free(doom64wad);
+							free(lumpinfo);
+							exit(-1);
+						}
 
 						RGBPalette *altPal = (RGBPalette *)malloc(sizeof(RGBPalette));
+						if (NULL == altPal) {
+							fprintf(stderr, "Could not allocate altPal for lump %d.\n", i);
+							free(curPal->table);
+							free(curPal);
+							free(tmpdata);
+							free(enemyPal->table);
+							free(enemyPal);
+							free(nonEnemyPal->table);
+							free(nonEnemyPal);
+							free(doom64wad);
+							free(lumpinfo);
+							exit(-1);
+						}
 						altPal->size = 256;
 						altPal->table = (RGBTriple *)malloc(256 * sizeof(RGBTriple));
+						if (NULL == altPal->table) {
+							fprintf(stderr, "Could not allocate altPal color table for lump %d.\n", i);
+							free(altPal);
+							free(curPal->table);
+							free(curPal);
+							free(tmpdata);
+							free(enemyPal->table);
+							free(enemyPal);
+							free(nonEnemyPal->table);
+							free(nonEnemyPal);
+							free(doom64wad);
+							free(lumpinfo);
+							exit(-1);
+						}
 
 						RGBPalette *altPal2 = (RGBPalette *)malloc(sizeof(RGBPalette));
+						if (NULL == altPal2) {
+							fprintf(stderr, "Could not allocate altPal2 for lump %d.\n", i);
+							free(altPal->table);
+							free(altPal);
+							free(curPal->table);
+							free(curPal);
+							free(tmpdata);
+							free(enemyPal->table);
+							free(enemyPal);
+							free(nonEnemyPal->table);
+							free(nonEnemyPal);
+							free(doom64wad);
+							free(lumpinfo);
+							exit(-1);
+						}
 						altPal2->size = 256;
 						altPal2->table = (RGBTriple *)malloc(256 * sizeof(RGBTriple));
+						if (NULL == altPal2->table) {
+							fprintf(stderr, "Could not allocate altPal2 color table for lump %d.\n", i);
+							free(altPal2);
+							free(altPal->table);
+							free(altPal);
+							free(curPal->table);
+							free(curPal);
+							free(tmpdata);
+							free(enemyPal->table);
+							free(enemyPal);
+							free(nonEnemyPal->table);
+							free(nonEnemyPal);
+							free(doom64wad);
+							free(lumpinfo);
+							exit(-1);
+						}
 
 						for (int ci=0;ci<256;ci++) {
 							if (!memcmp(first4, "SARG", 4)) {
@@ -395,28 +565,13 @@ int main (int argc, char **argv) {
 							}
 						}
 
-						RGBPalette *comPal = (RGBPalette *)malloc(sizeof(RGBPalette));
-						comPal->size = 256;
-						comPal->table = (RGBTriple *)malloc(256 * sizeof(RGBTriple));
-
-						for (int ci=0;ci<256;ci++) {
-							comPal->table[ci].R = D64MONSTER[ci][0];
-							comPal->table[ci].G = D64MONSTER[ci][1];
-							comPal->table[ci].B = D64MONSTER[ci][2];
-						}
-
 						RGBImage *curImg = fromDoom64Sprite(src, width, height, curPal);
 						RGBImage *altImg = fromDoom64Sprite(src, width, height, altPal);
 						RGBImage *altImg2 = fromDoom64Sprite(src, width, height, altPal2);
 
-						PalettizedImage *palImg = //Palettize(curImg, comPal);//
-						FloydSteinbergDither(curImg, comPal);
-
-						PalettizedImage *altPalImg = //Palettize(curImg, comPal);//
-						FloydSteinbergDither(altImg, comPal);
-						
-						PalettizedImage *altPalImg2 = //Palettize(curImg, comPal);//
-						FloydSteinbergDither(altImg2, comPal);						
+						PalettizedImage *palImg = FloydSteinbergDither(curImg, enemyPal);
+						PalettizedImage *altPalImg = FloydSteinbergDither(altImg, enemyPal);
+						PalettizedImage *altPalImg2 = FloydSteinbergDither(altImg2, enemyPal);
 
 						allImages[i] = palImg;
 						int wp2 = np2(width);
@@ -426,9 +581,26 @@ int main (int argc, char **argv) {
 						Resize(palImg, wp2, hp2);
 						Resize(altPalImg, wp2, hp2);
 						Resize(altPalImg2, wp2, hp2);
-						//printf("\t\t\t\t\t%08x\n", palImg);
 
 						allSprites[i] = (spriteN64_t *)malloc(sizeof(spriteN64_t) + (wp2*hp2));
+						if (NULL == allSprites[i]) {
+							fprintf(stderr, "Could not allocate sprite for lump %d.\n", i);
+							free(altPal2->table);
+							free(altPal2);
+							free(altPal->table);
+							free(altPal);
+							free(curPal->table);
+							free(curPal);
+							free(tmpdata);
+							free(enemyPal->table);
+							free(enemyPal);
+							free(nonEnemyPal->table);
+							free(nonEnemyPal);
+							free(doom64wad);
+							free(lumpinfo);
+							exit(-1);
+						}
+
 						allSprites[i]->tiles = SwapShort(tiles);
 						allSprites[i]->compressed = SwapShort(compressed);
 						allSprites[i]->cmpsize = SwapShort(cmpsize);
@@ -476,37 +648,77 @@ int main (int argc, char **argv) {
 							fullname[3] = '2';
 							altlumpnum2 = W_GetNumForName(fullname);
 						}
+
 						if (altlumpnum != -1) {
-						allSprites[altlumpnum] = (spriteN64_t *)malloc(sizeof(spriteN64_t) + (wp2*hp2));
-						allSprites[altlumpnum]->tiles = SwapShort(tiles);
-						allSprites[altlumpnum]->compressed = SwapShort(compressed);
-						allSprites[altlumpnum]->cmpsize = SwapShort(cmpsize);
-						allSprites[altlumpnum]->xoffs = SwapShort(xoffs);
-						allSprites[altlumpnum]->yoffs = SwapShort(yoffs);
-						allSprites[altlumpnum]->width = SwapShort(wp2);
-						allSprites[altlumpnum]->height = SwapShort(hp2);
-						allSprites[altlumpnum]->tileheight = SwapShort(tileheight);
-						load_twid(allSprites[altlumpnum]->data, altPalImg->pixels, wp2, hp2);						
+							allSprites[altlumpnum] = (spriteN64_t *)malloc(sizeof(spriteN64_t) + (wp2*hp2));
+							if (NULL == allSprites[altlumpnum]) {
+								fprintf(stderr, "Could not allocate sprite for alt lump %d.\n", altlumpnum);
+								free(allSprites[i]);
+								free(altPal2->table);
+								free(altPal2);
+								free(altPal->table);
+								free(altPal);
+								free(curPal->table);
+								free(curPal);
+								free(tmpdata);
+								free(enemyPal->table);
+								free(enemyPal);
+								free(nonEnemyPal->table);
+								free(nonEnemyPal);
+								free(doom64wad);
+								free(lumpinfo);
+								exit(-1);
+							}
+							allSprites[altlumpnum]->tiles = SwapShort(tiles);
+							allSprites[altlumpnum]->compressed = SwapShort(compressed);
+							allSprites[altlumpnum]->cmpsize = SwapShort(cmpsize);
+							allSprites[altlumpnum]->xoffs = SwapShort(xoffs);
+							allSprites[altlumpnum]->yoffs = SwapShort(yoffs);
+							allSprites[altlumpnum]->width = SwapShort(wp2);
+							allSprites[altlumpnum]->height = SwapShort(hp2);
+							allSprites[altlumpnum]->tileheight = SwapShort(tileheight);
+							load_twid(allSprites[altlumpnum]->data, altPalImg->pixels, wp2, hp2);
 						}
+
 						if (altlumpnum2 != -1) {
-						allSprites[altlumpnum2] = (spriteN64_t *)malloc(sizeof(spriteN64_t) + (wp2*hp2));
-						allSprites[altlumpnum2]->tiles = SwapShort(tiles);
-						allSprites[altlumpnum2]->compressed = SwapShort(compressed);
-						allSprites[altlumpnum2]->cmpsize = SwapShort(cmpsize);
-						allSprites[altlumpnum2]->xoffs = SwapShort(xoffs);
-						allSprites[altlumpnum2]->yoffs = SwapShort(yoffs);
-						allSprites[altlumpnum2]->width = SwapShort(wp2);
-						allSprites[altlumpnum2]->height = SwapShort(hp2);
-						allSprites[altlumpnum2]->tileheight = SwapShort(tileheight);
-						load_twid(allSprites[altlumpnum2]->data, altPalImg2->pixels, wp2, hp2);	
+							allSprites[altlumpnum2] = (spriteN64_t *)malloc(sizeof(spriteN64_t) + (wp2*hp2));
+							if (NULL == allSprites[altlumpnum2]) {
+								fprintf(stderr, "Could not allocate sprite for alt2 lump %d.\n", altlumpnum2);
+								free(allSprites[altlumpnum]);
+								free(allSprites[i]);
+								free(altPal2->table);
+								free(altPal2);
+								free(altPal->table);
+								free(altPal);
+								free(curPal->table);
+								free(curPal);
+								free(tmpdata);
+								free(enemyPal->table);
+								free(enemyPal);
+								free(nonEnemyPal->table);
+								free(nonEnemyPal);
+								free(doom64wad);
+								free(lumpinfo);
+								exit(-1);
+							}
+							allSprites[altlumpnum2]->tiles = SwapShort(tiles);
+							allSprites[altlumpnum2]->compressed = SwapShort(compressed);
+							allSprites[altlumpnum2]->cmpsize = SwapShort(cmpsize);
+							allSprites[altlumpnum2]->xoffs = SwapShort(xoffs);
+							allSprites[altlumpnum2]->yoffs = SwapShort(yoffs);
+							allSprites[altlumpnum2]->width = SwapShort(wp2);
+							allSprites[altlumpnum2]->height = SwapShort(hp2);
+							allSprites[altlumpnum2]->tileheight = SwapShort(tileheight);
+							load_twid(allSprites[altlumpnum2]->data, altPalImg2->pixels, wp2, hp2);
 						}
-						
+
 						free(curImg->pixels); free(curImg);
 						free(curPal->table); free(curPal);
-						free(comPal->table); free(comPal);
+						free(altPal->table); free(altPal);
+						free(altPal2->table); free(altPal2);
 					} else {
 						//printf("\t\t\t\tnonenemy\n");
-//non-enemy 256 color sprite %d\n", i);
+						//non-enemy 256 color sprite %d\n", i);
 						RGBPalette *curPal;
 						if (!(memcmp(name,"SAWGA0",6))) {
 							paldata = (void*)sprite + sizeof(spriteN64_t) + (cmpsize);
@@ -611,30 +823,13 @@ int main (int argc, char **argv) {
 								curPal = &bfggpal;
 							} else if (!(memcmp(name, "LASR", 4))) {
 								curPal = &lasrpal;
-							} /*else {
-								curPal = fromDoom64Palette((short*)((void*)sprite + sizeof(spriteN64_t) + (width*height)), 256);
-							}*/
+							}
 						}
 
-//						paldata = (void*)sprite + sizeof(spriteN64_t) + (width * height);
-//						RGBPalette *curPal = fromDoom64Palette((short *)paldata, 256);
 						RGBImage *curImg = fromDoom64Sprite(src, width, height, curPal);
-						RGBPalette *comPal = (RGBPalette *)malloc(sizeof(RGBPalette));
-						comPal->size = 256;
-						comPal->table = (RGBTriple *)malloc(256 * sizeof(RGBTriple));
-						for (int ci=0;ci<256;ci++) {
-							comPal->table[ci].R = D64NONENEMY[ci][0];
-							comPal->table[ci].G = D64NONENEMY[ci][1];
-							comPal->table[ci].B = D64NONENEMY[ci][2];
-						}
-						PalettizedImage *palImg = //Palettize(curImg, comPal); //
-						FloydSteinbergDither(curImg, comPal);
+						PalettizedImage *palImg = FloydSteinbergDither(curImg, nonEnemyPal);
 						allImages[i] = palImg;
-						//printf("\t\t\t\t\t%08x\n", palImg);
-						//free(palImg->pixels); free(palImg);
 						free(curImg->pixels); free(curImg);
-//						free(curPal->table); free(curPal);
-						free(comPal->table); free(comPal);
         				}
 				} else {
 					//printf("\t\t\t16 color\n");
@@ -644,31 +839,18 @@ int main (int argc, char **argv) {
 					paldata = (void*)sprite + sizeof(spriteN64_t) + cmpsize;
 					RGBPalette *curPal = fromDoom64Palette((short *)paldata, 16);
 					RGBImage *curImg = fromDoom64Sprite(expandedimg, width, height, curPal);
-
-					RGBPalette *comPal = (RGBPalette *)malloc(sizeof(RGBPalette));
-					comPal->size = 256;
-					comPal->table = (RGBTriple *)malloc(256 * sizeof(RGBTriple));
-					for (int ci=0;ci<256;ci++) {
-						comPal->table[ci].R = D64NONENEMY[ci][0];
-						comPal->table[ci].G = D64NONENEMY[ci][1];
-						comPal->table[ci].B = D64NONENEMY[ci][2];
-					}
-
 					PalettizedImage *palImg;
 					// 179 - 182 no dither
 //					if ((i >= 179 && i <= 182) || (i >= 216 && i <= 339)) {
 					if (i <= 346) {
-						palImg = Palettize(curImg, comPal);
+						palImg = Palettize(curImg, nonEnemyPal);
 					} else {
-						palImg = FloydSteinbergDither(curImg, comPal);
+						palImg = FloydSteinbergDither(curImg, nonEnemyPal);
 					}
 
-					//printf("\t\t\t\t\t%08x\n", palImg);
 					allImages[i] = palImg;
-//					free(palImg->pixels); free(palImg);
 					free(curImg->pixels); free(curImg);
 					free(curPal->table); free(curPal);
-					free(comPal->table); free(comPal);
 					free(expandedimg);
 				}
 				free(tmpdata);
@@ -677,6 +859,16 @@ int main (int argc, char **argv) {
 	}
 
 	uint8_t *ne_sheet = (uint8_t *)malloc(1024*1024);
+	if (NULL == ne_sheet) {
+		fprintf(stderr, "Could not allocate 1024*1024 sprite sheet buffer.\n");
+		free(enemyPal->table);
+		free(enemyPal);
+		free(nonEnemyPal->table);
+		free(nonEnemyPal);
+		free(doom64wad);
+		free(lumpinfo);
+		exit(-1);
+	}
 
 	for (int i=0;i<388;i++) {
 		int lumpnum = nonenemy_sheet[i][0];
@@ -687,7 +879,7 @@ int main (int argc, char **argv) {
 
 		PalettizedImage *lumpImg = allImages[lumpnum];
 		if (!lumpImg) {
-			printf("missing image for lump %d\n", lumpnum);
+			fprintf(stderr, "missing image for lump %d\n", lumpnum);
 			exit(-1);
 		}
 
@@ -699,14 +891,85 @@ int main (int argc, char **argv) {
 	}
 
 	uint8_t *twid_sheet = (uint8_t *)malloc(1024*1024);
+	if (NULL == twid_sheet) {
+		fprintf(stderr, "Could not allocate 1024*1024 TWIDDLED sprite sheet buffer.\n");
+		free(ne_sheet);
+		free(enemyPal->table);
+		free(enemyPal);
+		free(nonEnemyPal->table);
+		free(nonEnemyPal);
+		free(doom64wad);
+		free(lumpinfo);
+		exit(-1);
+	}
 	load_twid(twid_sheet, ne_sheet, 1024, 1024);
 	uint8_t junk[16];
 	sprintf(output_paths, "%s/vq/non_enemy.tex", output_directory);
-	int sheet_fd = open(output_paths, //"non_enemy.tex", 
-O_RDWR | O_CREAT, 0666);
-	write(sheet_fd, junk, 16);
-	write(sheet_fd, twid_sheet, 1024*1024);
-	close(sheet_fd);
+	FILE *sheet_fd = fopen(output_paths, "wb");
+	if (NULL == sheet_fd) {
+		fprintf(stderr, "Could not open file for writing twiddled sprite sheet.\n");
+		free(twid_sheet);
+		free(ne_sheet);
+		free(enemyPal->table);
+		free(enemyPal);
+		free(nonEnemyPal->table);
+		free(nonEnemyPal);
+		free(doom64wad);
+		free(lumpinfo);
+		exit(-1);
+	}
+
+	size_t twidsheet_total = 0;
+	size_t twidsheet_write = fwrite(twid_sheet, 1, 1024*1024, sheet_fd);
+	if (-1 == twidsheet_write) {
+		fprintf(stderr, "Could not write to twiddled sprite sheet file: %s\n", strerror(errno));
+		fclose(sheet_fd);
+		free(twid_sheet);
+		free(ne_sheet);
+		free(enemyPal->table);
+		free(enemyPal);
+		free(nonEnemyPal->table);
+		free(nonEnemyPal);
+		free(doom64wad);
+		free(lumpinfo);
+		exit(-1);
+	}
+	twidsheet_total += twidsheet_write;
+	printf("wrote %d/%d of twidsheet\n", twidsheet_write, twidsheet_total);
+	while(twidsheet_total < 1024*1024) {
+		twidsheet_write = fwrite(twid_sheet + twidsheet_total, 1, (1024*1024) - twidsheet_total, sheet_fd);
+		if (-1 == twidsheet_write) {
+			fprintf(stderr, "Could not write to twiddled sprite sheet file: %s\n", strerror(errno));
+			fclose(sheet_fd);
+			free(twid_sheet);
+			free(ne_sheet);
+			free(enemyPal->table);
+			free(enemyPal);
+			free(nonEnemyPal->table);
+			free(nonEnemyPal);
+			free(doom64wad);
+			free(lumpinfo);
+			exit(-1);
+		}
+		twidsheet_total += twidsheet_write;
+	printf("wrote %d/%d of twidsheet\n", twidsheet_write, twidsheet_total);
+
+	}
+
+	int sheetclose = fclose(sheet_fd);
+	if (0 != sheetclose) {
+		fprintf(stderr, "Error closing twiddled sprite sheet file: %s\n", strerror(errno));
+		free(twid_sheet);
+		free(ne_sheet);
+		free(enemyPal->table);
+		free(enemyPal);
+		free(nonEnemyPal->table);
+		free(nonEnemyPal);
+		free(doom64wad);
+		free(lumpinfo);
+		exit(-1);
+	}
+
 	free(ne_sheet);
 	free(twid_sheet);
 
@@ -714,31 +977,64 @@ O_RDWR | O_CREAT, 0666);
 	 * HERE BEGINS FIXWAD CODE adapted
 	 */
 	sprintf(output_paths, "%s/pow2.wad", output_directory);
-	int fd = open(output_paths, //"pow2.wad",
-O_RDWR | O_CREAT, 0666);
+	FILE *fd = fopen(output_paths, "wb");
+	if (NULL == fd) {
+		fprintf(stderr, "Could not open file for writing Dreamcast Doom 64 IWAD.\n");
+		free(twid_sheet);
+		free(ne_sheet);
+		free(enemyPal->table);
+		free(enemyPal);
+		free(nonEnemyPal->table);
+		free(nonEnemyPal);
+		free(doom64wad);
+		free(lumpinfo);
+		exit(-1);
+	}
 
 	for(int i=0;i<4;i++) {
-		write(fd, &identifier[i], 1);
+//		write(fd, &identifier[i], 1);
+		size_t idwrite = fwrite(&identifier[i], 1, 1, fd);
+		if (-1 == idwrite) {
+			fprintf(stderr, "Error writing identifier to Dreamcast Doom 64 IWAD: %s\n", strerror(errno));
+			fclose(fd);
+			free(twid_sheet);
+			free(ne_sheet);
+			free(enemyPal->table);
+			free(enemyPal);
+			free(nonEnemyPal->table);
+			free(nonEnemyPal);
+			free(doom64wad);
+			free(lumpinfo);
+			exit(-1);
+		}
 	}
-	write(fd, &numlumps, 4);
+
+	size_t numlumwrite = fwrite(&numlumps, 1, 4, fd);
+	if (-1 == numlumwrite) {
+		fprintf(stderr, "Error writing total lump count to Dreamcast Doom 64 IWAD: %s\n", strerror(errno));
+		fclose(fd);
+		free(twid_sheet);
+		free(ne_sheet);
+		free(enemyPal->table);
+		free(enemyPal);
+		free(nonEnemyPal->table);
+		free(nonEnemyPal);
+		free(doom64wad);
+		free(lumpinfo);
+		exit(-1);
+	}
+
 	int lastofs = 4 + 4 + 4;
 
 	for (int i=0;i<numlumps;i++) {
-		if (((i < 349) || (i > 923)) ||
-			((names[i][0] == 'P') && (names[i][1] == 'A') && (names[i][2] == 'L')) ) {
-
+		if (((i < 349) || (i > 923)) || ((names[i][0] == 'P') && (names[i][1] == 'A') && (names[i][2] == 'L')) ) {
 			int orig_size = lumpinfo[i].size;
-			//printf("%d %d -> ", i, lastofs);
-
 			if (lumpinfo[i].name[0] & 0x80) {
 				orig_size = lumpinfo[i+1].filepos - lumpinfo[i].filepos;
 			}
-
 			int padded_size = (orig_size + 3) & ~3;
 			lastofs = lastofs + padded_size;
-			//printf("%d\n", lastofs);
-		}
-		else {
+		} else {
 			uint8_t *outbuf;
 			int outlen;
 			int wp2 = SwapShort(allSprites[i]->width);
@@ -747,34 +1043,39 @@ O_RDWR | O_CREAT, 0666);
 			free(outbuf);
 			int orig_size = outlen;
 			int padded_size = (orig_size + 3) & ~3;
-			//printf("* %d %d -> ", i, lastofs);
 			lastofs = lastofs + padded_size;
-			//printf("%d\n", lastofs);
 		}
 	}
-//printf("computed lastofs %d (%08x)\n", lastofs, lastofs);
-	write(fd, &lastofs, 4);
+
+	size_t infotabofswrite = fwrite(&lastofs, 1, 4, fd);
+	if (-1 == infotabofswrite) {
+		fprintf(stderr, "Error writing info table offset to Dreamcast Doom 64 IWAD: %s\n", strerror(errno));
+		fclose(fd);
+		free(twid_sheet);
+		free(ne_sheet);
+		free(enemyPal->table);
+		free(enemyPal);
+		free(nonEnemyPal->table);
+		free(nonEnemyPal);
+		free(doom64wad);
+		free(lumpinfo);
+		exit(-1);
+	}
 	lastofs = 12;
 
 	for (int i=0;i<numlumps;i++) {
-		if (((i < 349) || (i > 923)) ||
-			((names[i][0] == 'P') && (names[i][1] == 'A') && (names[i][2] == 'L'))) {
-
+		if (((i < 349) || (i > 923)) || ((names[i][0] == 'P') && (names[i][1] == 'A') && (names[i][2] == 'L'))) {
 			int data_size;
 			int orig_size = lumpinfo[i].size;
-
 			data_size = orig_size;
 			if (lumpinfo[i].name[0] & 0x80) {
 				data_size = lumpinfo[i+1].filepos - lumpinfo[i].filepos;
 			}
-
 			memset(lumpdata, 0, LUMPDATASZ);
 			memcpy(lumpdata, doom64wad + lumpinfo[i].filepos, data_size);
-
 			data_size = (data_size+3)&~3;
-
-			write(fd, lumpdata, data_size);
-
+//			write(fd, lumpdata, data_size);
+			fwrite(lumpdata, 1, data_size, fd);
 			lumpinfo[i].filepos = lastofs;
 			lumpinfo[i].size = orig_size;
 			lastofs = lastofs + data_size;
@@ -789,13 +1090,11 @@ O_RDWR | O_CREAT, 0666);
 			fileLen = outlen;
 			int orig_size = fileLen;
 			int padded_size = (orig_size + 3) & ~3;
-
 			memset(lumpdata, 0, LUMPDATASZ);
 			memcpy(lumpdata, outbuf, orig_size);
 			free(outbuf);
-			
-			write(fd, lumpdata, padded_size);
-//printf("%d -> %d\n", origLen, outlen);
+//			write(fd, lumpdata, padded_size);
+			fwrite(lumpdata, 1, padded_size, fd);
 			lumpinfo[i].filepos = lastofs;
 			lumpinfo[i].size = origLen;
 			lastofs = lastofs + padded_size;
@@ -803,22 +1102,30 @@ O_RDWR | O_CREAT, 0666);
 	}
 
 	for (int i=0;i<numlumps;i++) {
-		write(fd, (void*)(&lumpinfo[i]), sizeof(lumpinfo_t));
+//		write(fd, (void*)(&lumpinfo[i]), sizeof(lumpinfo_t));
+		fwrite((void*)(&lumpinfo[i]), 1, sizeof(lumpinfo_t), fd);
 	}
-	close(fd);
+	fclose(fd);
 
 #define NUMALTLUMPS 311
 	char pwad[4] = {'P','W','A','D'};
 	sprintf(output_paths, "%s/alt.wad", output_directory);
-	int alt_fd = open(output_paths, //"alt.wad", 
-O_RDWR | O_CREAT, 0666);
+//	int alt_fd = open(output_paths, //"alt.wad", 
+//O_RDWR | O_CREAT, 0666);
+	FILE *alt_fd = fopen(output_paths, "wb");
 	for(int i=0;i<4;i++) {
-		write(alt_fd, &pwad[i], 1);
+		//write(alt_fd, &pwad[i], 1);
+		fwrite(&pwad[i], 1, 1, alt_fd);
 	}
 	int numaltlumps = NUMALTLUMPS;
-	write(alt_fd, &numaltlumps, 4);
+//	write(alt_fd, &numaltlumps, 4);
+	fwrite(&numaltlumps, 1, 4, alt_fd);
 	lastofs = 4 + 4 + 4;
 	lumpinfo_t *altlumpinfo = (lumpinfo_t *)malloc(numaltlumps * sizeof(lumpinfo_t));
+	if (NULL == altlumpinfo) {
+		fprintf(stderr, "Could not allocate alternate lump info.\n");
+		exit(-1);
+	}
 
 	for (int i=0;i<numaltlumps;i++) {
 		memset(altlumpinfo[i].name, 0, 8);
@@ -848,9 +1155,10 @@ O_RDWR | O_CREAT, 0666);
 		}
 	}
 
-	write(alt_fd, &lastofs, 4);
-	
-	for (int i=0;i<numaltlumps;i++) {
+//	write(alt_fd, &lastofs, 4);
+	fwrite(&lastofs, 1, 4, alt_fd);
+
+	for (int i = 0; i < numaltlumps; i++) {
 		if (altlumpinfo[i].size) {
 			int altlumpnum = W_GetNumForName(newlumps[i]);
 
@@ -864,18 +1172,27 @@ O_RDWR | O_CREAT, 0666);
 			fileLen = outlen;
 			int orig_size = fileLen;
 			int padded_size = (orig_size + 3) & ~3;
-			
+
 			memset(lumpdata, 0, LUMPDATASZ);
 			memcpy(lumpdata, outbuf, orig_size);
 			free(outbuf);
-			write(alt_fd, lumpdata, padded_size);
+//			write(alt_fd, lumpdata, padded_size);
+			fwrite(lumpdata, 1, padded_size, alt_fd);
 		}
 	}
-	
-	for (int i=0;i<numaltlumps;i++) {
-		write(alt_fd, (void*)(&altlumpinfo[i]), sizeof(lumpinfo_t));
-	}	
-	close(alt_fd);
+
+	for (int i = 0; i < numaltlumps; i++) {
+//		write(alt_fd, (void*)(&altlumpinfo[i]), sizeof(lumpinfo_t));
+		fwrite((void*)(&altlumpinfo[i]), 1, sizeof(lumpinfo_t), alt_fd);
+	}
+	fclose(alt_fd);
+
+	free(enemyPal->table);
+	free(enemyPal);
+	free(nonEnemyPal->table);
+	free(nonEnemyPal);
+	free(altlumpinfo);
+	free(lumpinfo);
 	free(doom64wad);
 	return 0;
 }

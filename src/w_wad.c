@@ -395,9 +395,8 @@ void W_Init (void)
 	sprintf(fnbuf, "%s/vq/non_enemy.tex", fnpre);
 	size_t vqsize = fs_load(fnbuf, &pnon_enemy);
 	dbgio_printf("non_enemy loaded size is %d\n", vqsize);
-	pvr_non_enemy = pvr_mem_malloc(vqsize);	
-	// dtex header, legacy junk, clean this up eventually
-	pvr_txr_load(16 + pnon_enemy, pvr_non_enemy, vqsize - 16);
+	pvr_non_enemy = pvr_mem_malloc(vqsize);
+	pvr_txr_load(pnon_enemy, pvr_non_enemy, vqsize);
 	free(pnon_enemy);
 	W_DrawLoadScreen("Item Tex", 1, 1);
 	timer_spin_delay_us(30000);
@@ -408,7 +407,7 @@ void W_Init (void)
 	pvr_sprite_cxt.gen.specular = PVR_SPECULAR_ENABLE;
 	pvr_sprite_cxt.gen.fog_type = PVR_FOG_TABLE;
 	pvr_sprite_cxt.gen.fog_type2 = PVR_FOG_TABLE;
-	pvr_poly_compile(&pvr_sprite_hdr, &pvr_sprite_cxt);	
+	pvr_poly_compile(&pvr_sprite_hdr, &pvr_sprite_cxt);
 }
 
 static char retname[9];
