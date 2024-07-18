@@ -16,10 +16,11 @@
 
 **Pre-requisites**
 
-The build is only guaranteed to work on the following platform:
+The build is known to work on the following platforms as of the current commit:
     Ubuntu 22.04
+    Windows 11 / Cygwin 64-bit
 
-It should work on most other Linux environments. The `wadtool` does not create working results on Cygwin anymore. Will look into that in the future.
+It should work on most other Linux environments.
     
 You will need a host/native GCC install and a full working Dreamcast/KallistiOS toolchain install (https://dreamcast.wiki/Getting_Started_with_Dreamcast_development).
 
