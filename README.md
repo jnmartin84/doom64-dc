@@ -16,12 +16,11 @@
 
 **Pre-requisites**
 
-The build has been done on the following platforms successfully:
-
-    Windows 10/11 with Cygwin
+The build is only guaranteed to work on the following platform:
     Ubuntu 22.04
-    Debian (unknown version)
 
+It should work on most other Linux environments. The `wadtool` does not create working results on Cygwin anymore. Will look into that in the future.
+    
 You will need a host/native GCC install and a full working Dreamcast/KallistiOS toolchain install (https://dreamcast.wiki/Getting_Started_with_Dreamcast_development).
 
 
@@ -88,7 +87,7 @@ The first terminal output you see should match the following except for the time
     Generated data files in specified selfboot directory.
     Done.
 
-Subsequent runs will not rebuild `wadtool` but start at `Running wadtool`.
+Subsequent runs will not rebuild `wadtool` but start at `Running wadtool` or skip that too if the generated files already exist in `selfboot`.
 
 When it is complete, you will now have the following new files in the `~/doom64-dc/selfboot` directory:
 
