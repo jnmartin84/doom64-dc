@@ -64,7 +64,7 @@ The below is the expected md5sum output
 
 Now place a copy of `doom64.z64` in the `wadtool` directory.
 
-Go to the repo directory and compile it like any other KallistiOS project. Make sure you source your KOS environment first.
+Go to the repo directory and compile it like any other KallistiOS project. Make sure you source your KOS environment first. It is starting to look like there is an issue when it is built at -O2 without lto. Modify `environ.sh` so KOS_CFLAGS has `-O3 -flto=auto` instead of `-O2` before you build.
 
 To build the source into an ELF file, run `make`.
 
