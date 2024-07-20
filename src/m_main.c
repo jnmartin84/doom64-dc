@@ -360,8 +360,8 @@ boolean enable_messages = true; // 8005A7B8
 int HUDopacity = 255;			// [Immorpher] HUD opacity
 int SfxVolume = 75;             // 8005A7C0
 int MusVolume = 85;             // 8005A7C4
-#define MAX_BRIGHTNESS 200
-int brightness = (3*MAX_BRIGHTNESS) / 4;             // 8005A7C8
+#define MAX_BRIGHTNESS 127
+int brightness = 60; // 8005A7C8
 int M_SENSITIVITY = 0;          // 8005A7CC
 boolean FeaturesUnlocked = true; // 8005A7D0
 int MotionBob = 0x100000; // [Immorpher] Motion Bob works in hexadecimal
@@ -1054,11 +1054,11 @@ int M_MenuTicker(void) // 80007E0C
                 case 9: // Brightness
                     if (buttons & PAD_RIGHT)
                     {
-                        brightness += (MAX_BRIGHTNESS / 100); // [Immorpher] increments doubled for scroll speed
+                        brightness += 1;
                         if (brightness <= MAX_BRIGHTNESS)
                         {
                             P_RefreshBrightness();
-                            if (!(brightness & (MAX_BRIGHTNESS / 100)))
+                            if (brightness & 1)
                             {
                                 S_StartSound(NULL, sfx_secmove);
                                 return ga_nothing;
@@ -1071,7 +1071,7 @@ int M_MenuTicker(void) // 80007E0C
                     }
                     else if (buttons & PAD_LEFT)
                     {
-                        brightness -= (MAX_BRIGHTNESS / 100); // [Immorpher] decrement speed doubled
+                        brightness -= 1;
                         if (brightness < 0)
                         {
                             brightness = 0;
@@ -1079,7 +1079,7 @@ int M_MenuTicker(void) // 80007E0C
                         else
                         {
                             P_RefreshBrightness();
-                            if (!(brightness & (MAX_BRIGHTNESS / 100)))
+                            if (brightness & 1)
                             {
                                 S_StartSound(NULL, sfx_secmove);
                                 return ga_nothing;
@@ -1846,7 +1846,7 @@ int M_MenuTicker(void) // 80007E0C
 						Autorun = false;
 
 						// Set video options
-                        brightness = 100;
+                        brightness = 60;
 						VideoFilter = 0; // [Immorpher] new video option
 						antialiasing = false; // [Immorpher] new video option
 						interlacing = false;  // [Immorpher] new video option
@@ -1892,7 +1892,7 @@ int M_MenuTicker(void) // 80007E0C
 						Autorun = true;
 
 						// Set video options
-                        brightness = 200;
+                        brightness = 127;
 						VideoFilter = 1; // [Immorpher] new video option
 						antialiasing = false; // [Immorpher] new video option
 						interlacing = false;  // [Immorpher] new video option
@@ -1938,7 +1938,7 @@ int M_MenuTicker(void) // 80007E0C
 						Autorun = true;
 
 						// Set video options
-                        brightness = 200;
+                        brightness = 127;
 						VideoFilter = 0; // [Immorpher] new video option
 						antialiasing = false; // [Immorpher] new video option
 						interlacing = false;  // [Immorpher] new video option
@@ -2405,9 +2405,7 @@ void M_VideoDrawer(void) // 80009884
     }
 
     ST_DrawSymbol(82, 80, 68, text_alpha | 0xffffff00);
-    ST_DrawSymbol(brightness  / 2  + 83, 80, 69, text_alpha | 0xffffff00);
-// when I get 300 working
-//    ST_DrawSymbol(brightness / 3  + 83, 80, 69, text_alpha | 0xffffff00);
+    ST_DrawSymbol(((101*brightness)>>7) + 83, 80, 69, text_alpha | 0xffffff00);
 
     ST_DrawSymbol(Menu_Video[0].x - 37, Menu_Video[cursorpos].y - 9, MenuAnimationTic + 70, text_alpha | 0xffffff00);
 }

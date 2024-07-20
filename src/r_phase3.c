@@ -443,16 +443,15 @@ void R_WallPrep(seg_t *seg)
 	fixed_t m_top;
 	fixed_t m_bottom;
 	fixed_t rowoffs;
-#if 0
-	unsigned int height2;
-#endif
-	int height;
+	fixed_t height;
 	int frontheight;
-	int sideheight1;
+	int sideheight;
 	short pic;
 
-	float r1, g1, b1;
-	float r2, g2, b2;
+	unsigned int r1, g1, b1;
+	unsigned int r2, g2, b2;
+	float rn, gn, bn;
+	float scale;
 	unsigned int thingcolor;
 	unsigned int upcolor;
 	unsigned int lowcolor;
@@ -483,12 +482,12 @@ void R_WallPrep(seg_t *seg)
 	frontheight = f_ceilingheight - f_floorheight;
 
 	if (li->flags & ML_BLENDING) {
-		r1 = (float)((upcolor  >> 24) & 0xff);
-		g1 = (float)((upcolor  >> 16) & 0xff);
-		b1 = (float)((upcolor  >> 8) & 0xff);
-		r2 = (float)((lowcolor >> 24) & 0xff);
-		g2 = (float)((lowcolor >> 16) & 0xff);
-		b2 = (float)((lowcolor >> 8) & 0xff);
+		r1 = ((upcolor  >> 24) & 0xff);
+		g1 = ((upcolor  >> 16) & 0xff);
+		b1 = ((upcolor  >> 8) & 0xff);
+		r2 = ((lowcolor >> 24) & 0xff);
+		g2 = ((lowcolor >> 16) & 0xff);
+		b2 = ((lowcolor >> 8) & 0xff);
 		tmp_upcolor = upcolor;
 		tmp_lowcolor = lowcolor;
 	} else {
@@ -515,43 +514,33 @@ void R_WallPrep(seg_t *seg)
 
 			if (li->flags & ML_BLENDING) {
 				if (frontheight && !(li->flags & ML_BLENDFULLTOP)) {
-#if 1
-					sideheight1 = b_ceilingheight - f_floorheight;
+					sideheight = b_ceilingheight - f_ceilingheight;
 
-					float scale1 = (float)sideheight1 / (float)frontheight;
-					float scale2 = (float)height / (float)frontheight;
-			
-					float nr1 = r1*scale1;
-					float ng1 = g1*scale1;
-					float nb1 = b1*scale1;
+					scale = (float)sideheight / (float)frontheight;
 
-					float nr2 = r2*scale2;
-					float ng2 = g2*scale2;
-					float nb2 = b2*scale2;
+					rn = ((float)r1-(float)r2)*scale + (float)r1;
+					gn = ((float)g1-(float)g2)*scale + (float)g1;
+					bn = ((float)b1-(float)b2)*scale + (float)b1;
 
-					float rf = nr1 + nr2;
-					float gf = ng1 + ng2;
-					float bf = nb1 + nb2;
+					if (!((rn < 256) && (gn < 256) && (bn < 256))) { // Rescale if out of color bounds
+						scale = 255.0f;
 
-					if (!((rf < 256) && (gf < 256) && (bf < 256))) {
-						float scale = 255.0f;
-
-						if (rf >= gf && rf >= bf) {
-							scale /= rf;
-						} else if (gf >= rf && gf >= bf) {
-							scale /= gf;
+						if (rn >= gn && rn >= bn) {
+							scale /= rn;
+						} else if (gn >= rn && gn >= bn) {
+							scale /= gn;
 						} else {
-							scale /= bf;
+							scale /= bn;
 						}
 
-						rf *= scale;
-						gf *= scale;
-						bf *= scale;
+						rn *= scale;
+						gn *= scale;
+						bn *= scale;
 					}
 
-					tmp_lowcolor = ((int)rf << 24) | ((int)gf << 16) | ((int)bf << 8) | 0xff;
+					tmp_lowcolor = ((int)rn << 24) | ((int)gn << 16) | ((int)bn << 8) | 0xff;
 
-					if (gamemap == 3 && brightness > 100) {
+					if (gamemap == 3 && (brightness > 57) && (brightness < 90)) {
 						int x1 = li->v1->x >> 16;
 						int y1 = li->v1->y >> 16;
 						int x2 = li->v2->x >> 16;
@@ -559,47 +548,19 @@ void R_WallPrep(seg_t *seg)
 
 						if ( ( (x1 == 1040 && y1 == -176) && (x2 == 1008 && y2 == -176) ) ||
 							( (x1 == 1008 && y1 == -464) && (x2 == 1040 && y2 == -464) ) ) {
-							float scale = 1.0f - ((float)(brightness-100)*0.0025f);
+							float scale = 1.0f - ((float)((/*brightness*/75-60)*3.0f)*0.0025f);
 
 							tmp_upcolor = ((int)(r1*scale)<<24) |
 											((int)(g1*scale)<<16) |
 											((int)(b1*scale)<<8) |
 											0xff;
 
-							tmp_lowcolor = ((int)(rf*scale) << 24) |
-											((int)(gf*scale) << 16) |
-											((int)(bf*scale) << 8) |
+							tmp_lowcolor = ((int)(rn*scale) << 24) |
+											((int)(gn*scale) << 16) |
+											((int)(bn*scale) << 8) |
 											0xff;
 						}
 					}
-#else
-					if (f_floorheight < f_ceilingheight) {
-						height2 = ((height << 16) / (f_ceilingheight - f_floorheight));
-					} else {
-						height2 = 0;
-					}
-
-					unsigned int rf = (((unsigned int)r2 * height2) >> 16) + (((unsigned int)r1*(65536 - height2)) >> 16);
-					unsigned int gf = (((unsigned int)g2 * height2) >> 16) + (((unsigned int)g1*(65536 - height2)) >> 16);
-					unsigned int bf = (((unsigned int)b2 * height2) >> 16) + (((unsigned int)b1*(65536 - height2)) >> 16);
-
-					if (!((rf < 256) && (gf < 256) && (bf < 256))) {
-						unsigned int max;
-						if (rf >= gf && rf >= bf) {
-							max = rf;
-						} else if (gf >= rf && gf >= bf) {
-							max = gf;
-						} else {
-							max = bf;
-						}
-
-						rf = (((rf<<16) / max) * 255) >> 16;
-						gf = (((gf<<16) / max) * 255) >> 16;
-						bf = (((bf<<16) / max) * 255) >> 16;
-					}
-
-					tmp_lowcolor = (rf << 24) | (gf << 16) | (bf << 8) | 0xff;
-#endif
 				} 
 
 				if (li->flags & ML_INVERSEBLEND) {
@@ -644,43 +605,32 @@ void R_WallPrep(seg_t *seg)
 
 			if (li->flags & ML_BLENDING) {
 				if (frontheight && !(li->flags & ML_BLENDFULLBOTTOM)) {
-#if 1
-					int sideheight1 = b_floorheight - f_floorheight;
+					sideheight = b_floorheight - f_ceilingheight;
 
-					float scale1 = (float)sideheight1 / (float)frontheight;
-					float scale2 = (float)height / (float)frontheight;
-			
-					float nr1 = r1*scale1;
-					float ng1 = g1*scale1;
-					float nb1 = b1*scale1;
+					scale = (float)sideheight / (float)frontheight;
 
-					float nr2 = r2*scale2;
-					float ng2 = g2*scale2;
-					float nb2 = b2*scale2;
+					rn = ((float)r1-(float)r2)*scale + (float)r1;
+					gn = ((float)g1-(float)g2)*scale + (float)g1;
+					bn = ((float)b1-(float)b2)*scale + (float)b1;
 
-					float rf = nr1 + nr2;
-					float gf = ng1 + ng2;
-					float bf = nb1 + nb2;
+					if (!((rn < 256) && (gn < 256) && (bn < 256))) { // Rescale if out of color bounds
+						scale = 255.0f;
 
-					if (!((rf < 256) && (gf < 256) && (bf < 256))) {
-						float scale = 255.0f;
-
-						if (rf >= gf && rf >= bf) {
-							scale /= rf;
-						} else if (gf >= rf && gf >= bf) {
-							scale /= gf;
+						if (rn >= gn && rn >= bn) {
+							scale /= rn;
+						} else if (gn >= rn && gn >= bn) {
+							scale /= gn;
 						} else {
-							scale /= bf;
+							scale /= bn;
 						}
 
-						rf *= scale;
-						gf *= scale;
-						bf *= scale;
+						rn *= scale;
+						gn *= scale;
+						bn *= scale;
 					}
 
-					tmp_upcolor = ((int)rf << 24) | ((int)gf << 16) | ((int)bf << 8) | 0xff;
-
-					if (gamemap == 3 && brightness > 100) {
+					tmp_upcolor = ((int)rn << 24) | ((int)gn << 16) | ((int)bn << 8) | 0xff;
+					if (gamemap == 3 && (brightness > 57) && (brightness < 90)) {
 						int x1 = li->v1->x >> 16;
 						int y1 = li->v1->y >> 16;
 						int x2 = li->v2->x >> 16;
@@ -688,47 +638,19 @@ void R_WallPrep(seg_t *seg)
 
 						if ( ( (x1 == 1040 && y1 == -176) && (x2 == 1008 && y2 == -176) ) ||
 							( (x1 == 1008 && y1 == -464) && (x2 == 1040 && y2 == -464) ) ) {
-							float scale = 1.0f - ((float)(brightness-100)*0.0025f);
+							float scale = 1.0f - ((float)((/*brightness*/75-60)*3.0f)*0.0025f);
 
 							tmp_lowcolor = ((int)(r2*scale)<<24) |
 											((int)(g2*scale)<<16) |
 											((int)(b2*scale)<<8) |
 											0xff;
 
-							tmp_upcolor = ((int)(rf*scale) << 24) |
-											((int)(gf*scale) << 16) |
-											((int)(bf*scale) << 8) |
+							tmp_upcolor = ((int)(rn*scale) << 24) |
+											((int)(gn*scale) << 16) |
+											((int)(bn*scale) << 8) |
 											0xff;
 						}
 					}
-#else
-					if (f_floorheight < f_ceilingheight) {
-						height2 = ((height << 16) / (f_ceilingheight - f_floorheight));
-					} else {
-						height2 = 0;
-					}
-
-					unsigned int rf = (((unsigned int)r2 * height2) >> 16) + (((unsigned int)r1*(65536 - height2)) >> 16);
-					unsigned int gf = (((unsigned int)g2 * height2) >> 16) + (((unsigned int)g1*(65536 - height2)) >> 16);
-					unsigned int bf = (((unsigned int)b2 * height2) >> 16) + (((unsigned int)b1*(65536 - height2)) >> 16);
-
-					if (!((rf < 256) && (gf < 256) && (bf < 256))) {
-						unsigned int max;
-						if (rf >= gf && rf >= bf) {
-							max = rf;
-						} else if (gf >= rf && gf >= bf) {
-							max = gf;
-						} else {
-							max = bf;
-						}
-
-						rf = (((rf<<16) / max) * 255) >> 16;
-						gf = (((gf<<16) / max) * 255) >> 16;
-						bf = (((bf<<16) / max) * 255) >> 16;
-					}
-
-					tmp_upcolor = (rf << 24) | (gf << 16) | (bf << 8) | 0xff;
-#endif
 				}
 
 				topcolor = tmp_upcolor;

@@ -656,11 +656,12 @@ void P_SetMovingCamera(line_t *line) // 8000F2F8
 		return;
 	}
 }
+
 void P_RefreshVideo(void) // [Immorpher] video refresh
 {
 #if 0
 	OSViMode *ViMode;
-	
+
 	if(antialiasing==true && interlacing==true)
 	{
 		if(osTvType == OS_TV_PAL)
@@ -721,44 +722,60 @@ void P_RefreshVideo(void) // [Immorpher] video refresh
 			ViMode = &osViModeTable[OS_VI_MPAL_LPN1];
 		}
 	}
-	
+
 	osViSetMode(ViMode);
-	
+
 	if(DitherFilter == true) // [Immorpher] Dither filter option
 	{
 		if (players[0].cheats & CF_GAMMA)
 		{
-			osViSetSpecialFeatures(OS_VI_GAMMA_ON|OS_VI_GAMMA_DITHER_OFF|OS_VI_DIVOT_OFF|OS_VI_DITHER_FILTER_ON);	
+			osViSetSpecialFeatures(OS_VI_GAMMA_ON|OS_VI_GAMMA_DITHER_OFF|OS_VI_DIVOT_OFF|OS_VI_DITHER_FILTER_ON);
 		} else {
-			osViSetSpecialFeatures(OS_VI_GAMMA_OFF|OS_VI_GAMMA_DITHER_OFF|OS_VI_DIVOT_OFF|OS_VI_DITHER_FILTER_ON);	
+			osViSetSpecialFeatures(OS_VI_GAMMA_OFF|OS_VI_GAMMA_DITHER_OFF|OS_VI_DIVOT_OFF|OS_VI_DITHER_FILTER_ON);
 		}
 	}
 	else {
 		if (players[0].cheats & CF_GAMMA)
 		{
-			osViSetSpecialFeatures(OS_VI_GAMMA_ON|OS_VI_GAMMA_DITHER_OFF|OS_VI_DIVOT_OFF|OS_VI_DITHER_FILTER_OFF);	
+			osViSetSpecialFeatures(OS_VI_GAMMA_ON|OS_VI_GAMMA_DITHER_OFF|OS_VI_DIVOT_OFF|OS_VI_DITHER_FILTER_OFF);
 		} else {
-			osViSetSpecialFeatures(OS_VI_GAMMA_OFF|OS_VI_GAMMA_DITHER_OFF|OS_VI_DIVOT_OFF|OS_VI_DITHER_FILTER_OFF);	
+			osViSetSpecialFeatures(OS_VI_GAMMA_OFF|OS_VI_GAMMA_DITHER_OFF|OS_VI_DIVOT_OFF|OS_VI_DITHER_FILTER_OFF);
 		}
 	}
 #endif
 }
 
-void P_RefreshBrightness(void) // 8000f410
-{
-	int factor;
+extern int DrawerStatus;
 
-	factor = brightness + 100;
+void P_RefreshBrightness(void)
+{
+	int factor = 100;
+	int i;
+	float curve, scale;
+
+	scale = (float)brightness / 127.0f;
+	scale /= 256.0f - (float)lightmax[2*brightness]; // 256 to prevent divide by 0
+
+	for (i = 1; i < 255; i++) { // [Immorpher] New brightness adjustment by "tracing out the circle"
+		curve = (float)i*scale;
+		if (curve > 1.0f)
+			curve = 1.0f;
+
+		curve = (float)i*(1.0f-curve) + curve*(float)lightmax[i];
+		lightcurve[i] = (char)curve;
+	}
+
 	if (factor < infraredFactor) {
 		factor = infraredFactor;
 	}
 
-	P_SetLightFactor(factor);
+	if (DrawerStatus == 1) // Doom 64 1.1 bug fix found by Nova
+		P_SetLightFactor(factor);
 }
 
-extern maplights_t *maplights;     // 800A5EA4
+extern maplights_t *maplights;
 
-void P_SetLightFactor(int lightfactor) // 8000F458
+void P_SetLightFactor(int lightfactor)
 {
 
 	float l_flt;
@@ -768,32 +785,32 @@ void P_SetLightFactor(int lightfactor) // 8000F458
 	int h, s, v;
 	int factor;
 	int i;
-//	int inframorph; // new test for infrared full bright
 
 	maplight = maplights;
 	light = lights;
-	for(i = 0; i < numlights; i++)
-	{
+	for (i = 0; i < numlights; i++) {
 		if (i > 255) {
 			int hsv = LightGetHSV(maplight->r, maplight->g, maplight->b);
 
 			h = (hsv >> 16) & 0xFF;
-			s = (hsv >>  8) & 0xFF;
-			v = (hsv      ) & 0xFF;
-            maplight++;
-            factor = v;
-        } else {
-            factor = i;
-        }
+			s = (hsv >> 8) & 0xFF;
+			v = hsv & 0xFF;
+			maplight++;
+			factor = v;
+		} else {
+			factor = i;
+		}
 
-        l_flt = (float)factor * ((float)lightfactor / 100.0);
+		l_flt = (float)factor * ((float)lightfactor / 100.0);
 
-        v = (int)l_flt;
-        
-        if (v > 255) {
-            v = 255;
-        }
-	
+		v = (int)l_flt;
+
+		if (v > 255) {
+			v = 255;
+		}
+
+		v = lightcurve[v];
+
 		if (i > 255) {
 			int rgb = LightGetRGB(h, s, v);
 			base_r = (rgb >> 16) & 0xFF;
@@ -803,42 +820,19 @@ void P_SetLightFactor(int lightfactor) // 8000F458
 			base_r = v;
 			base_g = v;
 			base_b = v;
-		} 
-#if 0			
+		}
+
 		// [GEC] New Cheat Codes
-		if (players[0].cheats & CF_FULLBRIGHT)
-		{
+		if (players[0].cheats & CF_FULLBRIGHT) {
 			base_r = 255;
 			base_g = 255;
 			base_b = 255;
-		}
-		else if (players[0].cheats & CF_NOCOLORS)
-		{
+		} else if (players[0].cheats & CF_NOCOLORS) {
 			base_r = v & 255;
 			base_g = v & 255;
 			base_b = v & 255;
 		}
-#endif		
-#if 0
-		// new infrared, first find max
-		if (infraredFactor == 300) {
-			if(base_r >= base_g && base_r >= base_b){
-				inframorph = base_r;
-			} else if(base_g >= base_b && base_g >= base_r) {
-				inframorph = base_g;
-			} else{   
-				inframorph = base_b;
-			}
-			
-			inframorph = (255 - inframorph)/15; // modulate amount of additional brightness
-			base_r = base_r + inframorph; // renormalize red
-			base_g = base_g + inframorph; // renormalize green
-			base_b = base_b + inframorph; // renormalize blue
-                        if (base_r > 255) base_r = 255;
-                        if (base_g > 255) base_g = 255;
-                        if (base_b > 255) base_b = 255;
-		}
-#endif
+
 		light->rgba = PACKRGBA(base_r, base_g, base_b, 255);
 		light++;
 	}
@@ -847,9 +841,9 @@ void P_SetLightFactor(int lightfactor) // 8000F458
 void T_FadeInBrightness(fadebright_t *fb) // 8000f610
 {
 	fb->factor += 2;
-	if (fb->factor >= (brightness + 100))
-	{
-		fb->factor = (brightness + 100);
+
+	if (fb->factor >= 100) {
+		fb->factor = 100;
 		P_RemoveThinker(&fb->thinker);
 	}
 
