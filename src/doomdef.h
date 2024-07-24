@@ -56,6 +56,7 @@ extern unsigned char lightmax[256];
 
 extern const float inv64;
 extern const float inv255;
+extern const float halfinv1024;
 extern const float inv1024;
 extern const float inv65536;
 
@@ -259,7 +260,7 @@ int D_abs(int v);
 //fixed_t finesine(int angle);
 //fixed_t finecosine(int angle);
 
-extern	fixed_t		finesine[5*FINEANGLES/4];
+extern	fixed_t		__attribute__((aligned(64))) finesine[5*FINEANGLES/4];
 extern	fixed_t		*finecosine;
 
 //angle_t tantoangle(int tan);
@@ -1181,9 +1182,9 @@ enum VID_MSG {
 extern u32 vid_side;       // 800A5248
 
 extern boolean disabledrawing; // 8005A720
-extern s32 vsync;              // 8005A724
-extern s32 drawsync2;          // 8005A728
-extern s32 drawsync1;          // 8005A72C
+extern volatile s32 vsync;              // 8005A724
+extern volatile s32 drawsync2;          // 8005A728
+extern volatile s32 drawsync1;          // 8005A72C
 extern u32 NextFrameIdx;       // 8005A730
 extern s32 FilesUsed;          // 8005A740
 

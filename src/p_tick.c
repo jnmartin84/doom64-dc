@@ -214,19 +214,7 @@ extern Matrix __attribute__((aligned(32))) R_ModelMatrix;
 void P_Drawer (void) // 80021AC8
 {
 	I_ClearFrame();
-#if 0
-	gMoveWd(GFX1++, G_MW_CLIP, G_MWO_CLIP_RNX, 1);
-	gMoveWd(GFX1++, G_MW_CLIP, G_MWO_CLIP_RNY, 1);
-	gMoveWd(GFX1++, G_MW_CLIP, G_MWO_CLIP_RPX, 65535);
-	gMoveWd(GFX1++, G_MW_CLIP, G_MWO_CLIP_RPY, 65535);
-	gMoveWd(GFX1++, G_MW_PERSPNORM, G_MWO_MATRIX_XX_XY_I, 68);
 
-	// create a projection matrix
-	gSPMatrix(GFX1++, OS_K0_TO_PHYSICAL(&R_ProjectionMatrix), G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
-
-	// create a model matrix
-	gSPMatrix(GFX1++, OS_K0_TO_PHYSICAL(&R_ModelMatrix), G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
-#endif
 	mat_load(&R_ProjectionMatrix);
 	mat_apply(&R_ModelMatrix);
 

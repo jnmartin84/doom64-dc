@@ -111,9 +111,9 @@ void clip_edge(d64Vertex_t *v1, d64Vertex_t *v2, d64Vertex_t *out)
 
 uint32_t lighted_color(uint32_t c, int ll)
 {
-	uint8_t r = (uint8_t)(((int)(256 + ((int)UNPACK_R(c)))*(int)ll) >> 9);
-	uint8_t g = (uint8_t)(((int)(256 + ((int)UNPACK_G(c)))*(int)ll) >> 9);
-	uint8_t b = (uint8_t)(((int)(256 + ((int)UNPACK_B(c)))*(int)ll) >> 9);
+	uint8_t r = (uint8_t)((UNPACK_R(c)*ll)>>8);//(((int)(256 + ((int)UNPACK_R(c)))*(int)ll) >> 9);
+	uint8_t g = (uint8_t)((UNPACK_G(c)*ll)>>8);//(((int)(256 + ((int)UNPACK_G(c)))*(int)ll) >> 9);
+	uint8_t b = (uint8_t)((UNPACK_B(c)*ll)>>8);//(((int)(256 + ((int)UNPACK_B(c)))*(int)ll) >> 9);
 	uint8_t a = UNPACK_A(c);
 	return D64_PVR_PACK_COLOR(a,r,g,b);
 }
@@ -715,7 +715,7 @@ void R_WallPrep(seg_t *seg)
 	}
 }
 
-#define INTEGER_VERT 0
+#define INTEGER_VERT 1
 
 int last_width = 64;
 int last_height = 64;

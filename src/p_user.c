@@ -257,33 +257,26 @@ void P_BuildMove (player_t *player) // 80022154
 	oldbuttons = oldticbuttons[0];
 
 	player->forwardmove = player->sidemove = player->angleturn = 0;
-	
-	if(Autorun == true && demoplayback == false) { // [Immorpher] New autorun option
-		speed = (buttons & cbutton->BT_SPEED) < 1;	
-	}
-	else {
-		speed = (buttons & cbutton->BT_SPEED) > 0;
-	}
+
+	speed = (buttons & cbutton->BT_SPEED) > 0;
 	sensitivity = 0;
+	
+	if(Autorun == true && demoplayback == false) {
+		speed = !speed;
+	}
 
 	/*  */
 	/* forward and backward movement  */
 	/*  */
-	if (cbutton->BT_FORWARD & buttons)
-	{
+	if (cbutton->BT_FORWARD & buttons) {
 		player->forwardmove = forwardmove[speed];
-	}
-	else if (cbutton->BT_BACK & buttons)
-	{
+	} else if (cbutton->BT_BACK & buttons) {
 		player->forwardmove = -forwardmove[speed];
-	}
-	else
-	{
+	} else {
 		/* Analyze analog stick movement (up / down) */
 		sensitivity = (int)((buttons) << 24) >> 24;
 
-		if(sensitivity >= MAXSENSITIVITY || sensitivity <= -MAXSENSITIVITY)
-		{
+		if(sensitivity >= MAXSENSITIVITY || sensitivity <= -MAXSENSITIVITY) {
 			player->forwardmove += (forwardmove[1] * sensitivity) / 80;
 		}
 	}
@@ -304,64 +297,48 @@ void P_BuildMove (player_t *player) // 80022154
 	/*  */
 	/* strafe movement  */
 	/*  */
-	if (buttons & cbutton->BT_STRAFELEFT)
-	{
+	if (buttons & cbutton->BT_STRAFELEFT) {
 		if (demoplayback)
 			player->sidemove -= sidemove[speed];
 		else
 			player->sidemove -= (sidemove[speed] * last_Ltrig) / 255;
 	}
-	if (buttons & cbutton->BT_STRAFERIGHT)
-	{
+	if (buttons & cbutton->BT_STRAFERIGHT) {
 		if (demoplayback)
 			player->sidemove += sidemove[speed];
 		else
 			player->sidemove += (sidemove[speed] * last_Rtrig) / 255;
 	}
 
-	if (buttons & cbutton->BT_STRAFE)
-	{
-		if (buttons & cbutton->BT_LEFT)
-		{
+	if (buttons & cbutton->BT_STRAFE) {
+		if (buttons & cbutton->BT_LEFT) {
 			player->sidemove = -sidemove[speed];
-		}
-		else if (buttons & cbutton->BT_RIGHT)
-		{
+		} else if (buttons & cbutton->BT_RIGHT) {
 			player->sidemove = sidemove[speed];
-		}
-		else
-		{
+		} else {
 			/* Analyze analog stick movement (left / right) */
 			sensitivity = (int)(((buttons & 0xff00) >> 8) << 24) >> 24;
 
-			if(sensitivity >= MAXSENSITIVITY || sensitivity <= -MAXSENSITIVITY)
-			{
+			if (sensitivity >= MAXSENSITIVITY || sensitivity <= -MAXSENSITIVITY) {
 				player->sidemove += (sidemove[1] * sensitivity) / 80;
 			}
 		}
-	}
-	else
-	{
+	} else {
 		if (sensitivity == 0)
 			speed = 0;
 
-		if (cbutton->BT_LEFT & buttons)
-		{
+		if (cbutton->BT_LEFT & buttons) {
 			player->angleturn =  angleturn[player->turnheld + (speed * SLOWTURNTICS)] << 17;
-		}
-		else if (cbutton->BT_RIGHT & buttons)
-		{
+		} else if (cbutton->BT_RIGHT & buttons) {
 			player->angleturn = -angleturn[player->turnheld + (speed * SLOWTURNTICS)] << 17;
-		}
-		else
-		{
+		} else {
 			/* Analyze analog stick movement (left / right) */
 			sensitivity = (int)(((buttons & 0xff00) >> 8) << 24) >> 24;
 			sensitivity = -sensitivity;
 
 			if(sensitivity >= MAXSENSITIVITY || sensitivity <= -MAXSENSITIVITY)
 			{
-				sensitivity = ((M_SENSITIVITY << 3) + 233) * sensitivity;
+				sensitivity = (((M_SENSITIVITY * 800) / 100) + 233) * sensitivity;
 				player->angleturn += (sensitivity / 80) << 17;
 			}
 		}

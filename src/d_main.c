@@ -71,14 +71,13 @@ void D_DoomMain(void)
     ST_Init();
     S_Init();
 
-	P_RefreshBrightness();
-
     gamevbls = 0;
     gametic = 0;
     ticsinframe = 0;
     ticon = 0;
     ticbuttons[0] = 0;
     oldticbuttons[0] = 0;
+
     D_SplashScreen();
 
     while (true) {
@@ -116,7 +115,7 @@ void D_DoomMain(void)
 
 // M_Random
 // Returns a 0-255 number
-const unsigned char rndtable[256] = 
+const unsigned char rndtable[256] =
 {
 	0, 8, 109, 220, 222, 241, 149, 107, 75, 248, 254, 140, 16, 66,
 	74, 21, 211, 47, 80, 242, 154, 27, 205, 128, 161, 89, 77, 36,
@@ -173,7 +172,7 @@ extern uint8_t __attribute__((aligned(32))) tr_buf[VERTBUF_SIZE];
 extern int last_Ltrig;
 extern int last_Rtrig;
 
-static uint64_t start_time, end_time;
+extern volatile int rdpmsg;
 
 int MiniLoop(void(*start)(void), void(*stop)(),
              int(*ticker)(void), void(*drawer)(void))
@@ -195,7 +194,6 @@ int MiniLoop(void(*start)(void), void(*stop)(),
 	drawsync2 = vsync;
 
 	while (true) {
-		start_time = timer_us_gettime64();
 		vblsinframe[0] = drawsync1;
 
 		// get buttons for next tic
@@ -206,22 +204,18 @@ int MiniLoop(void(*start)(void), void(*stop)(),
 
 		// Read|Write demos
 		if (demoplayback) {
-			//last_Ltrig = 255;
-			//last_Rtrig = 255;
-
 			if (buttons & (ALL_JPAD|ALL_BUTTONS)) {
 				exit = ga_exit;
 				break;
 			}
 
 			buttons = *demobuffer++;
+			ticbuttons[0] = buttons;
 
 			if ((buttons & PAD_START) || (((uintptr_t)demobuffer - (uintptr_t)demo_p) >= 16000)) {
 				exit = ga_exitdemo;
 				break;
 			}
-
-			ticbuttons[0] = buttons;
 		}
 
 		ticon += vblsinframe[0];
@@ -237,7 +231,6 @@ int MiniLoop(void(*start)(void), void(*stop)(),
 			if (exit != ga_nothing)
 				break;
 
-			vid_waitvbl();
 			pvr_scene_begin();
 			pvr_set_vertbuf(PVR_LIST_OP_POLY, op_buf, VERTBUF_SIZE);
 			pvr_set_vertbuf(PVR_LIST_TR_POLY, tr_buf, VERTBUF_SIZE);
@@ -246,14 +239,10 @@ int MiniLoop(void(*start)(void), void(*stop)(),
 
 			pvr_scene_finish();
 			pvr_wait_ready();
+			rdpmsg = 1;
 		}
 
 		gamevbls = gametic;
-
-		// best effort 30fps cap when frame time is less than 1/30th of a second
-		end_time = timer_us_gettime64();
-		if((end_time - start_time) < 33333)
-			timer_spin_delay_us(33333 - (end_time - start_time));
 
 		framecount += 1;
 	}

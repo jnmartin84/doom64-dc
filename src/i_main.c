@@ -25,17 +25,20 @@ extern int globallump;
 extern int globalcm;
 
 //----------
-
-#define SYS_THREAD_ID_TICKER 3
+kthread_t *main_thread;
+kthread_attr_t main_attr;
 
 kthread_t *sys_ticker_thread;
 kthread_attr_t sys_ticker_attr;
 
 boolean disabledrawing = false;
 
-s32 vsync = 0;
-s32 drawsync2 = 0;
-s32 drawsync1 = 0;
+volatile int vbi2msg = 0;
+volatile int rdpmsg = 0;
+volatile s32 vsync = 0;
+volatile s32 drawsync2 = 0;
+volatile s32 drawsync1 = 0;
+
 u32 NextFrameIdx = 0;
 
 s32 ControllerPakStatus = 1;
@@ -64,10 +67,17 @@ int __attribute__((noreturn)) main(int argc, char **argv)
 
 	vblank_handler_add(&vblfunc, NULL);
 
-	I_Main(NULL);
+    main_attr.create_detached = 0;
+    main_attr.stack_size = 65536;
+    main_attr.stack_ptr = NULL;
+    main_attr.prio = 10;
+    main_attr.label = "I_Main";
+
+    main_thread = thd_create_ex(&main_attr, I_Main, NULL);
+	dbgio_printf("started main thread\n");
 
 	while(1) {
-		;
+		thd_pass();
 	}
 }
 
@@ -89,17 +99,19 @@ void *I_SystemTicker(void *arg)
 	}
 
 	while(true) {
+		if(rdpmsg) {
+			rdpmsg = 0;
+			SystemTickerStatus |= 16;
+			thd_pass();
+			continue;
+		}
+
 		if (SystemTickerStatus & 16) {
 			if ((u32)(vsync - drawsync2) < 2) {
 				thd_pass();
 				continue;
 			}
 
-			if(vsync & 1) {
-				thd_pass();
-				continue;
-			}
-				
 			SystemTickerStatus &= ~16;
 
 			if (demoplayback) {
@@ -108,6 +120,8 @@ void *I_SystemTicker(void *arg)
 
 			drawsync1 = vsync - drawsync2;
 			drawsync2 = vsync;
+
+			vbi2msg = 1;
 		}
 
 		thd_pass();
@@ -123,10 +137,16 @@ void I_Init(void)
     sys_ticker_attr.create_detached = 0;
     sys_ticker_attr.stack_size = 32768;
     sys_ticker_attr.stack_ptr = NULL;
-    sys_ticker_attr.prio = 10;
+    sys_ticker_attr.prio = 9;
     sys_ticker_attr.label = "I_SystemTicker";
 
     sys_ticker_thread = thd_create_ex(&sys_ticker_attr, I_SystemTicker, NULL);
+
+	/* osJamMesg(&sys_msgque_vbi2, (OSMesg)VID_MSG_KICKSTART, OS_MESG_NOBLOCK); */
+	// initial value must be 1 or everything deadlocks
+	vbi2msg = 1;
+	rdpmsg = 0;
+
 	dbgio_printf("I_Init: started system ticker thread\n");
 }
 
@@ -241,11 +261,12 @@ void I_ClearFrame(void) // 8000637C
 
 void I_DrawFrame(void)  // 80006570
 {
-//	vid_side ^= 1;
-
-	SystemTickerStatus |= 16;
-
 	running++;
+
+	while (!vbi2msg) {
+		thd_pass();
+	}
+	vbi2msg = 0;
 }
 
 void I_GetScreenGrab(void)
@@ -274,23 +295,6 @@ short BigShort(short dat)
 
 void I_MoveDisplay(int x,int y) // 80006790
 {
-#if 0
-  int ViMode;
-
-  ViMode = osViGetCurrentMode();
-
-  osViModeTable[ViMode].comRegs.hStart =
-       (int)(((int)video_hStart >> 0x10 & 65535) + x) % 65535 << 0x10 |
-       (int)((video_hStart & 65535) + x) % 65535;
-
-  osViModeTable[ViMode].fldRegs[0].vStart =
-       (int)(((int)video_vStart1 >> 0x10 & 65535) + y) % 65535 << 0x10 |
-       (int)((video_vStart1 & 65535) + y) % 65535;
-
-  osViModeTable[ViMode].fldRegs[1].vStart =
-       (int)(((int)video_vStart2 >> 0x10 & 65535) + y) % 65535 << 0x10 |
-       (int)((video_vStart2 & 65535) + y) % 65535;
-#endif
 }
 
 #define MELTALPHA2 0.00392f
@@ -602,137 +606,16 @@ fade_return:
 
 int I_CheckControllerPak(void) // 800070B0
 {
-#if 0
-    int ret, file;
-    OSPfsState *fState;
-    s32 MaxFiles [2];
-    u8 validpaks;
-
-    ControllerPakStatus = 0;
-
-    if (gamepad_system_busy != 0)
-    {
-do {
-    osYieldThread();
-} while (gamepad_system_busy != 0);
-    }
-
-    FilesUsed = -1;
-    ret = PFS_ERR_NOPACK;
-
-    osPfsIsPlug(&sys_msgque_joy, &validpaks);
-
-    /* does the current controller have a memory pak? */
-    if (validpaks & 1)
-    {
-ret = osPfsInit(&sys_msgque_joy, &ControllerPak, NULL);
-
-if ((ret != PFS_ERR_NOPACK) &&
-    (ret != PFS_ERR_ID_FATAL) &&
-    (ret != PFS_ERR_DEVICE) &&
-    (ret != PFS_ERR_CONTRFAIL))
-{
-    ret = osPfsNumFiles(&ControllerPak, MaxFiles, &FilesUsed);
-
-    if (ret == PFS_ERR_INCONSISTENT)
-ret = osPfsChecker(&ControllerPak);
-
-    if (ret == 0)
-    {
-Pak_Memory = 123;
-fState = FileState;
-file = 0;
-do
-{
-    ret = osPfsFileState(&ControllerPak, file, fState);
-    file += 1;
-
-    if (ret != 0)
-      fState->file_size = 0;
-
-    Pak_Memory -= (fState->file_size >> 8);
-    fState += 1;
-} while (file != 16);
-ret = 0;
-    }
-}
-    }
-
-    ControllerPakStatus = 1;
-
-    return ret;
-#endif
     return 0;
 }
 
 int I_DeletePakFile(int filenumb) // 80007224
 {
-#if 0
-    int ret;
-    OSPfsState *fState;
-
-    ControllerPakStatus = 0;
-
-    if (gamepad_system_busy != 0)
-    {
-do {
-    osYieldThread();
-} while (gamepad_system_busy != 0);
-    }
-
-    fState = &FileState[filenumb];
-
-    if (fState->file_size == 0) {
-ret = 0;
-    }
-    else
-    {
-ret = osPfsDeleteFile(&ControllerPak,
-    FileState[filenumb].company_code,
-    FileState[filenumb].game_code,
-    FileState[filenumb].game_name,
-    FileState[filenumb].ext_name);
-
-if (ret == PFS_ERR_INCONSISTENT)
-    ret = osPfsChecker(&ControllerPak);
-
-if (ret == 0)
-{
-    Pak_Memory += (fState->file_size >> 8);
-    fState->file_size = 0;
-}
-    }
-
-    ControllerPakStatus = 1;
-
-    return ret;
-#endif
     return 0;
 }
 
 int I_SavePakFile(int filenumb, int flag, byte *data, int size) // 80007308
 {
-#if 0
-    int ret;
-
-    ControllerPakStatus = 0;
-
-    if (gamepad_system_busy != 0)
-    {
-do {
-osYieldThread();
-} while (gamepad_system_busy != 0);
-    }
-
-    ret = osPfsReadWriteFile(&ControllerPak, filenumb, (u8)flag, 0, size, (u8*)data);
-
-    if (ret == PFS_ERR_INCONSISTENT)
-ret = osPfsChecker(&ControllerPak);
-
-    ControllerPakStatus = 1;
-
-    return ret;
-#endif
     return 0;
 }
 
@@ -741,75 +624,10 @@ ret = osPfsChecker(&ControllerPak);
 
 int I_ReadPakFile(void) // 800073B8
 {
-#if 0
-    int ret;
-    u8 *ext_name;
-
-    ControllerPakStatus = 0;
-
-    if (gamepad_system_busy != 0)
-    {
-do {
-osYieldThread();
-} while (gamepad_system_busy != 0);
-    }
-
-    Pak_Data = NULL;
-    Pak_Size = 0;
-    ext_name = NULL;
-
-    ret = osPfsFindFile(&ControllerPak, COMPANY_CODE, GAME_CODE, Game_Name, ext_name, &File_Num);
-
-    if (ret == 0)
-    {
-Pak_Size = FileState[File_Num].file_size;
-Pak_Data = (byte *)Z_Malloc(Pak_Size, PU_STATIC, NULL);
-ret = osPfsReadWriteFile(&ControllerPak, File_Num, PFS_READ, 0, Pak_Size, Pak_Data);
-    }
-
-    ControllerPakStatus = 1;
-
-    return ret;
-#endif
     return 0;
 }
 
 int I_CreatePakFile(void) // 800074D4
 {
-#if 0
-    int ret;
-    u8 ExtName [8];
-
-    ControllerPakStatus = 0;
-
-    if (gamepad_system_busy != 0)
-    {
-do {
-  osYieldThread();
-} while (gamepad_system_busy != 0);
-    }
-
-    if (Pak_Memory < 2)
-Pak_Size = 256;
-    else
-Pak_Size = 512;
-
-    Pak_Data = (byte *)Z_Malloc(Pak_Size, PU_STATIC, NULL);
-    D_memset(Pak_Data, 0, Pak_Size);
-
-    *(int*)ExtName = 0;
-
-    ret = osPfsAllocateFile(&ControllerPak, COMPANY_CODE, GAME_CODE, Game_Name, ExtName, Pak_Size, &File_Num);
-
-    if (ret == PFS_ERR_INCONSISTENT)
-ret = osPfsChecker(&ControllerPak);
-
-    if (ret == 0)
-ret = osPfsReadWriteFile(&ControllerPak, File_Num, PFS_WRITE, 0, Pak_Size, Pak_Data);
-
-    ControllerPakStatus = 1;
-
-    return ret;
-#endif
     return 0;
 }

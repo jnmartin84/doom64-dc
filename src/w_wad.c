@@ -251,16 +251,16 @@ void W_Init (void)
 	short *pal1;
 	short *pal2;
 
-	W_DrawLoadScreen("Palettes", 0, 2);
-	timer_spin_delay_us(30000);
+	W_DrawLoadScreen("Palettes", 0, 100);
+	timer_spin_sleep(15);
 	sprintf(fnbuf, "%s/doom64monster.pal", fnpre);
 	fs_load(fnbuf, (void **)&pal1);
-	W_DrawLoadScreen("Palettes", 1, 2);
-	timer_spin_delay_us(30000);
+	W_DrawLoadScreen("Palettes", 50, 100);
+	timer_spin_sleep(15);
 	sprintf(fnbuf, "%s/doom64nonenemy.pal", fnpre);
 	fs_load(fnbuf, (void **)&pal2);
-	W_DrawLoadScreen("Palettes", 2, 2);
-	timer_spin_delay_us(30000);
+	W_DrawLoadScreen("Palettes", 100, 100);
+	timer_spin_sleep(15);
 
 	pvr_set_pal_format(PVR_PAL_ARGB1555);
 	for(int i=1;i<256;i++) {
@@ -390,16 +390,18 @@ void W_Init (void)
 	Z_Free(s2_wadfileptr);
 
 	// all non-enemy sprites are in an uncompressed, pretwiddled 8bpp 1024^2 sheet texture
-	W_DrawLoadScreen("Item Tex", 0, 1);
-	timer_spin_delay_us(30000);
+	W_DrawLoadScreen("Item Tex", 0, 100);
+	timer_spin_sleep(15);
 	sprintf(fnbuf, "%s/vq/non_enemy.tex", fnpre);
 	size_t vqsize = fs_load(fnbuf, &pnon_enemy);
+	W_DrawLoadScreen("Item Tex", 50, 100);
+	timer_spin_sleep(15);
 	dbgio_printf("non_enemy loaded size is %d\n", vqsize);
 	pvr_non_enemy = pvr_mem_malloc(vqsize);
 	pvr_txr_load(pnon_enemy, pvr_non_enemy, vqsize);
 	free(pnon_enemy);
-	W_DrawLoadScreen("Item Tex", 1, 1);
-	timer_spin_delay_us(30000);
+	W_DrawLoadScreen("Item Tex", 100, 100);
+	timer_spin_sleep(15);
 	dbgio_printf("PVR mem free after non_enemy: %lu\n", pvr_mem_available());
 
 	// common shared poly context/header used for all non-enemy sprites
