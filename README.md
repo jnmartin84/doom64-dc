@@ -1,5 +1,9 @@
 # Doom 64 for Dreamcast 
 
+
+You have to do a tiny bit of actual work to get this going. If you don't have 30 minutes to spare, just go play on Steam and call it a day.
+
+
 # playing guide
 
     A is attack
