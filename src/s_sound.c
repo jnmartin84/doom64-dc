@@ -18,7 +18,9 @@ void S_UpdateSounds(void) {}
 void W_DrawLoadScreen(char *what, int current, int total);
 sfxhnd_t sounds[NUMSFX+1];
 
-#define fullsfxname(sn) "/cd/sfx/"sn".wav"
+extern const char *fnpre;
+
+#define fullsfxname(sn) STORAGE_PREFIX"/sfx/"sn".wav"
 #define stringed(sfxname) #sfxname
 #define setsfx(sn) sounds[sn] = snd_sfx_load(fullsfxname(stringed(sn))); W_DrawLoadScreen("Sounds", sn, NUMSFX-24)
 
@@ -118,7 +120,7 @@ void init_all_sounds(void) {
 	setsfx(sfx_rectdie);
 	setsfx(sfx_rectpain);
 	setsfx(sfx_rectsit);
-	sounds[NUMSFX] = snd_sfx_load("/cd/sfx/sfx_electric_loop.wav");
+	sounds[NUMSFX] = snd_sfx_load(STORAGE_PREFIX"/sfx/sfx_electric_loop.wav");
 }
 
 extern int SfxVolume;
@@ -262,7 +264,7 @@ void S_StartMusic(int mus_seq)
 			break;
 		}
 
-		sprintf(itname, "/cd/ogg/%s.ogg", name);
+		sprintf(itname, STORAGE_PREFIX"/ogg/%s.ogg", name);
 
 		int looping = 1;
 		if(mus_seq == 115 || mus_seq == 114) {

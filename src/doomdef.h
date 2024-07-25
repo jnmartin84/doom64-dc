@@ -17,6 +17,9 @@
 #define s8 int8_t
 
 #include "i_main.h"
+
+#define STORAGE_PREFIX "/cd"
+
 #define MAX_CACHED_SPRITES 256
 
 #define VERTBUF_SIZE (768*1024)

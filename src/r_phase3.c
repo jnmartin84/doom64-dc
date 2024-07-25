@@ -102,6 +102,7 @@ void clip_edge(d64Vertex_t *v1, d64Vertex_t *v2, d64Vertex_t *out)
 	out->v.x = invt * v1->v.x + t * v2->v.x;
 	out->v.y = invt * v1->v.y + t * v2->v.y;
 	out->v.z = invt * v1->v.z + t * v2->v.z;
+
 	out->v.u = invt * v1->v.u + t * v2->v.u;
 	out->v.v = invt * v1->v.v + t * v2->v.v;
 
@@ -737,7 +738,7 @@ void R_RenderWall(seg_t *seg, int flags, int texture, int topHeight, int bottomH
 	
 	if (texture != 16) {
 		if (flags & ML_HMIRROR) {
-			cms = 1;
+			cms = 2;
 		} else {
 			cms = 0;
 		}
@@ -750,14 +751,12 @@ void R_RenderWall(seg_t *seg, int flags, int texture, int topHeight, int bottomH
 
 		if ((texture != globallump) || (globalcm != (cms | cmt))) {
 			data = W_CacheLumpNum(texture >> 4, PU_CACHE, dec_d64);
-			
-			P_CachePvrTexture(texnum, PU_CACHE);
-
 			wshift = SwapShort(((textureN64_t*)data)->wshift);
 			hshift = SwapShort(((textureN64_t*)data)->hshift);
-
 			last_width = 1 << wshift;
 			last_height = 1 << hshift;
+
+			P_CachePvrTexture(texnum, PU_CACHE);
 
 			// cms is S/H mirror
 			// cmt is T/V mirror

@@ -78,6 +78,11 @@ void D_DoomMain(void)
     ticbuttons[0] = 0;
     oldticbuttons[0] = 0;
 
+#if 0
+	// when I need to test changes to the finale / cast drawer
+	MiniLoop(F_Start, F_Stop, F_Ticker, F_Drawer);
+#endif
+
     D_SplashScreen();
 
     while (true) {

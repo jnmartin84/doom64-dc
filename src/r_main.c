@@ -32,6 +32,13 @@ int globalcm;                                   // 800A68FC
 
 
 Matrix __attribute__((aligned(32))) R_ProjectionMatrix;
+#if 0
+// double precision result is different from single precision at 7th decimal place
+ = {{1.0,0.0,0.0,0.0},
+	{0.0,1.333333 /*333333333*/,0.0,0.0},
+		{0.0,0.0,-1.004211 /*0526315789*/,-1.0},
+			{0.0,0.0,-16.033684 /*210526317*/,0.0}};
+#endif
 Matrix __attribute__((aligned(32))) R_ModelMatrix;
 
 /* */
@@ -67,6 +74,7 @@ void R_Init(void) // 800233E0
 	R_InitData();
 
 	guFrustumF(R_ProjectionMatrix, -8.0f, 8.0f, -6.0f, 6.0f, 8.0f, 3808.0f, 1.0f);
+
 	guMtxIdentF(R_ModelMatrix);
 
 	pvr_poly_cxt_col(&flash_cxt, PVR_LIST_TR_POLY);
@@ -198,6 +206,7 @@ void R_RenderPlayerView(void)
 
 	if((uint32_t)(FlashEnvColor & 0xFFFFFF00)) {
 		// draw a flat shaded untextured quad across the entire screen with the color and half alpha
+		// this is one of the more inaccurate things compared to the N64 original, sorry
 		pvr_vertex_t __attribute__((aligned(32))) verts[4];
 
 		uint32_t color = D64_PVR_REPACK_COLOR_ALPHA(FlashEnvColor, 127);

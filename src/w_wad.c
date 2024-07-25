@@ -62,7 +62,8 @@ pvr_ptr_t pvr_non_enemy;
 pvr_poly_cxt_t pvr_sprite_cxt;
 pvr_poly_hdr_t pvr_sprite_hdr;
 
-const char *fnpre = "/cd";
+// see doomdef.h
+const char *fnpre = STORAGE_PREFIX;
 
 char fnbuf[256];
 extern uint8_t __attribute__((aligned(32))) op_buf[VERTBUF_SIZE];
@@ -323,6 +324,9 @@ void W_Init (void)
 	wadfileptr = (wadinfo_t *)Z_Alloc(sizeof(wadinfo_t), PU_STATIC, NULL);
 	sprintf(fnbuf, "%s/pow2.wad", fnpre); // doom64.wad
 	wad_file = fs_open(fnbuf, O_RDONLY);
+	if (-1 == wad_file) {
+		I_Error("Could not open %s for reading.\n", fnbuf);
+	}
 
 	size_t full_wad_size = fs_seek(wad_file, 0, SEEK_END);
 	size_t wad_rem_size = full_wad_size;
@@ -359,7 +363,9 @@ void W_Init (void)
 	s2_wadfileptr = (wadinfo_t *)Z_Alloc(sizeof(wadinfo_t), PU_STATIC, NULL);
 	sprintf(fnbuf, "%s/alt.wad", fnpre);
 	s2_file = fs_open(fnbuf, O_RDONLY);
-
+	if (-1 == s2_file) {
+		I_Error("Could not open %s for reading.\n", fnbuf);
+	}
 	size_t alt_wad_size = fs_seek(s2_file, 0, SEEK_END);
 	wad_rem_size = alt_wad_size;
 	s2wad = malloc(wad_rem_size);

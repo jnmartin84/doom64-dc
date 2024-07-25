@@ -797,7 +797,9 @@ void AM_DrawLineThings(fixed_t x, fixed_t y, angle_t angle, int color) {
 			float dx = x2 - x1;
 			float dy = y2 - y1;
 
-			float hlw_invmag = frsqrt((dx*dx) + (dy*dy)) * (LINEWIDTH*0.5f); float nx = -dy * hlw_invmag; float ny = dx * hlw_invmag;
+			float hlw_invmag = frsqrt((dx*dx) + (dy*dy)) * (LINEWIDTH*0.5f);
+			float nx = -dy * hlw_invmag;
+			float ny = dx * hlw_invmag;
 
 			vert->x = x1 + nx;
 			vert->y = y1 + ny;

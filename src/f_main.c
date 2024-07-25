@@ -507,21 +507,6 @@ void F_Start(void) // 8000313C
 	S_StartMusic(113);
 }
 
-/*
-=================
-=
-= F_Stop/Cast_Stop
-=
-=================
-*/
-
-void F_Stop(void) // 80003220
-{
-	gamepaused = false;
-	DrawerStatus = 0;
-	S_StopMusic();
-	I_WIPE_FadeOutScreen();
-}
 
 /*
 =================
@@ -893,12 +878,115 @@ static inline uint32_t np2(uint32_t v) {
 	v++;
 	return v;
 }
+extern pvr_ptr_t pvr_troo[MAX_CACHED_SPRITES];
+extern pvr_poly_hdr_t hdr_troo[MAX_CACHED_SPRITES];
+extern pvr_poly_cxt_t cxt_troo[MAX_CACHED_SPRITES];
+extern uint8_t __attribute__((aligned(32))) tmptroo[256*256];
+extern int lump_frame[575 + 310];
+extern int used_lumps[575 + 310];
+extern int used_lump_idx;
+extern int del_idx;
+extern int total_cached_vram;
+extern int last_flush_frame;
+
+
+typedef enum {
+	sarg, // 349 - 394
+	playa, // 398 - 447
+	troo, //450 - 517
+	boss, //520-565
+	fatt, //567-617
+	skul, //619-658
+	pain, //660-687
+	bspi, //689-724
+	poss, // 727-775
+	head, //777-817
+	cybr, //819-875
+	rect, //877-923
+	spec, // w2 1 - 46
+	ply1, // w2 47 - 96
+	ply2, // w2 97-146
+	nite, // w2 147-214
+	baro, // w2 215-260
+	zomb, // w2 261-309
+	
+} finale_cast_t;
+
+static int get_monster_start_lump(finale_cast_t monster) {
+	switch (monster) {
+		case sarg: return 349;//
+		case playa: return 398;// - 447
+		case troo: return 450;// - 517
+		case boss: return 520;//-565
+		case fatt: return 567;//-617
+		case skul: return 619;//-658
+		case pain: return 660;//-687
+		case bspi: return 689;//-724
+		case poss: return 727;//-775
+		case head: return 777;//-817
+		case cybr: return 819;//-875
+		case rect: return 877;//-923
+		case spec: return 1;//, // w2 1 - 46
+		case ply1: return 47;//w2 47 - 96
+		case ply2: return 97;//// w2 97-146
+		case nite: return 147;//// w2 147-214
+		case baro: return 215;//// w2 215-260
+		case zomb: return 261;// // w2 261-309		
+		default: return -1;
+	}
+}
+
+static int get_num_monster_lumps(finale_cast_t monster) {
+	switch (monster) {
+		case sarg: return 46;
+		case playa: return 50;
+		case troo: return 68;
+		case boss: return 46;
+		case fatt: return 51;
+		case skul: return 40;
+		case pain: return 28;
+		case bspi: return 36;
+		case poss: return 49;
+		case head: return 41;
+		case cybr: return 57;
+		case rect: return 47;
+		case spec: return 46;
+		case ply1: return 50;
+		case ply2: return 50;
+		case nite: return 68;
+		case baro: return 46;
+		case zomb: return 49;
+		default: return -1;
+	}
+}
+
+static finale_cast_t get_monster(int lump) {
+	if (lump >= 349 && lump <= 394) return sarg;
+	else if (lump >= 398 && lump <= 447) return playa;
+	else if (lump >= 450 && lump <= 517) return troo;
+	else if (lump >= 520 && lump <= 565) return boss;
+	else if (lump >= 567 && lump <= 617) return fatt;
+	else if (lump >= 619 && lump <= 658) return skul;
+	else if (lump >= 660 && lump <= 687) return pain;
+	else if (lump >= 689 && lump <= 724) return bspi;
+	else if (lump >= 727 && lump <= 775) return poss;
+	else if (lump >= 777 && lump <= 817) return head;
+	else if (lump >= 819 && lump <= 875) return cybr;
+	else if (lump >= 877 && lump <= 923) return rect;
+	else if (lump >= 1 && lump <= 46) return spec;
+	else if (lump >= 47 && lump <= 96) return ply1;
+	else if (lump >= 97 && lump <= 146) return ply2;
+	else if (lump >= 147 && lump <= 214) return nite;
+	else if (lump >= 215 && lump <= 260) return baro;
+	else if (lump >= 261 && lump <= 309) return zomb;
+	else return -1;
+}
+
+static finale_cast_t cached_yet = -1;
+
 
 void BufferedDrawSprite(int type, state_t *state, int rotframe, int color, int xpos, int ypos) // 80003D1C
 {
-	static pvr_ptr_t pvranysprite = 0;
-	pvr_poly_cxt_t cxtanysprite;
-	pvr_poly_hdr_t hdranysprite;
 	float xl;
 	float xh;
 	float yl;
@@ -970,21 +1058,10 @@ void BufferedDrawSprite(int type, state_t *state, int rotframe, int color, int x
 			}
 		}
 
-		if (!pvranysprite) {
-			//pvr_mem_free(pvranysprite);
-			//pvranysprite = 0;
-			pvranysprite = pvr_mem_malloc(256*256);
-		}
-
-
-		// Don't filter these sprites.
-		pvr_poly_cxt_txr(&cxtanysprite, PVR_LIST_TR_POLY, PVR_TXRFMT_PAL8BPP | PVR_TXRFMT_8BPP_PAL(0) | PVR_TXRFMT_TWIDDLED, wp2, hp2, pvranysprite, PVR_FILTER_NONE);
-		pvr_poly_compile(&hdranysprite, &cxtanysprite);
-		theheader = &hdranysprite;
-		void *src = data + sizeof(spriteN64_t);
+		finale_cast_t cur_monster = get_monster(lump);
+		int monster_lump = lump;
 
 		if (external_pal && mobjinfo[type].palette) {
-			void *newlump;
 			int newlumpnum;
 			char *lumpname = W_GetNameForNum(lump);
 
@@ -1008,11 +1085,51 @@ void BufferedDrawSprite(int type, state_t *state, int rotframe, int color, int x
 			}
 
 			newlumpnum = W_S2_GetNumForName(lumpname);
-			newlump = W_S2_CacheLumpNum(newlumpnum, PU_CACHE, dec_jag);
-			src = newlump + sizeof(spriteN64_t);
+			monster_lump = newlumpnum;
+
+			cur_monster = get_monster(newlumpnum);
 		}
 
-		pvr_txr_load(src, pvranysprite, wp2*hp2);
+
+		int start_mlump = get_monster_start_lump(cur_monster);
+
+		// must cache every lump when a new monster is requested, they can't be loaded fast enough
+		// if they reload every single frame
+		if (cached_yet != cur_monster) {
+			if (cached_yet != -1) {
+				int num_mlump = get_num_monster_lumps(cached_yet);
+				for (int i=0;i<num_mlump;i++) {
+					if (pvr_troo[i]) {
+						pvr_mem_free(pvr_troo[i]);
+						pvr_troo[i] = 0;
+					}
+				}
+			}
+			cached_yet = cur_monster;
+			
+
+			int num_mlump = get_num_monster_lumps(cur_monster);
+			for (int nm=0;nm<num_mlump;nm++) {
+					void *mdata; void *msrc;
+					int mwidth,mheight,mwp2,mhp2;
+					if (start_mlump > 348) {
+						mdata = W_CacheLumpNum(start_mlump + nm, PU_CACHE, dec_jag);
+					} else {
+						mdata = W_S2_CacheLumpNum(start_mlump + nm, PU_CACHE, dec_jag);
+					}
+					mwidth = SwapShort(((spriteN64_t*)mdata)->width);
+					mheight = SwapShort(((spriteN64_t*)mdata)->height);
+					mwp2 = np2(mwidth);
+					mhp2 = np2(mheight);
+					msrc = mdata + sizeof(spriteN64_t);
+					pvr_troo[nm] = pvr_mem_malloc(mwp2*mhp2);
+					pvr_poly_cxt_txr(&cxt_troo[nm], PVR_LIST_TR_POLY, PVR_TXRFMT_PAL8BPP | PVR_TXRFMT_8BPP_PAL(0) | PVR_TXRFMT_TWIDDLED, mwp2, mhp2, pvr_troo[nm], PVR_FILTER_NONE);
+					pvr_poly_compile(&hdr_troo[nm], &cxt_troo[nm]);
+					pvr_txr_load(msrc, pvr_troo[nm], mwp2*mhp2);
+			}
+		}
+
+		theheader = &hdr_troo[monster_lump - start_mlump];
 
 		if (!flip) {
 			u0 = 0.0f;
@@ -1063,4 +1180,27 @@ void BufferedDrawSprite(int type, state_t *state, int rotframe, int color, int x
 	pvr_list_prim(PVR_LIST_TR_POLY, &verts, sizeof(verts));
 
 	globallump = -1;
+}
+
+/*
+=================
+=
+= F_Stop/Cast_Stop
+=
+=================
+*/
+
+void F_Stop(void) // 80003220
+{
+	gamepaused = false;
+	DrawerStatus = 0;
+	S_StopMusic();
+	I_WIPE_FadeOutScreen();
+	int num_mlump = get_num_monster_lumps(cached_yet);
+	for (int i=0;i<num_mlump;i++) {
+		if (pvr_troo[i]) {
+			pvr_mem_free(pvr_troo[i]);
+			pvr_troo[i] = 0;
+		}
+	}
 }
