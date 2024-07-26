@@ -33,6 +33,10 @@ kthread_attr_t sys_ticker_attr;
 
 boolean disabledrawing = false;
 
+mutex_t vbi2mtx;
+mutex_t rdpmtx;
+condvar_t vbi2cv;
+
 volatile int vbi2msg = 0;
 volatile int rdpmsg = 0;
 volatile s32 vsync = 0;
@@ -67,6 +71,10 @@ int __attribute__((noreturn)) main(int argc, char **argv)
 
 	vblank_handler_add(&vblfunc, NULL);
 
+	mutex_init(&vbi2mtx, MUTEX_TYPE_NORMAL);
+	mutex_init(&rdpmtx, MUTEX_TYPE_NORMAL);
+	cond_init(&vbi2cv);
+
     main_attr.create_detached = 0;
     main_attr.stack_size = 65536;
     main_attr.stack_ptr = NULL;
@@ -76,8 +84,10 @@ int __attribute__((noreturn)) main(int argc, char **argv)
     main_thread = thd_create_ex(&main_attr, I_Main, NULL);
 	dbgio_printf("started main thread\n");
 
+	thd_join(main_thread, NULL);
+
 	while(1) {
-		thd_pass();
+		; // don't care anymore
 	}
 }
 
@@ -99,8 +109,17 @@ void *I_SystemTicker(void *arg)
 	}
 
 	while(true) {
-		if(rdpmsg) {
+		int isrdp = 0;
+
+		mutex_lock(&rdpmtx);
+		isrdp = rdpmsg;
+		mutex_unlock(&rdpmtx);
+
+		if(isrdp) {
+			mutex_lock(&rdpmtx);
 			rdpmsg = 0;
+			mutex_unlock(&rdpmtx);
+
 			SystemTickerStatus |= 16;
 			thd_pass();
 			continue;
@@ -121,7 +140,10 @@ void *I_SystemTicker(void *arg)
 			drawsync1 = vsync - drawsync2;
 			drawsync2 = vsync;
 
+			mutex_lock(&vbi2mtx);
 			vbi2msg = 1;
+			cond_signal(&vbi2cv);
+			mutex_unlock(&vbi2mtx);
 		}
 
 		thd_pass();
@@ -263,10 +285,12 @@ void I_DrawFrame(void)  // 80006570
 {
 	running++;
 
+	mutex_lock(&vbi2mtx);
 	while (!vbi2msg) {
-		thd_pass();
+		cond_wait(&vbi2cv, &vbi2mtx);
 	}
 	vbi2msg = 0;
+	mutex_unlock(&vbi2mtx);
 }
 
 void I_GetScreenGrab(void)

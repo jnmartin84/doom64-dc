@@ -718,8 +718,8 @@ void R_WallPrep(seg_t *seg)
 
 #define INTEGER_VERT 1
 
-int last_width = 64;
-int last_height = 64;
+float last_width_inv = 1.0f / 64.0f;
+float last_height_inv = 1.0f / 64.0f;
 
 void P_CachePvrTexture(int i, int tag);
 
@@ -738,7 +738,7 @@ void R_RenderWall(seg_t *seg, int flags, int texture, int topHeight, int bottomH
 	
 	if (texture != 16) {
 		if (flags & ML_HMIRROR) {
-			cms = 2;
+			cms = 1;
 		} else {
 			cms = 0;
 		}
@@ -753,8 +753,8 @@ void R_RenderWall(seg_t *seg, int flags, int texture, int topHeight, int bottomH
 			data = W_CacheLumpNum(texture >> 4, PU_CACHE, dec_d64);
 			wshift = SwapShort(((textureN64_t*)data)->wshift);
 			hshift = SwapShort(((textureN64_t*)data)->hshift);
-			last_width = 1 << wshift;
-			last_height = 1 << hshift;
+			last_width_inv = 1.0f / (float)(1 << wshift);
+			last_height_inv = 1.0f / (float)(1 << hshift);
 
 			P_CachePvrTexture(texnum, PU_CACHE);
 
@@ -806,10 +806,10 @@ void R_RenderWall(seg_t *seg, int flags, int texture, int topHeight, int bottomH
 		short stu2 = stu1 + (seg->length >> 4);
 		short stv1 = topOffset;
 		short stv2 = bottomOffset;
-		float tu1 = (float)stu1 / (float)last_width;
-		float tu2 = (float)stu2 / (float)last_width;
-		float tv1 = (float)stv1 / (float)last_height;
-		float tv2 = (float)stv2 / (float)last_height;
+		float tu1 = (float)stu1 * last_width_inv;
+		float tu2 = (float)stu2 * last_width_inv;
+		float tv1 = (float)stv1 * last_height_inv;
+		float tv2 = (float)stv2 * last_height_inv;
 
 		dVTX[0] = &(dT1.dVerts[0]);
 		dVTX[1] = &(dT1.dVerts[1]);
@@ -843,8 +843,8 @@ void R_RenderWall(seg_t *seg, int flags, int texture, int topHeight, int bottomH
 	}
 }
 
-int last_sw;
-int last_sh;
+float last_sw_inv_x32;
+float last_sh_inv_x32;
 
 void R_RenderSwitch(seg_t *seg, int texture, int topOffset, int color)
 {
@@ -863,8 +863,8 @@ void R_RenderSwitch(seg_t *seg, int texture, int topOffset, int color)
 		wshift = SwapShort(((textureN64_t*)data)->wshift);
 		hshift = SwapShort(((textureN64_t*)data)->hshift);
 
-		last_sw = 1 << wshift;
-		last_sh = 1 << hshift;
+		last_sw_inv_x32 = 32.0f / (float)(1 << wshift);
+		last_sh_inv_x32 = 32.0f / (float)(1 << hshift);
 
 		if (!VideoFilter) {
 			tcxt[texture][0].txr.filter = PVR_FILTER_BILINEAR;
@@ -909,9 +909,9 @@ void R_RenderSwitch(seg_t *seg, int texture, int topOffset, int color)
 	float z2 = (float)((-y) - (sin << 3) + cos) * inv65536;
 #endif
 	float tu1 = 0.0f;
-	float tu2 = 32.0f / (float)last_sw;
+	float tu2 = last_sw_inv_x32;
 	float tv1 = 0.0f;
-	float tv2 = 32.0f / (float)last_sh;
+	float tv2 = last_sh_inv_x32;
 
 	dVTX[0] = &(dT1.dVerts[0]);
 	dVTX[1] = &(dT1.dVerts[1]);

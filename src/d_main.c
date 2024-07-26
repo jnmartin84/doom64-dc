@@ -179,6 +179,8 @@ extern int last_Rtrig;
 
 extern volatile int rdpmsg;
 
+extern mutex_t rdpmtx;
+
 int MiniLoop(void(*start)(void), void(*stop)(),
              int(*ticker)(void), void(*drawer)(void))
 {
@@ -244,7 +246,10 @@ int MiniLoop(void(*start)(void), void(*stop)(),
 
 			pvr_scene_finish();
 			pvr_wait_ready();
+
+			mutex_lock(&rdpmtx);
 			rdpmsg = 1;
+			mutex_unlock(&rdpmtx);
 		}
 
 		gamevbls = gametic;
