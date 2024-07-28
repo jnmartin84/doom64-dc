@@ -804,14 +804,6 @@ void F_Drawer(void) // 800039DC
 
 	I_ClearFrame();
 
-	//gDPPipeSync(GFX1++);
-	//gDPSetCycleType(GFX1++, G_CYC_FILL);
-	//gDPSetRenderMode(GFX1++,G_RM_NOOP,G_RM_NOOP2);
-	//gDPSetColorImage(GFX1++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WD, OS_K0_TO_PHYSICAL(cfb[vid_side]));
-	// Fill borders with black
-	//gDPSetFillColor(GFX1++, GPACK_RGBA5551(0,0,0,0) << 16 | GPACK_RGBA5551(0,0,0,0)) ;
-	//gDPFillRectangle(GFX1++, 0, 0, SCREEN_WD-1, SCREEN_HT-1);
-
 	switch(finalestage)
 	{
 		case F_STAGE_FADEIN_BACKGROUD:
@@ -889,49 +881,49 @@ extern int del_idx;
 extern int total_cached_vram;
 extern int last_flush_frame;
 
-
 typedef enum {
-	sarg, // 349 - 394
-	playa, // 398 - 447
-	troo, //450 - 517
-	boss, //520-565
-	fatt, //567-617
-	skul, //619-658
-	pain, //660-687
-	bspi, //689-724
-	poss, // 727-775
-	head, //777-817
-	cybr, //819-875
-	rect, //877-923
-	spec, // w2 1 - 46
-	ply1, // w2 47 - 96
-	ply2, // w2 97-146
-	nite, // w2 147-214
-	baro, // w2 215-260
-	zomb, // w2 261-309
-	
+	sarg,
+	playa,
+	troo,
+	boss,
+	fatt,
+	skul,
+	pain,
+	bspi,
+	poss,
+	head,
+	cybr,
+	rect,
+	spec,
+	ply1,
+	ply2,
+	nite,
+	baro,
+	zomb,
 } finale_cast_t;
 
 static int get_monster_start_lump(finale_cast_t monster) {
 	switch (monster) {
-		case sarg: return 349;//
-		case playa: return 398;// - 447
-		case troo: return 450;// - 517
-		case boss: return 520;//-565
-		case fatt: return 567;//-617
-		case skul: return 619;//-658
-		case pain: return 660;//-687
-		case bspi: return 689;//-724
-		case poss: return 727;//-775
-		case head: return 777;//-817
-		case cybr: return 819;//-875
-		case rect: return 877;//-923
-		case spec: return 1;//, // w2 1 - 46
-		case ply1: return 47;//w2 47 - 96
-		case ply2: return 97;//// w2 97-146
-		case nite: return 147;//// w2 147-214
-		case baro: return 215;//// w2 215-260
-		case zomb: return 261;// // w2 261-309		
+		case sarg: return 349;
+		case playa: return 398;
+		case troo: return 450;
+		case boss: return 520;
+		case fatt: return 567;
+		case skul: return 619;
+		case pain: return 660;
+		case bspi: return 689;
+		case poss: return 727;
+		case head: return 777;
+		case cybr: return 819;
+		case rect: return 877;
+
+		case spec: return 1;
+		case ply1: return 47;
+		case ply2: return 97;
+		case nite: return 147;
+		case baro: return 215;
+		case zomb: return 261;
+
 		default: return -1;
 	}
 }
@@ -973,17 +965,18 @@ static finale_cast_t get_monster(int lump) {
 	else if (lump >= 777 && lump <= 817) return head;
 	else if (lump >= 819 && lump <= 875) return cybr;
 	else if (lump >= 877 && lump <= 923) return rect;
+
 	else if (lump >= 1 && lump <= 46) return spec;
 	else if (lump >= 47 && lump <= 96) return ply1;
 	else if (lump >= 97 && lump <= 146) return ply2;
 	else if (lump >= 147 && lump <= 214) return nite;
 	else if (lump >= 215 && lump <= 260) return baro;
 	else if (lump >= 261 && lump <= 309) return zomb;
+
 	else return -1;
 }
 
 static finale_cast_t cached_yet = -1;
-
 
 void BufferedDrawSprite(int type, state_t *state, int rotframe, int color, int xpos, int ypos) // 80003D1C
 {
@@ -991,13 +984,13 @@ void BufferedDrawSprite(int type, state_t *state, int rotframe, int color, int x
 	float xh;
 	float yl;
 	float yh;
-	float u0,v0,u1,v1;
+	float u0, v0, u1, v1;
 	int wp2;
 	int hp2;
-	spritedef_t     *sprdef;
-	spriteframe_t   *sprframe;
-	int			    lump;
-	boolean		    flip;
+	spritedef_t *sprdef;
+	spriteframe_t *sprframe;
+	int lump;
+	boolean flip;
 
 	byte *data;
 
@@ -1110,22 +1103,22 @@ void BufferedDrawSprite(int type, state_t *state, int rotframe, int color, int x
 
 			int num_mlump = get_num_monster_lumps(cur_monster);
 			for (int nm=0;nm<num_mlump;nm++) {
-					void *mdata; void *msrc;
-					int mwidth,mheight,mwp2,mhp2;
-					if (start_mlump > 348) {
-						mdata = W_CacheLumpNum(start_mlump + nm, PU_CACHE, dec_jag);
-					} else {
-						mdata = W_S2_CacheLumpNum(start_mlump + nm, PU_CACHE, dec_jag);
-					}
-					mwidth = SwapShort(((spriteN64_t*)mdata)->width);
-					mheight = SwapShort(((spriteN64_t*)mdata)->height);
-					mwp2 = np2(mwidth);
-					mhp2 = np2(mheight);
-					msrc = mdata + sizeof(spriteN64_t);
-					pvr_troo[nm] = pvr_mem_malloc(mwp2*mhp2);
-					pvr_poly_cxt_txr(&cxt_troo[nm], PVR_LIST_TR_POLY, PVR_TXRFMT_PAL8BPP | PVR_TXRFMT_8BPP_PAL(0) | PVR_TXRFMT_TWIDDLED, mwp2, mhp2, pvr_troo[nm], PVR_FILTER_NONE);
-					pvr_poly_compile(&hdr_troo[nm], &cxt_troo[nm]);
-					pvr_txr_load(msrc, pvr_troo[nm], mwp2*mhp2);
+				void *mdata; void *msrc;
+				int mwidth,mheight,mwp2,mhp2;
+				if (start_mlump > 348) {
+					mdata = W_CacheLumpNum(start_mlump + nm, PU_CACHE, dec_jag);
+				} else {
+					mdata = W_S2_CacheLumpNum(start_mlump + nm, PU_CACHE, dec_jag);
+				}
+				mwidth = SwapShort(((spriteN64_t*)mdata)->width);
+				mheight = SwapShort(((spriteN64_t*)mdata)->height);
+				mwp2 = np2(mwidth);
+				mhp2 = np2(mheight);
+				msrc = mdata + sizeof(spriteN64_t);
+				pvr_troo[nm] = pvr_mem_malloc(mwp2*mhp2);
+				pvr_poly_cxt_txr(&cxt_troo[nm], PVR_LIST_TR_POLY, PVR_TXRFMT_PAL8BPP | PVR_TXRFMT_8BPP_PAL(0) | PVR_TXRFMT_TWIDDLED, mwp2, mhp2, pvr_troo[nm], PVR_FILTER_NONE);
+				pvr_poly_compile(&hdr_troo[nm], &cxt_troo[nm]);
+				pvr_txr_load(msrc, pvr_troo[nm], mwp2*mhp2);
 			}
 		}
 
