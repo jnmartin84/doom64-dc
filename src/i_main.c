@@ -577,8 +577,8 @@ void I_WIPE_FadeOutScreen(void) // 80006D34
 	v1 = 0.9375f; // 240.0f / 256.0f;
 	x0 = 0.0f;
 	y0 = 0.0f;
-	x1 = REAL_SCREEN_WD;//639.0f;
-	y1 = REAL_SCREEN_HT;//479.0f;
+	x1 = REAL_SCREEN_WD;
+	y1 = REAL_SCREEN_HT;
 	for (int vn = 0; vn < 4; vn++) {
 		verts[vn].flags = PVR_CMD_VERTEX;
 		verts[vn].z = 5.0f;
