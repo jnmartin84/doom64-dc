@@ -1,3 +1,6 @@
+#ifndef __SHEETS_H
+#define __SHEETS_H
+
 int non_enemy_len = 388;
 
 float non_enemy[][5] = {
@@ -391,11 +394,6 @@ float non_enemy[][5] = {
 {210,0.9453125,0.15234375,0.9609375,0.1796875}, /* YSKUA0 */
 };
 
-extern int firstsprite;
-extern pvr_poly_hdr_t **headers_for_sprites;
-
-extern pvr_poly_hdr_t pvr_sprite_hdr;
-
 float *all_u;
 float *all_v;
 
@@ -410,7 +408,6 @@ static void setup_sprite_headers() {
 
 	for (int i=0;i<non_enemy_len; i++) {
 		int lump = (int)non_enemy[i][0];
-		headers_for_sprites[lump] = &pvr_sprite_hdr;
 		all_u[lump] = non_enemy[i][1];
 		all_v[lump] = non_enemy[i][2];
 		all_u2[lump] = non_enemy[i][3];
@@ -418,4 +415,4 @@ static void setup_sprite_headers() {
 	}
 }	
 
-
+#endif // __SHEETS_H

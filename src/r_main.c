@@ -31,15 +31,8 @@ int globallump;                                 // 800A68f8
 int globalcm;                                   // 800A68FC
 
 
-Matrix __attribute__((aligned(32))) R_ProjectionMatrix;
-#if 0
-// double precision result is different from single precision at 7th decimal place
- = {{1.0,0.0,0.0,0.0},
-	{0.0,1.333333 /*333333333*/,0.0,0.0},
-		{0.0,0.0,-1.004211 /*0526315789*/,-1.0},
-			{0.0,0.0,-16.033684 /*210526317*/,0.0}};
-#endif
-Matrix __attribute__((aligned(32))) R_ModelMatrix;
+Matrix R_ProjectionMatrix;
+Matrix R_ModelMatrix;
 
 /* */
 /* precalculated math */
@@ -90,9 +83,9 @@ void R_Init(void) // 800233E0
 =
 ==============
 */
-static Matrix __attribute__((aligned(32))) RotX;
-static Matrix __attribute__((aligned(32))) RotY;
-static Matrix __attribute__((aligned(32))) Tran;
+static Matrix RotX;
+static Matrix RotY;
+static Matrix Tran;
 
 void R_RenderPlayerView(void)
 {
@@ -127,38 +120,11 @@ void R_RenderPlayerView(void)
 
 	// Phase 2
 	if (rendersky) {
-		// [Immorpher] Set linear texture filtering for skies only if wanted
-		if (VideoFilter == 1) { 
-#if 0
-			gDPSetTextureFilter(GFX1++, G_TF_BILERP);
-#endif
-		}
 		R_RenderSKY();
 	}
 
 #define PVR_MIN_Z 0.0001f
 	 pvr_set_zclip(PVR_MIN_Z);
-
-#if 0
-	gDPSetCycleType(GFX1++, G_CYC_2CYCLE);
-	gDPSetTextureLOD(GFX1++, G_TL_TILE);
-	gDPSetTextureLUT(GFX1++, G_TT_RGBA16);
-	gDPSetTexturePersp(GFX1++, G_TP_PERSP);
-	gDPSetAlphaCompare(GFX1++, G_AC_THRESHOLD);
-	gDPSetBlendColor(GFX1++, 0, 0, 0, 0);
-
-	gDPSetCombineMode(GFX1++, G_CC_D64COMB07, G_CC_D64COMB08);
-
-	gDPSetRenderMode(GFX1++, G_RM_FOG_SHADE_A, G_RM_TEX_EDGE2);
-
-	FnearA = (1000 - FogNear);
-	FnearB = ((0-FogNear) << 8) + 128000;
-	Fnear  = (((128000 / FnearA) << 16) | ((FnearB / FnearA) & 0xffff));
-	gMoveWd(GFX1++, G_MW_FOG, G_MWO_FOG, Fnear);
-
-	// Apply Fog Color
-	gDPSetFogColorD64(GFX1++, FogColor);
-#endif
 
 	fogfactor = (1000 - FogNear);
 
@@ -214,7 +180,7 @@ void R_RenderPlayerView(void)
 		pvr_vertex_t *vert = verts;
 		vert->flags = PVR_CMD_VERTEX;
 		vert->x = 0.0f;
-		vert->y = REAL_SCREEN_HT - 1;
+		vert->y = REAL_SCREEN_HT;
 		vert->z = 5.0f;
 		vert->argb = color;
 		vert++;
@@ -227,14 +193,14 @@ void R_RenderPlayerView(void)
 		vert++;
 
 		vert->flags = PVR_CMD_VERTEX;
-		vert->x = REAL_SCREEN_WD - 1;
-		vert->y = REAL_SCREEN_HT - 1;
+		vert->x = REAL_SCREEN_WD;
+		vert->y = REAL_SCREEN_HT;
 		vert->z = 5.0f;
 		vert->argb = color;
 		vert++;
 
 		vert->flags = PVR_CMD_VERTEX_EOL;
-		vert->x = REAL_SCREEN_WD - 1;
+		vert->x = REAL_SCREEN_WD;
 		vert->y = 0.0f;
 		vert->z = 5.0f;
 		vert->argb = color;

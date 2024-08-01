@@ -223,25 +223,12 @@ void R_RenderCloudSky(void)
 
 void R_RenderVoidSky(void) // 800256B4
 {
-#if 0
-	gDPSetCycleType(GFX1++, G_CYC_FILL);
-	gDPSetRenderMode(GFX1++,G_RM_NOOP,G_RM_NOOP2);
-
-	// Fill borders with SkyVoidColor
-	gDPSetFillColor(GFX1++, SkyVoidColor);
-	gDPFillRectangle(GFX1++, 0, 0, SCREEN_WD-1, SCREEN_HT-1);
-#endif
 	pvr_set_bg_color((float)UNPACK_R(SkyVoidColor)/255.0f, (float)UNPACK_G(SkyVoidColor)/255.0f, (float)UNPACK_B(SkyVoidColor)/255.0f);
 }
 
 void R_RenderEvilSky(void) // 80025738
 {
 	int color;
-#if 0
-	gDPSetPrimColor(GFX1++, 0, ((lights[255].rgba >> 8)  - Skyfadeback), 0, 0, 0, 255);
-#endif
-	R_RenderSkyPic(SkyPicSpace, 128, 0);
-	R_RenderSkyPic(SkyPicSpace, 240, 1);
 
 	if (Skyfadeback) {
 		Skyfadeback += 4;
@@ -253,7 +240,14 @@ void R_RenderEvilSky(void) // 80025738
 			color = 128;
 		else
 			color = Skyfadeback;
+	}
 
+	if (Skyfadeback < 255) {
+		R_RenderSkyPic(SkyPicSpace, 128, 0);
+		R_RenderSkyPic(SkyPicSpace, 240, 1);
+	}
+
+	if (Skyfadeback) {
 		M_DrawBackground(63, 25, color, "EVIL", 0.00015f, 0);
 	}
 }
@@ -310,11 +304,6 @@ void R_RenderClouds(void) // 80025878
 	u1 = (((float)CloudOffsetX * inv65536) + 1.5f) - pos;
 	v0 = ((float)CloudOffsetY * inv65536);
 	v1 = ((float)CloudOffsetY * inv65536) + 2.0f;
-
-// this is some kind of blend color
-#if 0
-    gDPSetPrimColorD64(GFX1++, 0, (lights[255].rgba >> 8), SkyCloudColor);
-#endif
 
 	dVTX[0] = &(dT1.dVerts[0]);
 	dVTX[1] = &(dT1.dVerts[1]);
@@ -453,8 +442,6 @@ void R_RenderSkyPic(int lump, int yoffset, int callno) // 80025BDC
 
 	float u0,v0,u1,v1;
 	pvr_vertex_t __attribute__((aligned(32))) verts[4];
-	// ang is (-255,0)
-	// -255 is 0 on the 
 	u0 = (float)ang / 256.0f;
 	u1 = u0 + 1.0f;
 	v0 = 0.0f;
@@ -484,13 +471,13 @@ void R_RenderSkyPic(int lump, int yoffset, int callno) // 80025BDC
 	vert->v = v0;
 	vert++;
 
-	vert->x = (float)REAL_SCREEN_WD - 1.0f;
+	vert->x = (float)REAL_SCREEN_WD;
 	vert->y = (float)(yl+height)*(float)RES_RATIO;
 	vert->u = u1;
 	vert->v = v1;
 	vert++;
 
-	vert->x = (float)REAL_SCREEN_WD - 1.0f;
+	vert->x = (float)REAL_SCREEN_WD;
 	vert->y = (float)yl*(float)RES_RATIO;
 	vert->u = u1;
 	vert->v = v0;
@@ -506,8 +493,7 @@ pvr_ptr_t pvrfire;
 pvr_poly_cxt_t pvrfirecxt;
 pvr_poly_hdr_t pvrfirehdr;
 
-// TODO make this use a palette
-void R_RenderFireSky(void) // 80025F68
+void R_RenderFireSky(void)
 {
 	byte *buff;
 	byte *src, *srcoffset, *tmpSrc;
@@ -521,9 +507,6 @@ void R_RenderFireSky(void) // 80025F68
 		pvrfirecxt.depth.write = PVR_DEPTHWRITE_DISABLE;
 		pvr_poly_compile(&pvrfirehdr, &pvrfirecxt);
 	}
-
-	// see all of the horrible geometry cracks
-	//pvr_set_bg_color(1.0f,0.0f,1.0f);
 
 	if (((gamevbls < gametic) && (gametic & 1)) && (!gamepaused)) {
 		buff = SkyFireData[FireSide];

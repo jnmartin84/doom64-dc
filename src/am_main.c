@@ -230,9 +230,12 @@ void AM_Control (player_t *player) // 800004F4
 = Draws the current frame to workingscreen
 ==================
 */
-extern Matrix __attribute__((aligned(32))) R_ProjectionMatrix;
+extern Matrix R_ProjectionMatrix;
 
 float empty_table[129] = {0};
+static Matrix RotX;
+static Matrix RotY;
+static Matrix ThenTrans;
 
 void AM_Drawer (void) // 800009AC
 {
@@ -267,7 +270,7 @@ void AM_Drawer (void) // 800009AC
 
 	pvr_set_bg_color(0,0,0);
 	pvr_fog_table_color(0.0f,0.0f,0.0f,0.0f);
-pvr_fog_table_custom(	empty_table	);	
+	pvr_fog_table_custom(empty_table);
 
 	p = &players[0];
 
@@ -293,13 +296,8 @@ pvr_fog_table_custom(	empty_table	);
 	s = finesine[angle];
 	c = finecosine[angle];
 
-	Matrix __attribute__((aligned(32))) RotX;
 	DoomRotateX(RotX, -1.0, 0.0); // -pi/2 rad
-
-	Matrix __attribute__((aligned(32))) RotY;
 	DoomRotateY(RotY, (float)s/65536.0f, (float)c/65536.0f);
-
-	Matrix __attribute__((aligned(32))) ThenTrans;
 	DoomTranslate(ThenTrans, -((float)xpos/65536.0f), -((float)scale/65536.0f), (float)ypos/65536.0f);
 
 	mat_load(&R_ProjectionMatrix);
@@ -448,8 +446,7 @@ static boolean AM_DrawSubsector(player_t *player, int bspnum)
 
 	R_RenderPlane(&leafs[sub->leaf], sub->numverts, 0,
 				  textures[sec->floorpic], 0, 0,
-				  lights[sec->colors[1]].rgba, 0, 0, 255);
-//void R_RenderPlane(leaf_t *leaf, int numverts, int zpos, int texture, int xpos, int ypos, int color, int ceiling, int lightlevel, int alpha);
+				  lights[sec->colors[1]].rgba, 0, 0, 255); // no dynamic light
 	return true;
 }
 /*

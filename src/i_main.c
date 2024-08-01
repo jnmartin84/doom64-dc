@@ -10,7 +10,7 @@
 #include <arch/irq.h>
 #include <unistd.h>
 
-KOS_INIT_FLAGS(INIT_DEFAULT | INIT_MALLOCSTATS);
+KOS_INIT_FLAGS(INIT_DEFAULT/* | INIT_MALLOCSTATS*/);
 
 pvr_init_params_t pvr_params = {
 { PVR_BINSIZE_16, 0, PVR_BINSIZE_16, 0, 0 }, VERTBUF_SIZE, 1, 0, 0, 3
@@ -60,7 +60,7 @@ void vblfunc(uint32_t c, void *d)
 int __attribute__((noreturn)) main(int argc, char **argv)
 {
 	dbgio_dev_select("serial");
-
+	vid_set_enabled(0);
 #if REAL_SCREEN_WD == 640
 	vid_set_mode(DM_640x480, PM_RGB565);
 #else
@@ -69,7 +69,13 @@ int __attribute__((noreturn)) main(int argc, char **argv)
 
 	pvr_init(&pvr_params);
 
+#if NO_DITHER
+	PVR_SET(PVR_FB_CFG_2, 0x00000001);
+#endif
+
 	vblank_handler_add(&vblfunc, NULL);
+
+	vid_set_enabled(1);
 
 	mutex_init(&vbi2mtx, MUTEX_TYPE_NORMAL);
 	mutex_init(&rdpmtx, MUTEX_TYPE_NORMAL);
@@ -326,6 +332,7 @@ void I_MoveDisplay(int x,int y) // 80006790
 #define FB_TEX_H 256
 #define FB_TEX_SIZE (FB_TEX_W * FB_TEX_H * sizeof(uint16_t))
 #define US_ONE_FRAME (1000000 / 60)
+extern float empty_table[129];
 void I_WIPE_MeltScreen(void)
 {
 	pvr_vertex_t __attribute__((aligned(32))) verts[8];
@@ -374,13 +381,15 @@ void I_WIPE_MeltScreen(void)
 	pvr_txr_load(fb, pvrfb, FB_TEX_SIZE);
 	pvr_poly_cxt_txr(&wipecxt, PVR_LIST_TR_POLY,
 					PVR_TXRFMT_RGB565 | PVR_TXRFMT_NONTWIDDLED,
-					FB_TEX_W, FB_TEX_H, pvrfb, PVR_FILTER_BILINEAR);
+					FB_TEX_W, FB_TEX_H, pvrfb, PVR_FILTER_NONE);
 	wipecxt.blend.src = PVR_BLEND_ONE;
 	wipecxt.blend.dst = PVR_BLEND_ONE;
 	pvr_poly_compile(&wipehdr,  &wipecxt);
 
+	// Fill borders with black
 	pvr_set_bg_color(0,0,0);
 	pvr_fog_table_color(0.0f,0.0f,0.0f,0.0f);
+	pvr_fog_table_custom(empty_table);
 
 	u0 = 0.0f;
 	u1 = 0.625f; // 320.0f / 512.0f;
@@ -388,8 +397,8 @@ void I_WIPE_MeltScreen(void)
 	v1 = 0.9375f; // 240.0f / 256.0f;
 	x0 = 0.0f;
 	y0 = 0.0f;
-	x1 = REAL_SCREEN_WD - 1;
-	y1 = REAL_SCREEN_HT - 1;
+	x1 = REAL_SCREEN_WD;
+	y1 = REAL_SCREEN_HT;
 	y0a = y0;
 	y1a = y1;
 
@@ -404,7 +413,7 @@ void I_WIPE_MeltScreen(void)
 	for (int vn = 4; vn < 8; vn++) {
 		verts[vn].flags = PVR_CMD_VERTEX;
 		verts[vn].z = 6.0f;
-		verts[vn].argb = 0x01000000; // PVR_PACK_COLOR(MELTALPHA2, 0.0, 0.0, 0.0);
+		verts[vn].argb = 0x0f303030; // PVR_PACK_COLOR(MELTALPHA2, 0.0, 0.0, 0.0);
 		verts[vn].oargb = 0;
 	}
 	verts[7].flags = PVR_CMD_VERTEX_EOL;
@@ -489,11 +498,11 @@ void I_WIPE_MeltScreen(void)
 
 		pvr_txr_load(fb, pvrfb, FB_TEX_SIZE);
 #if REAL_SCREEN_WD == 640
-		y0a += 4.0f;
-		y1a += 4.0f;
+		y0a += 1.0f;
+		y1a += 1.0f;
 #else
-		y0a += 2.0f;
-		y1a += 2.0f;
+		y0a += 0.5f;
+		y1a += 0.5f;
 #endif
 		usleep(US_ONE_FRAME);
 	}
@@ -503,6 +512,7 @@ void I_WIPE_MeltScreen(void)
 wipe_end:
 	Z_Free(fb);
 wipe_return:
+	I_WIPE_FadeOutScreen();
 	return;
 }
 
@@ -553,7 +563,7 @@ void I_WIPE_FadeOutScreen(void) // 80006D34
 	pvr_txr_load(fb, pvrfb, FB_TEX_SIZE);
 	pvr_poly_cxt_txr(&wipecxt, PVR_LIST_TR_POLY,
 					PVR_TXRFMT_RGB565 | PVR_TXRFMT_NONTWIDDLED,
-					FB_TEX_W, FB_TEX_H, pvrfb, PVR_FILTER_BILINEAR);
+					FB_TEX_W, FB_TEX_H, pvrfb, PVR_FILTER_NONE);
 	wipecxt.blend.src = PVR_BLEND_ONE;
 	wipecxt.blend.dst = PVR_BLEND_ONE;
 	pvr_poly_compile(&wipehdr, &wipecxt);
@@ -567,8 +577,8 @@ void I_WIPE_FadeOutScreen(void) // 80006D34
 	v1 = 0.9375f; // 240.0f / 256.0f;
 	x0 = 0.0f;
 	y0 = 0.0f;
-	x1 = REAL_SCREEN_WD - 1;//639.0f;
-	y1 = REAL_SCREEN_HT - 1;//479.0f;
+	x1 = REAL_SCREEN_WD;//639.0f;
+	y1 = REAL_SCREEN_HT;//479.0f;
 	for (int vn = 0; vn < 4; vn++) {
 		verts[vn].flags = PVR_CMD_VERTEX;
 		verts[vn].z = 5.0f;

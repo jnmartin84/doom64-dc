@@ -13,7 +13,8 @@ extern int VideoFilter;
 extern pvr_poly_cxt_t **tcxt;
 extern void **tsptrs;
 
-extern pvr_poly_hdr_t **headers_for_sprites;
+extern pvr_poly_hdr_t pvr_sprite_hdr;
+extern pvr_poly_hdr_t pvr_sprite_hdr_nofilter;
 
 extern float *all_u;
 extern float *all_v;
@@ -716,7 +717,7 @@ void R_WallPrep(seg_t *seg)
 	}
 }
 
-#define INTEGER_VERT 1
+#define INTEGER_VERT 0
 
 float last_width_inv = 1.0f / 64.0f;
 float last_height_inv = 1.0f / 64.0f;
@@ -1328,7 +1329,12 @@ void R_RenderThings(subsector_t *sub)
 					dVTX[0]->v.u = dVTX[3]->v.u = all_u[lump] + (((float)spos - 0.5f)*inv1024);
 				}
 
-				theheader = headers_for_sprites[lump];
+				if (!VideoFilter) {
+					theheader = &pvr_sprite_hdr;
+				} else {
+					theheader = &pvr_sprite_hdr_nofilter;
+				}
+
 				dVTX[0]->v.v = dVTX[1]->v.v = all_v[lump] + halfinv1024;
 				dVTX[3]->v.v = dVTX[2]->v.v = all_v[lump] + (((float)height-0.5f)*inv1024);
 			} else {
@@ -1775,7 +1781,11 @@ void R_RenderPSprites(void)
 			vert->u = u2 - halfinv1024;
 			vert->v = v1 + halfinv1024;
 
-			pvr_list_prim(PVR_LIST_TR_POLY, headers_for_sprites[lump], sizeof(pvr_poly_hdr_t));
+			if (!VideoFilter) {
+				pvr_list_prim(PVR_LIST_TR_POLY, &pvr_sprite_hdr, sizeof(pvr_poly_hdr_t));
+			} else {
+				pvr_list_prim(PVR_LIST_TR_POLY, &pvr_sprite_hdr_nofilter, sizeof(pvr_poly_hdr_t));
+			}
 			pvr_list_prim(PVR_LIST_TR_POLY, &quad2, sizeof(quad2));
 		} // if ((state = psp->state) != 0)
 	} // for i < numsprites

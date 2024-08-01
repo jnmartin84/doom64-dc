@@ -264,7 +264,7 @@ int IN_Ticker(void) // 80004E24
 
 	return ga_nothing;
 }
-
+extern float empty_table[129];
 void IN_Drawer(void) // 80005164
 {
 	int i, c;
@@ -273,15 +273,10 @@ void IN_Drawer(void) // 80005164
 
 	I_ClearFrame();
 
-	//gDPPipeSync(GFX1++);
-	//gDPSetCycleType(GFX1++, G_CYC_FILL);
-	//gDPSetRenderMode(GFX1++, G_RM_NOOP, G_RM_NOOP2);
-	//gDPSetColorImage(GFX1++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WD, OS_K0_TO_PHYSICAL(cfb[vid_side]));
 	// Fill borders with black
-    //gDPSetFillColor(GFX1++, GPACK_RGBA5551(0,0,0,0) << 16 | GPACK_RGBA5551(0,0,0,0)) ;
-    //gDPFillRectangle(GFX1++, 0, 0, SCREEN_WD-1, SCREEN_HT-1);
-pvr_set_bg_color(0,0,0);
-pvr_fog_table_color(0.0f,0.0f,0.0f,0.0f);
+	pvr_set_bg_color(0,0,0);
+	pvr_fog_table_color(0.0f,0.0f,0.0f,0.0f);
+	pvr_fog_table_custom(empty_table);
 
 	M_DrawBackground(63, 25, 128, "EVIL", 0.00015f, 0);
 

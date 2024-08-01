@@ -61,6 +61,7 @@ void *pnon_enemy;
 pvr_ptr_t pvr_non_enemy;
 pvr_poly_cxt_t pvr_sprite_cxt;
 pvr_poly_hdr_t pvr_sprite_hdr;
+pvr_poly_hdr_t pvr_sprite_hdr_nofilter;
 
 // see doomdef.h
 const char *fnpre = STORAGE_PREFIX;
@@ -333,10 +334,10 @@ void W_Init (void)
 	fullwad = malloc(wad_rem_size);
 	size_t wad_read = 0;
 	fs_seek(wad_file, 0, SEEK_SET);
-	while(wad_rem_size > (128*1024)) {
-		fs_read(wad_file, (void*)fullwad + wad_read, (128*1024));
-		wad_read += (128*1024);
-		wad_rem_size -= (128*1024);
+	while(wad_rem_size > (256*1024)) {
+		fs_read(wad_file, (void*)fullwad + wad_read, (256*1024));
+		wad_read += (256*1024);
+		wad_rem_size -= (256*1024);
 		W_DrawLoadScreen("Doom 64 IWAD", wad_read, full_wad_size);
 	}
 	fs_read(wad_file, (void*)fullwad + wad_read, wad_rem_size);
@@ -371,10 +372,10 @@ void W_Init (void)
 	s2wad = malloc(wad_rem_size);
 	wad_read = 0;
 	fs_seek(s2_file, 0, SEEK_SET);
-	while(wad_rem_size > (128*1024)) {
-		fs_read(s2_file, (void*)s2wad + wad_read, (128*1024));
-		wad_read += (128*1024);
-		wad_rem_size -= (128*1024);
+	while(wad_rem_size > (256*1024)) {
+		fs_read(s2_file, (void*)s2wad + wad_read, (256*1024));
+		wad_read += (256*1024);
+		wad_rem_size -= (256*1024);
 		W_DrawLoadScreen("Sprite WAD", wad_read, alt_wad_size);
 	}
 	fs_read(s2_file, (void*)s2wad + wad_read, wad_rem_size);
@@ -416,6 +417,12 @@ void W_Init (void)
 	pvr_sprite_cxt.gen.fog_type = PVR_FOG_TABLE;
 	pvr_sprite_cxt.gen.fog_type2 = PVR_FOG_TABLE;
 	pvr_poly_compile(&pvr_sprite_hdr, &pvr_sprite_cxt);
+	
+	pvr_poly_cxt_txr(&pvr_sprite_cxt, PVR_LIST_TR_POLY, PVR_TXRFMT_PAL8BPP | PVR_TXRFMT_8BPP_PAL(1) | PVR_TXRFMT_TWIDDLED, 1024, 1024, pvr_non_enemy, PVR_FILTER_NONE);
+	pvr_sprite_cxt.gen.specular = PVR_SPECULAR_ENABLE;
+	pvr_sprite_cxt.gen.fog_type = PVR_FOG_TABLE;
+	pvr_sprite_cxt.gen.fog_type2 = PVR_FOG_TABLE;
+	pvr_poly_compile(&pvr_sprite_hdr_nofilter, &pvr_sprite_cxt);	
 }
 
 static char retname[9];

@@ -1694,12 +1694,6 @@ int M_MenuTicker(void) // 80007E0C
 							VideoFilter = 0;
 						}
 						force_filter_flush = 1;
-						if (!VideoFilter) {
-							pvr_sprite_cxt.txr.filter = PVR_FILTER_BILINEAR;
-						} else {
-							pvr_sprite_cxt.txr.filter = PVR_FILTER_NONE;
-						}	
-						pvr_poly_compile(&pvr_sprite_hdr, &pvr_sprite_cxt);
                         return ga_nothing;
                     }
                     break;
@@ -3124,6 +3118,9 @@ void M_SavePakDrawer(void) // 8000AB44
     //gDPSetFillColor(GFX1++, GPACK_RGBA5551(0,0,0,0) << 16 | GPACK_RGBA5551(0,0,0,0)) ;
     //gDPFillRectangle(GFX1++, 0, 0, SCREEN_WD-1, SCREEN_HT-1);
 
+	// Fill borders with black
+	pvr_set_bg_color(0,0,0);
+	pvr_fog_table_color(0.0f,0.0f,0.0f,0.0f);
     M_DrawBackground(63, 25, 128, "EVIL", 0.00015f, 0);
 
     ST_DrawString(-1, 20, "Controller Pak", text_alpha | 0xc0000000);
