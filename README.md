@@ -25,7 +25,7 @@ The build is known to work on the following platforms as of the current commit:
     Debian (version?)
     Ubuntu 22.04
     Windows 11 - Cygwin 64-bit
-    Windows (version? - DreamSDK
+    Windows (version?) - DreamSDK
 
 It should work on most other Linux environments.
     
