@@ -170,11 +170,7 @@ void P_CachePvrTexture(int i, int tag)
 			tmptex[j+1] = tmp_pal[(sps >> 4) & 0xf];
 		}
 		pvr_txr_load_ex(tmptex, tex_txr_ptr[i][k], (1<<wshift), (1<<hshift), PVR_TXRLOAD_16BPP);
-		//if (pt[i]) {
-			//pvr_poly_cxt_txr(&tcxt[i][k], PVR_LIST_TR_POLY, PVR_TXRFMT_ARGB1555, (1 << wshift), (1 << hshift), tex_txr_ptr[i][k], PVR_FILTER_BILINEAR);
-		//} else {
-			pvr_poly_cxt_txr(&tcxt[i][k], PVR_LIST_TR_POLY, PVR_TXRFMT_ARGB1555, (1 << wshift), (1 << hshift), tex_txr_ptr[i][k], PVR_FILTER_BILINEAR);
-		//}
+		pvr_poly_cxt_txr(&tcxt[i][k], PVR_LIST_TR_POLY, PVR_TXRFMT_ARGB1555, (1 << wshift), (1 << hshift), tex_txr_ptr[i][k], PVR_FILTER_BILINEAR);
 		tcxt[i][k].gen.specular = PVR_SPECULAR_ENABLE;
 		tcxt[i][k].gen.fog_type = PVR_FOG_TABLE;
 		tcxt[i][k].gen.fog_type2 = PVR_FOG_TABLE;
@@ -229,7 +225,6 @@ void P_Init (void) // 8001F340
 			tex_txr_ptr[i] = 0;
 			tcxt[i] = 0;
 			num_pal[i] = 0;
-			//pt[i] = 0;
 		}
 	}
 

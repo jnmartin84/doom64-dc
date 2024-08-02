@@ -40,6 +40,8 @@ extern unsigned char lightmax[256];
 #define D64_PVR_REPACK_COLOR_ALPHA(color,a) (((color >> 8) & 0x00ffffff) | (a << 24))
 #define D64_PVR_PACK_COLOR(a,r,g,b) ((a << 24) | (r << 16) | (g << 8) | b)
 
+#define NO_DITHER 0
+
 #if 1
 #define REAL_SCREEN_WD 640
 #else
@@ -163,7 +165,7 @@ void init_all_sounds(void);
 void P_RefreshBrightness(void);
 void P_RefreshVideo(void);
 
-typedef float   Matrix[4][4];
+typedef float __attribute__((aligned(32))) Matrix[4][4];
 
 static inline void guMtxIdentF(Matrix mf)
 {

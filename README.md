@@ -10,11 +10,11 @@ You have to do a tiny bit of actual work to get this going. If you don't have 30
     B is use
     X is weapon backward
     Y is weapon forward
-    START is start (bring up menu)
+    combined press of X and Y brings up automap and cycles through (second press goes to line map, third press back to game)
     D-PAD/Analog Stick is move
     L trigger is strafe left (analog sensitive)
     R trigger strafe right (analog sensitive)
-    combined press of L trigger and R trigger brings up automap and cycles through (second press goes to line map, third press back to game)
+    START is start (bring up menu)
 
 # build guide
 

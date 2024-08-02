@@ -40,6 +40,9 @@ void R_InitFont(void);
 void R_InitSymbols(void);
 void R_InitData (void) // 80023180
 {
+	// with single precision float
+	// this table is not accurate enough for demos to sync
+	// so I generated it offline on PC and put it in tables.c
 #if 0
 	int i;
 	int val = 0;
@@ -76,7 +79,6 @@ uint16_t tmp_pal[16];
 uint16_t tmp_8bpp_pal[256];
 
 uint8_t *num_pal;
-//uint8_t *pt;
 
 pvr_ptr_t pvrstatus;
 extern pvr_poly_cxt_t statuscxt;
@@ -330,11 +332,9 @@ void R_InitTextures(void)
 	tex_txr_ptr = (pvr_ptr_t **)malloc(numtextures * sizeof(pvr_ptr_t*));
 	tcxt = (pvr_poly_cxt_t **)malloc(numtextures * sizeof(pvr_poly_cxt_t*));
 	num_pal = (uint8_t*)malloc(numtextures);
-	//pt = (uint8_t*)malloc(numtextures);
 	memset(tex_txr_ptr, 0, sizeof(pvr_ptr_t *) * numtextures);
 	memset(tcxt, 0, sizeof(pvr_poly_cxt_t *) * numtextures);
 	memset(num_pal, 0, numtextures);
-	//memset(pt, 0, numtextures);
 
 	textures = Z_Malloc(numtextures * sizeof(int), PU_STATIC, NULL);
 
@@ -356,16 +356,11 @@ void R_InitTextures(void)
 =================
 */
 
-pvr_poly_hdr_t **headers_for_sprites;
-
 void R_InitSprites(void) // 80023378
 {
 	firstsprite = W_GetNumForName("S_START") + 1;
 	lastsprite = W_GetNumForName("S_END") - 1;
 	numsprites = (lastsprite - firstsprite) + 1;
 	
-	headers_for_sprites = (pvr_poly_hdr_t **)malloc((numsprites+1) * sizeof(pvr_poly_hdr_t*));
-	memset(headers_for_sprites, 0, (numsprites+1) * sizeof(pvr_poly_hdr_t*));
-
 	setup_sprite_headers();
 }

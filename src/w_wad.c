@@ -61,6 +61,7 @@ void *pnon_enemy;
 pvr_ptr_t pvr_non_enemy;
 pvr_poly_cxt_t pvr_sprite_cxt;
 pvr_poly_hdr_t pvr_sprite_hdr;
+pvr_poly_hdr_t pvr_sprite_hdr_nofilter;
 
 // see doomdef.h
 const char *fnpre = STORAGE_PREFIX;
@@ -416,6 +417,12 @@ void W_Init (void)
 	pvr_sprite_cxt.gen.fog_type = PVR_FOG_TABLE;
 	pvr_sprite_cxt.gen.fog_type2 = PVR_FOG_TABLE;
 	pvr_poly_compile(&pvr_sprite_hdr, &pvr_sprite_cxt);
+	
+	pvr_poly_cxt_txr(&pvr_sprite_cxt, PVR_LIST_TR_POLY, PVR_TXRFMT_PAL8BPP | PVR_TXRFMT_8BPP_PAL(1) | PVR_TXRFMT_TWIDDLED, 1024, 1024, pvr_non_enemy, PVR_FILTER_NONE);
+	pvr_sprite_cxt.gen.specular = PVR_SPECULAR_ENABLE;
+	pvr_sprite_cxt.gen.fog_type = PVR_FOG_TABLE;
+	pvr_sprite_cxt.gen.fog_type2 = PVR_FOG_TABLE;
+	pvr_poly_compile(&pvr_sprite_hdr_nofilter, &pvr_sprite_cxt);	
 }
 
 static char retname[9];
