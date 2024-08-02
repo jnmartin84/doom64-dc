@@ -334,10 +334,10 @@ void W_Init (void)
 	fullwad = malloc(wad_rem_size);
 	size_t wad_read = 0;
 	fs_seek(wad_file, 0, SEEK_SET);
-	while(wad_rem_size > (256*1024)) {
-		fs_read(wad_file, (void*)fullwad + wad_read, (256*1024));
-		wad_read += (256*1024);
-		wad_rem_size -= (256*1024);
+	while(wad_rem_size > (128*1024)) {
+		fs_read(wad_file, (void*)fullwad + wad_read, (128*1024));
+		wad_read += (128*1024);
+		wad_rem_size -= (128*1024);
 		W_DrawLoadScreen("Doom 64 IWAD", wad_read, full_wad_size);
 	}
 	fs_read(wad_file, (void*)fullwad + wad_read, wad_rem_size);
@@ -372,10 +372,10 @@ void W_Init (void)
 	s2wad = malloc(wad_rem_size);
 	wad_read = 0;
 	fs_seek(s2_file, 0, SEEK_SET);
-	while(wad_rem_size > (256*1024)) {
-		fs_read(s2_file, (void*)s2wad + wad_read, (256*1024));
-		wad_read += (256*1024);
-		wad_rem_size -= (256*1024);
+	while(wad_rem_size > (128*1024)) {
+		fs_read(s2_file, (void*)s2wad + wad_read, (128*1024));
+		wad_read += (128*1024);
+		wad_rem_size -= (128*1024);
 		W_DrawLoadScreen("Sprite WAD", wad_read, alt_wad_size);
 	}
 	fs_read(s2_file, (void*)s2wad + wad_read, wad_rem_size);
