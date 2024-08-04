@@ -432,6 +432,7 @@ void P_LoadBlockMap (void) // 8001DE38
 	byte    *src;
 
 	length = W_MapLumpLength(ML_BLOCKMAP);
+
 	blockmaplump = Z_Malloc(length, PU_LEVEL, 0);
 	src = (byte *)W_GetMapLump(ML_BLOCKMAP);
 	D_memcpy(blockmaplump,src,length);
@@ -610,24 +611,24 @@ void P_LoadMacros(void) // 8001E478
     macro_t *pMacro;
     int headerSize;
     int i, j;
-
+	int toplevelspecial = 0;
     data = (short *)W_GetMapLump(ML_MACROS);
 
     nummacros = (*data++);
     specialCount = (*data++);
+	toplevelspecial = specialCount;
     headerSize = sizeof(void*) * nummacros;
 
     macroData = (byte *)Z_Malloc(((nummacros + specialCount) * sizeof(macro_t)) + headerSize, PU_LEVEL, 0);
     macros = (macro_t**)macroData;
     pMacro = (macro_t*)(macroData + headerSize);
 
-    for(i = 0; i < nummacros; i++)
-    {
+    for(i = 0; i < nummacros; i++) {
         macros[i] = pMacro;
         specialCount = (*data++);
+		if (!toplevelspecial) specialCount = 0;
 
-        for(j = 0; j < specialCount+1; j++)
-        {
+        for(j = 0; j < specialCount+1; j++) {
             pMacro->id = (*data++);
             pMacro->tag = (*data++);
             pMacro->special = (*data++);
@@ -757,7 +758,6 @@ void P_SetupLevel(int map, skill_t skill) // 8001E974
 	mobjhead.next = mobjhead.prev = &mobjhead;
 
 	spawncount = 0;
-
 	W_OpenMapWad(map);
 
 	/* note: most of this ordering is important */

@@ -171,8 +171,8 @@ void M_ClearRandom(void)
 }
 
 uint64_t framecount = 0;
-extern uint8_t __attribute__((aligned(32))) op_buf[VERTBUF_SIZE];
-extern uint8_t __attribute__((aligned(32))) tr_buf[VERTBUF_SIZE];
+extern uint8_t __attribute__((aligned(32))) op_buf[OP_VERTBUF_SIZE];
+extern uint8_t __attribute__((aligned(32))) tr_buf[TR_VERTBUF_SIZE];
 
 extern int last_Ltrig;
 extern int last_Rtrig;
@@ -239,8 +239,8 @@ int MiniLoop(void(*start)(void), void(*stop)(),
 				break;
 
 			pvr_scene_begin();
-			pvr_set_vertbuf(PVR_LIST_OP_POLY, op_buf, VERTBUF_SIZE);
-			pvr_set_vertbuf(PVR_LIST_TR_POLY, tr_buf, VERTBUF_SIZE);
+			pvr_set_vertbuf(PVR_LIST_OP_POLY, op_buf, OP_VERTBUF_SIZE);
+			pvr_set_vertbuf(PVR_LIST_TR_POLY, tr_buf, TR_VERTBUF_SIZE);
 
 			drawer();
 

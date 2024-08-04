@@ -551,7 +551,7 @@ void AM_DrawLineThings(fixed_t x, fixed_t y, angle_t angle, int color) {
 	verts[3].flags = PVR_CMD_VERTEX_EOL;
 	verts[7].flags = PVR_CMD_VERTEX_EOL;
 	verts[11].flags = PVR_CMD_VERTEX_EOL;
-	pvr_poly_cxt_col(&cxt, PVR_LIST_OP_POLY);
+	pvr_poly_cxt_col(&cxt, PVR_LIST_TR_POLY);
 	pvr_poly_compile(&hdr, &cxt);
 
 	dVTX[0] = &(dT1.dVerts[0]);
@@ -589,7 +589,7 @@ void AM_DrawLineThings(fixed_t x, fixed_t y, angle_t angle, int color) {
 	int lvert = 0;
 	int lhori = 0;
 
-	pvr_list_prim(PVR_LIST_OP_POLY, &hdr, sizeof(hdr));
+	pvr_list_prim(PVR_LIST_TR_POLY, &hdr, sizeof(hdr));
 	{
 		int x1,y1,x2,y2;
 
@@ -860,7 +860,7 @@ void AM_DrawLineThings(fixed_t x, fixed_t y, angle_t angle, int color) {
 		x2 = v1->v.x;
 		y2 = v1->v.y;
 
-		pvr_list_prim(PVR_LIST_OP_POLY, &hdr, sizeof(hdr));
+		pvr_list_prim(PVR_LIST_TR_POLY, &hdr, sizeof(hdr));
 		if (lhori) {
 			x1 -= (LINEWIDTH*0.5f);
 			x2 -= (LINEWIDTH*0.5f);
@@ -940,7 +940,7 @@ void AM_DrawLineThings(fixed_t x, fixed_t y, angle_t angle, int color) {
 			vert++;
 		}
 	}
-	pvr_list_prim(PVR_LIST_OP_POLY, &verts, sizeof(pvr_vertex_t)*12);
+	pvr_list_prim(PVR_LIST_TR_POLY, &verts, sizeof(pvr_vertex_t)*12);
 }
 
 void AM_DrawLine(player_t *player, fixed_t bbox[static 4])
@@ -949,7 +949,7 @@ void AM_DrawLine(player_t *player, fixed_t bbox[static 4])
 	int i, color;
 	pvr_poly_hdr_t hdr;
 	pvr_poly_cxt_t cxt;
-	pvr_poly_cxt_col(&cxt, PVR_LIST_OP_POLY);
+	pvr_poly_cxt_col(&cxt, PVR_LIST_TR_POLY);
 	pvr_poly_compile(&hdr, &cxt);
 
 	dVTX[0] = &(dT1.dVerts[0]);
@@ -1047,7 +1047,7 @@ void AM_DrawLine(player_t *player, fixed_t bbox[static 4])
 				x2 = v1->v.x;
 				y2 = v1->v.y;
 
-				pvr_list_prim(PVR_LIST_OP_POLY, &hdr, sizeof(hdr));
+				pvr_list_prim(PVR_LIST_TR_POLY, &hdr, sizeof(hdr));
 				if (lhori) {
 					x1 -= (LINEWIDTH*0.5f);
 					x2 -= (LINEWIDTH*0.5f);
@@ -1126,7 +1126,7 @@ void AM_DrawLine(player_t *player, fixed_t bbox[static 4])
 					vert->z = v1->v.z;
 					vert++;
 				}
-				pvr_list_prim(PVR_LIST_OP_POLY, &verts, sizeof(pvr_vertex_t)*4);
+				pvr_list_prim(PVR_LIST_TR_POLY, &verts, sizeof(pvr_vertex_t)*4);
 			}
 		}
 	}

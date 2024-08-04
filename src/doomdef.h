@@ -22,7 +22,8 @@
 
 #define MAX_CACHED_SPRITES 256
 
-#define VERTBUF_SIZE (768*1024)
+#define OP_VERTBUF_SIZE (128*1024)
+#define TR_VERTBUF_SIZE ((768+128)*1024*2)
 extern unsigned char lightcurve[256];
 extern unsigned char lightmax[256];
 #define get_color_argb1555(rrr,ggg,bbb,aaa) ((uint16_t)(((aaa&1)<<15) | (((rrr>>3)&0x1f)<<10) | (((ggg>>3)&0x1f)<<5) | ((bbb>>3)&0x1f)))

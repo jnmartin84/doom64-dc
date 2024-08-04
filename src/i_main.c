@@ -10,14 +10,14 @@
 #include <arch/irq.h>
 #include <unistd.h>
 
-KOS_INIT_FLAGS(INIT_DEFAULT/* | INIT_MALLOCSTATS*/);
+KOS_INIT_FLAGS(INIT_DEFAULT | INIT_MALLOCSTATS);
 
 pvr_init_params_t pvr_params = {
-{ PVR_BINSIZE_16, 0, PVR_BINSIZE_16, 0, 0 }, VERTBUF_SIZE, 1, 0, 0, 3
+{ PVR_BINSIZE_16, 0, PVR_BINSIZE_16, 0, 0 }, 512*1024 /*VERTBUF_SIZE*/, 1, 0, 0, 3
 };
 
-uint8_t __attribute__((aligned(32))) op_buf[VERTBUF_SIZE];
-uint8_t __attribute__((aligned(32))) tr_buf[VERTBUF_SIZE];
+uint8_t __attribute__((aligned(32))) op_buf[OP_VERTBUF_SIZE];
+uint8_t __attribute__((aligned(32))) tr_buf[TR_VERTBUF_SIZE];
 
 int side = 0;
 
@@ -196,8 +196,8 @@ void I_Error(char *error, ...)
     while (true) {
 		vid_waitvbl();
 		pvr_scene_begin();
-		pvr_set_vertbuf(PVR_LIST_OP_POLY, op_buf, VERTBUF_SIZE);
-		pvr_set_vertbuf(PVR_LIST_TR_POLY, tr_buf, VERTBUF_SIZE);
+		pvr_set_vertbuf(PVR_LIST_OP_POLY, op_buf, OP_VERTBUF_SIZE);
+		pvr_set_vertbuf(PVR_LIST_TR_POLY, tr_buf, TR_VERTBUF_SIZE);
 		I_ClearFrame();
 		ST_Message(err_text_x, err_text_y, buffer, 0xffffffff);
 		I_DrawFrame();
@@ -424,8 +424,8 @@ void I_WIPE_MeltScreen(void)
 		vid_waitvbl();
 
 		pvr_scene_begin();
-		pvr_set_vertbuf(PVR_LIST_OP_POLY, op_buf, VERTBUF_SIZE);
-		pvr_set_vertbuf(PVR_LIST_TR_POLY, tr_buf, VERTBUF_SIZE);
+		pvr_set_vertbuf(PVR_LIST_OP_POLY, op_buf, OP_VERTBUF_SIZE);
+		pvr_set_vertbuf(PVR_LIST_TR_POLY, tr_buf, TR_VERTBUF_SIZE);
 		vert = verts;
 		vert->x = x0;
 		vert->y = y1;
@@ -607,8 +607,8 @@ void I_WIPE_FadeOutScreen(void) // 80006D34
 
 		vid_waitvbl();
 		pvr_scene_begin();
-		pvr_set_vertbuf(PVR_LIST_OP_POLY, op_buf, VERTBUF_SIZE);
-		pvr_set_vertbuf(PVR_LIST_TR_POLY, tr_buf, VERTBUF_SIZE);
+		pvr_set_vertbuf(PVR_LIST_OP_POLY, op_buf, OP_VERTBUF_SIZE);
+		pvr_set_vertbuf(PVR_LIST_TR_POLY, tr_buf, TR_VERTBUF_SIZE);
 		vert = verts;
 		vert->x = x0;
 		vert->y = y1;
