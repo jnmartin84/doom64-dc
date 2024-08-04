@@ -246,10 +246,10 @@ void clip_triangle(d64Triangle_t *triangle, pvr_poly_hdr_t *hdr, int lightlevel,
 	/* dVerts[0] and dVerts[1] visible */
 	case 3: {
 		/* out 1 */
-		clip_edge(&triangle->dVerts[2], &triangle->dVerts[0], &triangle->spare[0]);
+		clip_edge(&triangle->dVerts[1], &triangle->dVerts[2], &triangle->spare[0]);
 
 		/* out 2 */
-		clip_edge(&triangle->dVerts[1], &triangle->dVerts[2], &triangle->spare[1]);
+		clip_edge(&triangle->dVerts[2], &triangle->dVerts[0], &triangle->spare[1]);
 
 		perspdiv(&triangle->dVerts[0]);
 		perspdiv(&triangle->dVerts[1]);
@@ -261,8 +261,6 @@ void clip_triangle(d64Triangle_t *triangle, pvr_poly_hdr_t *hdr, int lightlevel,
 
 		pvr_list_prim(list, hdr, sizeof(pvr_poly_hdr_t));
 		pvr_list_prim(list, &triangle->dVerts[0].v, sizeof(pvr_vertex_t));
-		pvr_list_prim(list, &triangle->dVerts[1].v, sizeof(pvr_vertex_t));
-		pvr_list_prim(list, &triangle->spare[0].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->dVerts[1].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->spare[1].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->spare[0].v, sizeof(pvr_vertex_t));
@@ -281,20 +279,15 @@ void clip_triangle(d64Triangle_t *triangle, pvr_poly_hdr_t *hdr, int lightlevel,
 		perspdiv(&triangle->spare[0]);
 		perspdiv(&triangle->spare[1]);
 
+		triangle->dVerts[2].v.flags = PVR_CMD_VERTEX;
 		triangle->spare[0].v.flags = PVR_CMD_VERTEX;
-		triangle->spare[1].v.flags = PVR_CMD_VERTEX;
+		triangle->spare[1].v.flags = PVR_CMD_VERTEX_EOL;
 
 		pvr_list_prim(list, hdr, sizeof(pvr_poly_hdr_t));
 		pvr_list_prim(list, &triangle->dVerts[0].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->spare[0].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->dVerts[2].v, sizeof(pvr_vertex_t));
-
-		triangle->dVerts[2].v.flags = PVR_CMD_VERTEX;
-		triangle->spare[0].v.flags = PVR_CMD_VERTEX_EOL;
-
 		pvr_list_prim(list, &triangle->spare[1].v, sizeof(pvr_vertex_t));
-		pvr_list_prim(list, &triangle->dVerts[2].v, sizeof(pvr_vertex_t));
-		pvr_list_prim(list, &triangle->spare[0].v, sizeof(pvr_vertex_t));
 	}
 	break;
 	/* dVerts[1] and dVerts[2] visible */
@@ -308,17 +301,15 @@ void clip_triangle(d64Triangle_t *triangle, pvr_poly_hdr_t *hdr, int lightlevel,
 		perspdiv(&triangle->spare[0]);
 		perspdiv(&triangle->spare[1]);
 
-		triangle->dVerts[2].v.flags = PVR_CMD_VERTEX;
+		triangle->dVerts[2].v.flags = PVR_CMD_VERTEX_EOL;
 		triangle->spare[0].v.flags = PVR_CMD_VERTEX;
-		triangle->spare[1].v.flags = PVR_CMD_VERTEX_EOL;
+		triangle->spare[1].v.flags = PVR_CMD_VERTEX;
 
 		pvr_list_prim(list, hdr, sizeof(pvr_poly_hdr_t));
 		pvr_list_prim(list, &triangle->spare[0].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->dVerts[1].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->spare[1].v, sizeof(pvr_vertex_t));
-		pvr_list_prim(list, &triangle->dVerts[1].v, sizeof(pvr_vertex_t));
 		pvr_list_prim(list, &triangle->dVerts[2].v, sizeof(pvr_vertex_t));
-		pvr_list_prim(list, &triangle->spare[1].v, sizeof(pvr_vertex_t));
 	}
 	break;
 	}
@@ -739,7 +730,7 @@ void R_RenderWall(seg_t *seg, int flags, int texture, int topHeight, int bottomH
 	
 	if (texture != 16) {
 		if (flags & ML_HMIRROR) {
-			cms = 1;
+			cms = 2;
 		} else {
 			cms = 0;
 		}
@@ -1669,8 +1660,8 @@ void R_RenderLaser(mobj_t *thing)
 	memcpy(&(dT2.dVerts[1]), &laserverts[4], sizeof(d64Vertex_t));
 	memcpy(&(dT2.dVerts[2]), &laserverts[5], sizeof(d64Vertex_t));
 
-	clip_triangle(&dT1, &hdr, 255, PVR_LIST_TR_POLY, 0);
-	clip_triangle(&dT2, &hdr, 255, PVR_LIST_TR_POLY, 0);
+	clip_triangle(&dT1, &hdr, 255, PVR_LIST_OP_POLY, 0);
+	clip_triangle(&dT2, &hdr, 255, PVR_LIST_OP_POLY, 0);
 }
 
 void R_RenderPSprites(void)
