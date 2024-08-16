@@ -50,8 +50,6 @@ s32 gamepad_system_busy = 0;
 s32 FilesUsed = -1;
 u32 SystemTickerStatus = 0;
 
-int vsinternal = 0;
-
 void vblfunc(uint32_t c, void *d)
 {
 	vsync++;
@@ -262,18 +260,15 @@ int I_GetControllerData(void)
 		// START
 		ret |= (cont->buttons & CONT_START) ? PAD_START : 0;
 
-		if(cont->ltrig && !cont->rtrig) {
+		if (cont->ltrig && !cont->rtrig) {
 			ret |= PAD_L_TRIG;
-		}
-		else if(cont->rtrig && !cont->ltrig) {
+		} else if (cont->rtrig && !cont->ltrig) {
 			ret |= PAD_R_TRIG;
 		}
 	}
 
 	return ret;
 }
-
-
 
 void I_CheckGFX(void)
 {
@@ -293,10 +288,13 @@ void I_DrawFrame(void)  // 80006570
 	running++;
 
 	mutex_lock(&vbi2mtx);
+
 	while (!vbi2msg) {
 		cond_wait(&vbi2cv, &vbi2mtx);
 	}
+
 	vbi2msg = 0;
+
 	mutex_unlock(&vbi2mtx);
 }
 
