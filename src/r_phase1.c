@@ -28,6 +28,35 @@ void	R_AddLine(seg_t *line);
 void	R_AddSprite(subsector_t *sub);
 void	R_RenderBSPNodeNoClip(int bspnum);
 
+
+projectile_light_t projectile_lights[NUM_DYNLIGHT];
+int lightidx = -1;
+
+static void R_ResetProjectileLights(void) {
+	lightidx = -1;
+}
+
+static void R_AddProjectileLight(fixed_t x, fixed_t y, fixed_t z, float rad, uint32_t lightc) {
+	if (lightidx < (NUM_DYNLIGHT-1))
+		lightidx++;
+	else return;
+
+	projectile_lights[lightidx].x = (float)(x >> 16);
+	projectile_lights[lightidx].y = (float)(y >> 16);
+	projectile_lights[lightidx].z = (float)(z >> 16);
+
+	projectile_lights[lightidx].r = (float)((lightc >> 16)&255) / 255.0f;
+	projectile_lights[lightidx].g = (float)((lightc >> 8)&255) / 255.0f;
+	projectile_lights[lightidx].b = (float)(lightc&255) / 255.0f;
+
+	projectile_lights[lightidx].radius = rad;
+}
+
+extern int player_shooting;
+extern int player_light;
+extern int player_last_weapon;
+
+int player_light_fade = -1;
 // Kick off the rendering process by initializing the solidsubsectors array and then
 // starting the BSP traversal.
 //
@@ -36,12 +65,65 @@ void R_BSP(void)
 	int count;
 	subsector_t **sub;
 
+
 	validcount++;
 
 	rendersky = false;
 
 	numdrawsubsectors = 0;
 	numdrawvissprites = 0;
+	R_ResetProjectileLights();
+
+	player_t *p;
+	p = &players[0];
+	
+	// convoluted logic for making a light appear when a player shoots and then 
+	// making it fade out over slightly different times for different weapons
+	if (player_light) {
+		if (player_shooting) {
+			R_AddProjectileLight(p->mo->x, p->mo->y, players[0].viewz, 384 ,0xff7f7f7f);
+			player_shooting = 0;
+			goto skip_player_light;
+		} else if (!player_shooting && player_light_fade == -1) {
+			if (player_last_weapon == wp_pistol) {
+				player_light_fade = 2;
+			} else if (player_last_weapon == wp_shotgun) {
+				player_light_fade = 4;
+			} else if (player_last_weapon == wp_supershotgun) {
+				player_light_fade = 6;
+			} else if (player_last_weapon == wp_chaingun) {
+				player_light_fade = 4;
+			}
+		}
+		
+		if (!player_shooting && player_light_fade != -1) {
+			int scale_start = 0;
+			if (player_last_weapon == wp_pistol) {
+				scale_start = 3;
+			} else if (player_last_weapon == wp_shotgun) {
+				scale_start = 5;
+			} else if (player_last_weapon == wp_supershotgun) {
+				scale_start = 7;
+			} else if (player_last_weapon == wp_chaingun) {
+				scale_start = 5;
+			}
+
+			int8_t c = 0x7f - ((scale_start - player_light_fade - 1)*2);
+
+			if (player_light_fade == 0) {
+				player_light = 0;
+				player_light_fade = -1;
+				goto skip_player_light;
+			} else {
+				player_light_fade -= 1;
+			}
+
+			uint32_t color = 0xff00000 | ((c&0xff) << 16) | ((c&0xff) << 8) | (c&0xff);
+			R_AddProjectileLight(p->mo->x, p->mo->y, players[0].viewz, 384 - ((scale_start - player_light_fade)*32), color);
+		}
+	}
+
+skip_player_light:
 
 	visspritehead = vissprites;
 
@@ -468,6 +550,8 @@ void R_AddSprite(subsector_t *sub) // 80024A98
 			visspritehead->next = sub->vissprite;
 			sub->vissprite = visspritehead;
 
+			R_AddProjectileLight(thing->x, thing->y, thing->z, 304, 0x00ff0000);
+
 			visspritehead++;
 			numdrawvissprites++;
 		}
@@ -509,7 +593,7 @@ void R_AddSprite(subsector_t *sub) // 80024A98
 			visspritehead->flip = flip;
 			visspritehead->next = NULL;
 			visspritehead->sector = sub->sector;
-//dbgio_printf("r_phase1 1\n");
+
 			data = (byte *)W_CacheLumpNum(lump, PU_CACHE, dec_jag);
 
 			CurSub = sub;
@@ -554,6 +638,254 @@ void R_AddSprite(subsector_t *sub) // 80024A98
 				VisSrpNew->next = visspritehead;
 			else
 				CurSub->vissprite = visspritehead;
+
+			int random_factor = I_Random()%24;
+
+			// red keycard / skull key
+			if(lump == 188 || lump == 208) {
+				int r = 255 - random_factor;
+
+				uint32_t color = (r << 16);
+				
+				R_AddProjectileLight(thing->x, thing->y, thing->z, 112, color);
+			}
+
+			// yellow keycard / skull key
+			if(lump == 189 || lump == 210) {
+				int r = 255 - random_factor;
+				int g = 255 - random_factor;
+
+				uint32_t color = (r << 16) | (g << 8);
+				
+				R_AddProjectileLight(thing->x, thing->y, thing->z, 112, color);
+			}
+
+			// blue keycard / skull key
+			if(lump == 190 || lump == 209) {
+				int b = 255 - random_factor;
+
+				uint32_t color = b;
+				
+				R_AddProjectileLight(thing->x, thing->y, thing->z, 112, color);
+			}
+
+#if 0
+			// rad suit
+			if(lump >= 73 && lump <= 74) {
+				int g = 127;
+
+				if (lump == 74) {
+					g = 96;
+				}
+				uint32_t color = (g << 8);
+				
+				R_AddProjectileLight(thing->x, thing->y, thing->z, 32, color);
+			}
+
+			// green armor
+			if(lump >= 179 && lump <= 180) {
+				int g = 127;
+
+				if (lump == 180) {
+					g = 96;
+				}
+				uint32_t color = (g << 8);
+				
+				R_AddProjectileLight(thing->x, thing->y, thing->z, 32, color);
+			}
+
+			// blue armor
+			if(lump >= 181 && lump <= 182) {
+				int b = 127;
+
+				if (lump == 181) {
+					b = 96;
+				}
+				uint32_t color = b;
+				
+				R_AddProjectileLight(thing->x, thing->y, thing->z, 32, color);
+			}
+#endif
+
+			// rockets and barrels
+			if(lump >= 211 && lump <= 220) {
+				// 255 127 0
+				float radius = 304;
+				int r = 255 - random_factor;
+				int g = 127 - random_factor;
+
+				if (lump > 215) {
+					r /= ((lump - 216)/2) + 1;
+					g /= ((lump - 216)/2) + 1;
+					radius += 24;
+				}
+				uint32_t color = (r << 16) | (g << 8);
+				
+				// 216 to 220 are when it hits and disappears
+				R_AddProjectileLight(thing->x, thing->y, thing->z, radius, color);
+			}
+
+			// normal imp
+			if(lump >= 238 && lump <= 246) {
+				// 255 127 0
+				float radius = 256;
+				
+				int r = 255 - random_factor;
+				int g = 127 - random_factor;
+
+				if (lump > 240) {
+					r /= ((lump - 241)/2) + 1;
+					g /= ((lump - 241)/2) + 1;
+					radius += 24;
+				}
+				uint32_t color = (r << 16) | (g << 8);
+				
+				// 241 to 246 are when it hits and disappears
+				R_AddProjectileLight(thing->x, thing->y, thing->z, radius, color);
+			}
+
+			// nightmare imp
+			if(lump >= 247 && lump <= 255) {
+				float radius = 256;
+				int r = 0x8a - random_factor;
+				int g = 0x2b - random_factor;
+				int b = 0xe2 - random_factor;
+
+				if (lump > 249) {
+					r /= ((lump - 250)/2) + 1;
+					g /= ((lump - 250)/2) + 1;
+					b /= ((lump - 250)/2) + 1;
+					radius += 24;
+				}
+				uint32_t color = (r << 16) | (g << 8) | b;
+				
+				// 250 to 255 are when it hits and disappears
+				R_AddProjectileLight(thing->x, thing->y, thing->z, radius, color);
+			}
+
+			// hell knight
+			if(lump >= 256 && lump <= 269) {
+				float radius = 256;
+				int g = 255 - random_factor;
+				// 264
+				if (lump > 263) {
+					g /= ((lump - 264)/2) + 1;
+					radius += 24;
+				}
+				uint32_t color = (g << 8);
+				R_AddProjectileLight(thing->x, thing->y, thing->z, radius, color);
+			}
+
+			// baron of hell
+			if(lump >= 270 && lump <= 283) {
+				float radius = 256;
+				int r = 255 - random_factor;
+				// 278
+				if (lump > 277) {
+					r /= ((lump - 278)/2) + 1;
+					radius += 24;
+				}
+				uint32_t color = (r << 16);
+				R_AddProjectileLight(thing->x, thing->y, thing->z, radius, color);
+			}
+
+			// mancubus???
+			if(lump >= 284 && lump <= 304) {
+				float radius = 256;
+
+				int r = 255 - random_factor;
+				int g = 127 - random_factor;
+
+				if (lump > 298) {
+					r /= ((lump - 299)/2) + 1;
+					g /= ((lump - 299)/2) + 1;
+					radius += 24;
+				}
+				uint32_t color = (r << 16) | (g << 8);
+				
+				// 299 to 304 are when it hits and disappears
+				R_AddProjectileLight(thing->x, thing->y, thing->z, radius, color);
+			}
+
+			// cacodemon
+			if(lump >= 305 && lump <= 314) {
+				// 255 63 0
+					float radius = 256;
+
+				int r = 255 - random_factor;
+				int g = 63 - random_factor;
+
+				if (lump > 307) {
+					r /= ((lump - 308)/2) + 1;
+					g /= ((lump - 308)/2) + 1;
+					radius += 24;
+				}
+				uint32_t color = (r << 16) | (g << 8);
+				
+				// 308 to 314 are when it hits and disappears
+				R_AddProjectileLight(thing->x, thing->y, thing->z, radius, color);
+			}
+
+			// bfg
+			if(lump >= 315 && lump <= 322) {
+				float radius = 304;
+				int g = 255 - random_factor;
+				// 317
+				if (lump > 316) {
+					g /= ((lump - 317)/2) + 1;
+					radius += 24;
+				}
+				uint32_t color = (g << 8);
+				R_AddProjectileLight(thing->x, thing->y, thing->z, radius, color);
+			}
+
+			// plasma
+			if(lump >= 323 && lump <= 330) {
+				float radius = 304;
+				int b = 255 - random_factor;
+				// 325
+				if (lump > 324) {
+					b /= ((lump - 325)/2) + 1;
+					radius += 24;
+				}
+				uint32_t color = b;
+				R_AddProjectileLight(thing->x, thing->y, thing->z, radius, color);
+			}
+
+			// spider shot
+			if(lump >= 331 && lump <= 338) {
+				float radius = 224;
+				int r = 0x8a - random_factor;
+				int g = 0xa3 - random_factor;
+				int b = 0xfa - random_factor;
+				// 333
+				if (lump > 332) {
+					r /= ((lump - 333)/2) + 1;
+					g /= ((lump - 333)/2) + 1;
+					b /= ((lump - 333)/2) + 1;
+					radius += 24;
+				}
+				uint32_t color = (r << 16) | (g << 8) | b;
+				
+				R_AddProjectileLight(thing->x, thing->y, thing->z, radius, color);
+			}
+
+			// skul
+			if(lump >= 619 && lump <= 658) {
+				// 255 127 0
+				float radius = 224;
+				int r = 128 - random_factor;
+				int g = 63 - random_factor;
+
+				if (lump > 649) {
+					r /= ((lump - 650)/2) + 1;
+					g /= ((lump - 650)/2) + 1;
+					radius += 24;
+				}
+				uint32_t color = (r << 16) | (g << 8);
+				
+				R_AddProjectileLight(thing->x, thing->y, thing->z, radius, color);
+			}
 
 			visspritehead->next = VisSrpCur;
 

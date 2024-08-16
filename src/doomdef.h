@@ -18,12 +18,26 @@
 
 #include "i_main.h"
 
+#define NUM_DYNLIGHT 32
+
+typedef struct {
+	float x;
+	float y;
+	float z;
+
+	float r;
+	float g;
+	float b;
+
+	float radius;
+} projectile_light_t;
+
 #define STORAGE_PREFIX "/cd"
 
 #define MAX_CACHED_SPRITES 256
 
-#define OP_VERTBUF_SIZE (128*1024)
-#define TR_VERTBUF_SIZE ((768+128)*1024*2)
+#define OP_VERTBUF_SIZE (256*1024)
+#define TR_VERTBUF_SIZE ((768)*1024*2)
 extern unsigned char lightcurve[256];
 extern unsigned char lightmax[256];
 #define get_color_argb1555(rrr,ggg,bbb,aaa) ((uint16_t)(((aaa&1)<<15) | (((rrr>>3)&0x1f)<<10) | (((ggg>>3)&0x1f)<<5) | ((bbb>>3)&0x1f)))

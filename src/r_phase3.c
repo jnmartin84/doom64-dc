@@ -11,7 +11,6 @@ extern short SwapShort(short dat);
 extern int VideoFilter;
 
 extern pvr_poly_cxt_t **tcxt;
-extern void **tsptrs;
 
 extern pvr_poly_hdr_t pvr_sprite_hdr;
 extern pvr_poly_hdr_t pvr_sprite_hdr_nofilter;
@@ -20,10 +19,6 @@ extern float *all_u;
 extern float *all_v;
 extern float *all_u2;
 extern float *all_v2;
-
-extern pvr_ptr_t *tex_txr_ptr;
-extern uint8_t *pt;
-extern int firsttex;
 
 pvr_vertex_t __attribute__ ((aligned(32))) quad2[4];
 
@@ -116,8 +111,147 @@ uint32_t lighted_color(uint32_t c, int ll)
 	uint8_t r = (uint8_t)((UNPACK_R(c)*ll)>>8);//(((int)(256 + ((int)UNPACK_R(c)))*(int)ll) >> 9);
 	uint8_t g = (uint8_t)((UNPACK_G(c)*ll)>>8);//(((int)(256 + ((int)UNPACK_G(c)))*(int)ll) >> 9);
 	uint8_t b = (uint8_t)((UNPACK_B(c)*ll)>>8);//(((int)(256 + ((int)UNPACK_B(c)))*(int)ll) >> 9);
+	
 	uint8_t a = UNPACK_A(c);
 	return D64_PVR_PACK_COLOR(a,r,g,b);
+}
+
+void surfaceNormal(d64Triangle_t *surface, d64Vertex_t *normResult)
+{
+	float ux = surface->dVerts[1].v.x - surface->dVerts[0].v.x;	
+	float uy = surface->dVerts[1].v.y - surface->dVerts[0].v.y;	
+	float uz = surface->dVerts[1].v.z - surface->dVerts[0].v.z;	
+
+	float vx = surface->dVerts[2].v.x - surface->dVerts[0].v.x;	
+	float vy = surface->dVerts[2].v.y - surface->dVerts[0].v.y;	
+	float vz = surface->dVerts[2].v.z - surface->dVerts[0].v.z;	
+
+	normResult->v.x = (uy * vz) - (uz * vy);
+	normResult->v.y = (uz * vx) - (ux * vz);
+	normResult->v.z = (ux * vy) - (uy * vx);
+	
+	//vec3f_normalize(normResult->v.x, normResult->v.y, normResult->v.z);
+}
+
+extern int dont_color;
+extern int lightidx;
+extern projectile_light_t projectile_lights[NUM_DYNLIGHT];
+
+d64Vertex_t lightverts[NUM_DYNLIGHT];
+
+static void R_TransformProjectileLights(void)
+{
+	for (int i = 0; i < lightidx + 1; i++) {
+		d64Vertex_t *lightvert = &lightverts[i];
+		lightvert->v.x = projectile_lights[i].x;
+		lightvert->v.y = projectile_lights[i].z;
+		lightvert->v.z = -projectile_lights[i].y;
+		transform_vert(lightvert);
+	}
+}
+
+int recompute_norm = 1;
+static d64Vertex_t norm;
+static float crossprod;
+
+void applyProjectileLighting(d64Triangle_t *triangle, d64Vertex_t *vertex) {
+	pvr_vertex_t *coord = &(vertex->v);
+
+	float lightingr = 0.0f;
+	float lightingg = 0.0f;
+	float lightingb = 0.0f;
+
+	if (dont_color) return;
+
+	// only compute norm if this global is set on entry
+	if (recompute_norm) {
+		surfaceNormal(triangle, &norm);
+		// and don't compute again unless it gets explicitly set again
+		// this saves MANY redundant computations of the surface normal
+		// for wall quads
+		vec3f_length(norm.v.x, norm.v.y, norm.v.z, crossprod);
+		vec3f_normalize(norm.v.x, norm.v.y, norm.v.z);
+		recompute_norm = 0;
+	}
+
+	for (int i = 0; i < lightidx + 1; i++) {
+		d64Vertex_t *lightvert = &lightverts[i];
+
+		float dx = (lightvert->v.x - coord->x);
+		float dy = (lightvert->v.y - coord->y);
+		float dz = (lightvert->v.z - coord->z);
+		float lr = projectile_lights[i].radius;
+
+		float lightdist;
+		vec3f_length(dx, dy, dz, lightdist);
+
+		if (lightdist < lr) {
+			float dotprod;
+
+			vec3f_dot(dx, dy, dz, norm.v.x, norm.v.y, norm.v.z, dotprod);
+
+			if (dotprod >= 0) {
+				float linear_scalar = ((lr - lightdist) / lr);
+				float lum = ((dotprod + 0.1)/lightdist);
+				float ls2 = linear_scalar*linear_scalar;
+
+				// distance attenuation on its own is not good enough here
+				// also need the dot product luminance scaling
+				float light_scale = lum * ls2;
+				
+				lightingr += (projectile_lights[i].r * light_scale);
+				lightingg += (projectile_lights[i].g * light_scale);
+				lightingb += (projectile_lights[i].b * light_scale);
+			}
+		}
+	}
+
+	if (coord->oargb != 0) {
+		float coord_r = (float)((coord->oargb >> 16) & 0xff) / 255.0f;
+		float coord_g = (float)((coord->oargb >> 8) & 0xff) / 255.0f;
+		float coord_b = (float)(coord->oargb & 0xff) / 255.0f;
+		lightingr += coord_r;
+		lightingg += coord_g;
+		lightingb += coord_b;
+	}
+
+	if ((lightingr > 1.0f) || (lightingg > 1.0f) || (lightingb > 1.0f)) {
+		float maxrgb = 0.0f;
+		if (lightingr > maxrgb) maxrgb = lightingr;
+		if (lightingg > maxrgb) maxrgb = lightingg;
+		if (lightingb > maxrgb) maxrgb = lightingb;
+
+		lightingr /= maxrgb;
+		lightingg /= maxrgb;
+		lightingb /= maxrgb;
+	}
+
+	if ((lightingr + lightingg + lightingb) > 0.0f) {
+		const int component_intensity = 192;
+		
+		// this is a hack to handle dark areas
+		// because I am using a specular highlight color for dynamic lighting,
+		// really dark vertices with textures applied are still basically solid black
+		// with a colorful full-face specular highlight
+		// set the vertex color to a dark but not too dark gray
+		// now the dynamic lighting has a useful effect
+		int coord_r = (coord->argb >> 16) & 0xff;
+		int coord_g = (coord->argb >> 8) & 0xff;
+		int coord_b = coord->argb & 0xff;
+
+		if (coord_r < 0x10 && coord_g < 0x10 && coord_b < 0x10) {
+			coord_r += 0x37;
+			coord_g += 0x37;
+			coord_b += 0x37;
+
+			coord->argb = D64_PVR_PACK_COLOR(0xff, coord_r, coord_g, coord_b);
+		}
+
+		coord->oargb = 0xff000000 | 
+		(((int)(lightingr*component_intensity) & 0xff) << 16) | 
+		(((int)(lightingg*component_intensity) & 0xff) << 8) | 
+		(((int)(lightingb*component_intensity) & 0xff));
+	}
 }
 
 // this is special-cased for all of the quads that do not require near-z clipping and will happily submit with 4 unmodified verts
@@ -127,6 +261,9 @@ void clip_quad(d64Triangle_t *triangle, d64Triangle_t *triangle2, pvr_poly_hdr_t
 	if (!vm) {
 		return;
 	}
+
+	// this state falls through to clip_triangle when needed
+	recompute_norm = 1;
 		
 	if (vm == 15) {
 		if (!specd) {
@@ -141,6 +278,13 @@ void clip_quad(d64Triangle_t *triangle, d64Triangle_t *triangle2, pvr_poly_hdr_t
 		triangle->dVerts[2].v.flags = PVR_CMD_VERTEX;
 		triangle2->dVerts[2].v.flags = PVR_CMD_VERTEX_EOL;
 
+		// surface normal gets computed here for entire quad
+		applyProjectileLighting(triangle,&triangle->dVerts[0]);
+		// the next 3 calls reuse norm
+		applyProjectileLighting(triangle,&triangle->dVerts[1]);
+		applyProjectileLighting(triangle,&triangle->dVerts[2]);
+		applyProjectileLighting(triangle2,&triangle2->dVerts[2]);
+
 		perspdiv(&triangle->dVerts[0]);
 		perspdiv(&triangle->dVerts[1]);
 		perspdiv(&triangle->dVerts[2]);
@@ -154,7 +298,9 @@ void clip_quad(d64Triangle_t *triangle, d64Triangle_t *triangle2, pvr_poly_hdr_t
 		pvr_list_prim(list, &triangle2->dVerts[2].v, sizeof(pvr_vertex_t));
 	} else {
 		// this is for every quad with at least one vert that needs clipping
+		// this first call with recompute the surface normal for the quad based on the triangle
 		clip_triangle(triangle, hdr, lightlevel, list, specd);
+		// this second call will reuse the surface normal computed in previous call
 		clip_triangle(triangle2, hdr, lightlevel, list, specd);
 	}
 }
@@ -179,6 +325,10 @@ void clip_triangle(d64Triangle_t *triangle, pvr_poly_hdr_t *hdr, int lightlevel,
 	switch (vm) {
 	/* all verts visible */
 	case 7: {
+		applyProjectileLighting(triangle,&triangle->dVerts[0]);
+		applyProjectileLighting(triangle,&triangle->dVerts[1]);
+		applyProjectileLighting(triangle,&triangle->dVerts[2]);
+
 		perspdiv(&triangle->dVerts[0]);
 		perspdiv(&triangle->dVerts[1]);
 		perspdiv(&triangle->dVerts[2]);
@@ -197,6 +347,10 @@ void clip_triangle(d64Triangle_t *triangle, pvr_poly_hdr_t *hdr, int lightlevel,
 		clip_edge(&triangle->dVerts[0], &triangle->dVerts[1], &triangle->spare[0]);
 		clip_edge(&triangle->dVerts[2], &triangle->dVerts[0], &triangle->spare[1]);
 
+		applyProjectileLighting(triangle,&triangle->dVerts[0]);
+		applyProjectileLighting(triangle,&triangle->spare[0]);
+		applyProjectileLighting(triangle,&triangle->spare[1]);
+
 		perspdiv(&triangle->dVerts[0]);
 		perspdiv(&triangle->spare[0]);
 		perspdiv(&triangle->spare[1]);
@@ -209,15 +363,19 @@ void clip_triangle(d64Triangle_t *triangle, pvr_poly_hdr_t *hdr, int lightlevel,
 	break;
 	/* dVerts[1] visible */
 	case 2: {
+		triangle->spare[0].v.flags = PVR_CMD_VERTEX;
+		triangle->spare[1].v.flags = PVR_CMD_VERTEX_EOL;
+
 		clip_edge(&triangle->dVerts[0], &triangle->dVerts[1], &triangle->spare[0]);
 		clip_edge(&triangle->dVerts[1], &triangle->dVerts[2], &triangle->spare[1]);
+
+		applyProjectileLighting(triangle,&triangle->dVerts[1]);
+		applyProjectileLighting(triangle,&triangle->spare[0]);
+		applyProjectileLighting(triangle,&triangle->spare[1]);
 
 		perspdiv(&triangle->dVerts[1]);
 		perspdiv(&triangle->spare[0]);
 		perspdiv(&triangle->spare[1]);
-
-		triangle->spare[0].v.flags = PVR_CMD_VERTEX;
-		triangle->spare[1].v.flags = PVR_CMD_VERTEX_EOL;
 
 		pvr_list_prim(list, hdr, sizeof(pvr_poly_hdr_t));
 		pvr_list_prim(list, &triangle->spare[0].v, sizeof(pvr_vertex_t));
@@ -227,15 +385,19 @@ void clip_triangle(d64Triangle_t *triangle, pvr_poly_hdr_t *hdr, int lightlevel,
 	break;
 	/* dVerts[2] visible */
 	case 4: {
+		triangle->spare[0].v.flags = PVR_CMD_VERTEX;
+		triangle->spare[1].v.flags = PVR_CMD_VERTEX;
+
 		clip_edge(&triangle->dVerts[2], &triangle->dVerts[0], &triangle->spare[0]);
 		clip_edge(&triangle->dVerts[1], &triangle->dVerts[2], &triangle->spare[1]);
+
+		applyProjectileLighting(triangle,&triangle->dVerts[2]);
+		applyProjectileLighting(triangle,&triangle->spare[0]);
+		applyProjectileLighting(triangle,&triangle->spare[1]);
 
 		perspdiv(&triangle->dVerts[2]);
 		perspdiv(&triangle->spare[0]);
 		perspdiv(&triangle->spare[1]);
-
-		triangle->spare[0].v.flags = PVR_CMD_VERTEX;
-		triangle->spare[1].v.flags = PVR_CMD_VERTEX;
 
 		pvr_list_prim(list, hdr, sizeof(pvr_poly_hdr_t));
 		pvr_list_prim(list, &triangle->spare[0].v, sizeof(pvr_vertex_t));
@@ -245,19 +407,24 @@ void clip_triangle(d64Triangle_t *triangle, pvr_poly_hdr_t *hdr, int lightlevel,
 	break;
 	/* dVerts[0] and dVerts[1] visible */
 	case 3: {
+		triangle->spare[0].v.flags = PVR_CMD_VERTEX_EOL;
+		triangle->spare[1].v.flags = PVR_CMD_VERTEX;
+
 		/* out 1 */
 		clip_edge(&triangle->dVerts[1], &triangle->dVerts[2], &triangle->spare[0]);
 
 		/* out 2 */
 		clip_edge(&triangle->dVerts[2], &triangle->dVerts[0], &triangle->spare[1]);
 
+		applyProjectileLighting(triangle,&triangle->dVerts[0]);
+		applyProjectileLighting(triangle,&triangle->dVerts[1]);
+		applyProjectileLighting(triangle,&triangle->spare[0]);
+		applyProjectileLighting(triangle,&triangle->spare[1]);
+
 		perspdiv(&triangle->dVerts[0]);
 		perspdiv(&triangle->dVerts[1]);
 		perspdiv(&triangle->spare[0]);
 		perspdiv(&triangle->spare[1]);
-		
-		triangle->spare[0].v.flags = PVR_CMD_VERTEX_EOL;
-		triangle->spare[1].v.flags = PVR_CMD_VERTEX;
 
 		pvr_list_prim(list, hdr, sizeof(pvr_poly_hdr_t));
 		pvr_list_prim(list, &triangle->dVerts[0].v, sizeof(pvr_vertex_t));
@@ -268,20 +435,25 @@ void clip_triangle(d64Triangle_t *triangle, pvr_poly_hdr_t *hdr, int lightlevel,
 	break;
 	/* dVerts[0] and dVerts[2] visible */
 	case 5: {
+		triangle->dVerts[2].v.flags = PVR_CMD_VERTEX;
+		triangle->spare[0].v.flags = PVR_CMD_VERTEX;
+		triangle->spare[1].v.flags = PVR_CMD_VERTEX_EOL;
+
 		/* out 1 */
 		clip_edge(&triangle->dVerts[0], &triangle->dVerts[1], &triangle->spare[0]);
 
 		/* out 2 */
 		clip_edge(&triangle->dVerts[1], &triangle->dVerts[2], &triangle->spare[1]);
 
+		applyProjectileLighting(triangle,&triangle->dVerts[0]);
+		applyProjectileLighting(triangle,&triangle->dVerts[2]);
+		applyProjectileLighting(triangle,&triangle->spare[0]);
+		applyProjectileLighting(triangle,&triangle->spare[1]);
+
 		perspdiv(&triangle->dVerts[0]);
 		perspdiv(&triangle->dVerts[2]);
 		perspdiv(&triangle->spare[0]);
 		perspdiv(&triangle->spare[1]);
-
-		triangle->dVerts[2].v.flags = PVR_CMD_VERTEX;
-		triangle->spare[0].v.flags = PVR_CMD_VERTEX;
-		triangle->spare[1].v.flags = PVR_CMD_VERTEX_EOL;
 
 		pvr_list_prim(list, hdr, sizeof(pvr_poly_hdr_t));
 		pvr_list_prim(list, &triangle->dVerts[0].v, sizeof(pvr_vertex_t));
@@ -292,18 +464,23 @@ void clip_triangle(d64Triangle_t *triangle, pvr_poly_hdr_t *hdr, int lightlevel,
 	break;
 	/* dVerts[1] and dVerts[2] visible */
 	case 6: {
+		triangle->dVerts[2].v.flags = PVR_CMD_VERTEX_EOL;
+		triangle->spare[0].v.flags = PVR_CMD_VERTEX;
+		triangle->spare[1].v.flags = PVR_CMD_VERTEX;
+
 		/* out 1 */
 		clip_edge(&triangle->dVerts[0], &triangle->dVerts[1], &triangle->spare[0]);
 		clip_edge(&triangle->dVerts[2], &triangle->dVerts[0], &triangle->spare[1]);
+
+		applyProjectileLighting(triangle,&triangle->dVerts[1]);
+		applyProjectileLighting(triangle,&triangle->dVerts[2]);
+		applyProjectileLighting(triangle,&triangle->spare[0]);
+		applyProjectileLighting(triangle,&triangle->spare[1]);
 
 		perspdiv(&triangle->dVerts[1]);
 		perspdiv(&triangle->dVerts[2]);
 		perspdiv(&triangle->spare[0]);
 		perspdiv(&triangle->spare[1]);
-
-		triangle->dVerts[2].v.flags = PVR_CMD_VERTEX_EOL;
-		triangle->spare[0].v.flags = PVR_CMD_VERTEX;
-		triangle->spare[1].v.flags = PVR_CMD_VERTEX;
 
 		pvr_list_prim(list, hdr, sizeof(pvr_poly_hdr_t));
 		pvr_list_prim(list, &triangle->spare[0].v, sizeof(pvr_vertex_t));
@@ -330,6 +507,8 @@ void R_RenderPSprites(void);
 void R_RenderAll(void)
 {
 	subsector_t *sub;
+
+	R_TransformProjectileLights();
 
 	while (endsubsector--, (endsubsector >= solidsubsectors)) {
 		sub = *endsubsector;
@@ -407,10 +586,12 @@ void R_RenderWorld(subsector_t *sub)
 			}
 
 			lf = &leafs[sub->leaf];
+			dont_color = 1;
 			R_RenderPlane(lf, numverts, frontsector->floorheight >> FRACBITS,
 							textures[frontsector->floorpic + 1],
 							xoffset, yoffset,
 							lights[frontsector->colors[1]].rgba, 0, frontsector->lightlevel, 255);
+			dont_color = 0;
 
 			lf = &leafs[sub->leaf];
 			R_RenderPlane(lf, numverts, frontsector->floorheight >> FRACBITS,
@@ -830,7 +1011,6 @@ void R_RenderWall(seg_t *seg, int flags, int texture, int topHeight, int bottomH
 
 		memcpy(&(dT2.dVerts[0]), dVTX[0], sizeof(d64Vertex_t));
 		memcpy(&(dT2.dVerts[1]), dVTX[2], sizeof(d64Vertex_t));
-
 		clip_quad(&dT1, &dT2, &thdr, frontsector->lightlevel, PVR_LIST_TR_POLY, 0);
 	}
 }
@@ -1010,6 +1190,22 @@ void R_RenderPlane(leaf_t *leaf, int numverts, int zpos, int texture, int xpos, 
 
 	transform_vert(dVTX[0]);
 	color_vert(dVTX[0], newcolor);
+
+	// ceilings and floors don't need computation for unit normal
+	// they're always flat planes
+	// it is either unit down or unit up
+	// easy
+	recompute_norm = 0;
+	crossprod = 1;
+	if (ceiling) {
+		norm.v.x = 0;
+		norm.v.y = 0;
+		norm.v.z = -1;
+	} else {
+		norm.v.x = 0;
+		norm.v.y = 0;
+		norm.v.z = 1;
+	}
 
 	if (numverts & 1) {
 		vertex_t *vrt1;
@@ -1597,7 +1793,7 @@ void R_RenderLaser(mobj_t *thing)
 	pvr_poly_cxt_t cxt;
 	pvr_poly_hdr_t hdr;
 
-	pvr_poly_cxt_col(&cxt, PVR_LIST_OP_POLY);
+	pvr_poly_cxt_col(&cxt, PVR_LIST_TR_POLY);
 	pvr_poly_compile(&hdr, &cxt);
 
 	laserverts[0].v.x = (laserdata->x1 >> 16);
@@ -1647,8 +1843,8 @@ void R_RenderLaser(mobj_t *thing)
 	memcpy(&(dT2.dVerts[1]), &laserverts[1], sizeof(d64Vertex_t));
 	memcpy(&(dT2.dVerts[2]), &laserverts[2], sizeof(d64Vertex_t));
 
-	clip_triangle(&dT1, &hdr, 255, PVR_LIST_OP_POLY, 0);
-	clip_triangle(&dT2, &hdr, 255, PVR_LIST_OP_POLY, 0);
+	clip_triangle(&dT1, &hdr, 255, PVR_LIST_TR_POLY, 0);
+	clip_triangle(&dT2, &hdr, 255, PVR_LIST_TR_POLY, 0);
 
 	// 0 3 5
 	// 3 4 5
@@ -1660,8 +1856,8 @@ void R_RenderLaser(mobj_t *thing)
 	memcpy(&(dT2.dVerts[1]), &laserverts[4], sizeof(d64Vertex_t));
 	memcpy(&(dT2.dVerts[2]), &laserverts[5], sizeof(d64Vertex_t));
 
-	clip_triangle(&dT1, &hdr, 255, PVR_LIST_OP_POLY, 0);
-	clip_triangle(&dT2, &hdr, 255, PVR_LIST_OP_POLY, 0);
+	clip_triangle(&dT1, &hdr, 255, PVR_LIST_TR_POLY, 0);
+	clip_triangle(&dT2, &hdr, 255, PVR_LIST_TR_POLY, 0);
 }
 
 void R_RenderPSprites(void)
@@ -1732,6 +1928,85 @@ void R_RenderPSprites(void)
 			for(int i = 0; i < 4; i++) {
 				quad2[i].argb = quad_color;
 				quad2[i].oargb = quad_light_color;
+			}
+
+			{
+				float lightingr = 0.0f;
+				float lightingg = 0.0f;
+				float lightingb = 0.0f;
+				uint32_t projectile_light = 0;
+				for (int i=0;i<lightidx+1;i++) {
+					d64Vertex_t *lightvert = &lightverts[i];
+					
+					float dx = lightvert->v.x;
+					float dy = lightvert->v.y;
+					float dz = lightvert->v.z;
+					float lr = projectile_lights[i].radius;
+
+					float lightdist;
+					vec3f_length(dx,dy,dz,lightdist);
+
+					if (lightdist < lr) {
+						float linear_scalar = ((lr - lightdist) / lr);
+						float lum = 0.5f;
+						float ls2 = linear_scalar*linear_scalar;
+
+						float light_scale = lum * ls2;
+							
+						lightingr += (projectile_lights[i].r * light_scale);
+						lightingg += (projectile_lights[i].g * light_scale);
+						lightingb += (projectile_lights[i].b * light_scale);
+					}		
+				}
+
+				if (quad_light_color != 0) {
+					float coord_r = (float)((quad_light_color >> 16) & 0xff) / 255.0f;
+					float coord_g = (float)((quad_light_color >> 8) & 0xff) / 255.0f;
+					float coord_b = (float)(quad_light_color & 0xff) / 255.0f;
+					lightingr += coord_r;
+					lightingg += coord_g;
+					lightingb += coord_b;
+				}
+
+				if ((lightingr > 1.0f) || (lightingg > 1.0f) || (lightingb > 1.0f)) {
+					float maxrgb = 0.0f;
+					if (lightingr > maxrgb) maxrgb = lightingr;
+					if (lightingg > maxrgb) maxrgb = lightingg;
+					if (lightingb > maxrgb) maxrgb = lightingb;
+
+					lightingr /= maxrgb;
+					lightingg /= maxrgb;
+					lightingb /= maxrgb;
+				}
+
+				if ((lightingr + lightingg + lightingb) > 0.0f) {
+					const int component_intensity = 96;
+					projectile_light = 0xff000000 | 
+					(((int)(lightingr*component_intensity) & 0xff) << 16) | 
+					(((int)(lightingg*component_intensity) & 0xff) << 8) | 
+					(((int)(lightingb*component_intensity) & 0xff));
+				}
+
+				for (int i = 0; i < 4; i++) {
+					// this is a hack to handle dark areas
+					// because I am using a specular highlight color for dynamic lighting,
+					// really dark vertices with textures applied are still basically solid black
+					// with a colorful full-face specular highlight
+					// set the vertex color to a dark but not too dark gray
+					// now the dynamic lighting has a useful effect
+					int coord_r = (quad_color >> 16) & 0xff;
+					int coord_g = (quad_color >> 8) & 0xff;
+					int coord_b = quad_color & 0xff;
+					if (coord_r < 0x10 && coord_g < 0x10 && coord_b < 0x10) {
+						coord_r += 0x37;
+						coord_g += 0x37;
+						coord_b += 0x37;
+
+						quad_color = D64_PVR_PACK_COLOR(0xff, coord_r, coord_g, coord_b);
+						quad2[i].argb = quad_color;
+					}
+					quad2[i].oargb = projectile_light;
+				}
 			}
 
 			x = (((psp->sx >> 16) - SwapShort(((spriteN64_t*)data)->xoffs)) + 160);

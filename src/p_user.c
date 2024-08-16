@@ -636,6 +636,7 @@ void P_PlayerInSpecialSector (player_t *player, sector_t *sec) // 80022B1C
 	}
 }
 
+
 /*
 =================
 =
@@ -742,13 +743,10 @@ void P_PlayerThink (player_t *player) // 80022D60
 			player->usedown = false;
 		}
 
-		if (buttons & cbutton->BT_ATTACK)
-		{
+		if (buttons & cbutton->BT_ATTACK) {
 			P_SetMobjState(player->mo, S_006);//S_PLAY_ATK1
 			player->attackdown++;
-		}
-		else
-		{
+		} else {
 			player->attackdown = 0;
 		}
 

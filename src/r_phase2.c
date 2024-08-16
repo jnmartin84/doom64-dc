@@ -288,6 +288,8 @@ d64Vertex_t SkyFireVertex[4] = // 8005B210
 extern d64Vertex_t *dVTX[4];
 extern d64Triangle_t dT1, dT2;
 
+int dont_color = 0;
+
 void R_RenderClouds(void) // 80025878
 {
 	float pos = (TRUEANGLES(viewangle) / 360.0f) * 2.0f;
@@ -345,7 +347,9 @@ void R_RenderClouds(void) // 80025878
 	memcpy(&(dT2.dVerts[0]), dVTX[0], sizeof(d64Vertex_t));
 	memcpy(&(dT2.dVerts[1]), dVTX[2], sizeof(d64Vertex_t));
 
+	dont_color = 1;
 	clip_quad(&dT1, &dT2, &cloudhdr, 0, PVR_LIST_OP_POLY, 1);
+	dont_color = 0;
 }
 
 extern uint16_t bgpal[256];
@@ -644,7 +648,9 @@ void R_RenderFireSky(void)
 	memcpy(&(dT2.dVerts[0]), dVTX[0], sizeof(d64Vertex_t));
 	memcpy(&(dT2.dVerts[1]), dVTX[2], sizeof(d64Vertex_t));
 
+	dont_color = 1;
 	clip_quad(&dT1, &dT2, &pvrfirehdr, 127, PVR_LIST_OP_POLY, 0);
+	dont_color = 0;
 }
 
 void R_CloudThunder(void) // 80026418

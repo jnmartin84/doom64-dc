@@ -452,6 +452,10 @@ boolean P_CheckAmmo (player_t *player) // 8001B5BC
 =
 ================
 */
+int player_shooting = 0;
+int player_light = 0;
+int player_last_weapon = 0;
+extern int player_light_fade;
 
 void P_FireWeapon (player_t *player) // 8001B7CC
 {
@@ -467,6 +471,18 @@ void P_FireWeapon (player_t *player) // 8001B7CC
 	new = weaponinfo[player->readyweapon].atkstate;
 	P_SetPsprite (player, ps_weapon, new);
 	P_NoiseAlert (player);
+
+	// dynamic lighting for weapons, see r_phase1.c, r_phase3.c
+	if (player->readyweapon >= wp_pistol && 
+			player->readyweapon <= wp_chaingun) {
+		player_last_weapon = player->readyweapon;
+		if (player_shooting == 0 && player_light_fade == -1) {
+			player_shooting = 1;
+			player_light = 1;
+		}
+	} else {
+		player_shooting = 0;
+	}
 }
 
 /*
