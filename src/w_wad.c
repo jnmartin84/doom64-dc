@@ -851,6 +851,7 @@ void W_OpenMapWad(int mapnum) // 8002C5B0
 {
 	int infotableofs;
 	char name [8];
+	int lump, size;
 
     name[0] = 'M';
     name[1] = 'A';
@@ -858,27 +859,12 @@ void W_OpenMapWad(int mapnum) // 8002C5B0
     name[3] = '0' + (char)(mapnum / 10);
     name[4] = '0' + (char)(mapnum % 10);
     name[5] = 0;
-#if 0
-	if ((name[3] == '0') && ((name[4] == '1') || (name[4] == '2') || (name[4] == '3'))) {
-		sprintf(fnbuf, "%s/map%c%c.wad", fnpre, name[3], name[4]);
-		file_t mapfd = fs_open(fnbuf, O_RDONLY);
-		if(-1 == mapfd) {
-			I_Error("Could not open %s for reading.\n", fnbuf);
-		}
-		size_t mapsize = fs_seek(mapfd, 0, SEEK_END);
-		fs_seek(mapfd, 0, SEEK_SET);
-		mapfileptr = Z_Alloc(mapsize, PU_STATIC, NULL);
-		fs_read(mapfd, mapfileptr, mapsize);
-		fs_close(mapfd);
-	} else 
-#endif	
-	{
-		int lump, size;
-		lump = W_GetNumForName(name);
-		size = W_LumpLength(lump);
-		mapfileptr = Z_Alloc(size, PU_STATIC, NULL);
-		W_ReadLump(lump, mapfileptr, dec_d64);
-	}
+
+	lump = W_GetNumForName(name);
+	size = W_LumpLength(lump);
+	mapfileptr = Z_Alloc(size, PU_STATIC, NULL);
+	W_ReadLump(lump, mapfileptr, dec_d64);
+
     mapnumlumps = (((wadinfo_t*)mapfileptr)->numlumps);
     infotableofs = (((wadinfo_t*)mapfileptr)->infotableofs);
 
