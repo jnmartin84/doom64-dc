@@ -33,6 +33,7 @@ C_FILES := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
 O_FILES := $(foreach file,$(C_FILES),$(file:.c=.o))
 
 CFLAGS = $(KOS_CFLAGS)
+# -DRANGECHECK=1
 
 # tools
 PRINT = printf
