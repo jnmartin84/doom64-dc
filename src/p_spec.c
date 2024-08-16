@@ -61,8 +61,6 @@ extern uint16_t tmptex[64*64];
 extern uint16_t tmp_pal[16];
 extern uint8_t *num_pal;
 
-//extern uint8_t *pt;
-
 int P_Init_calls = 0;
 
 void P_CachePvrTexture(int i, int tag)
@@ -141,7 +139,6 @@ void P_CachePvrTexture(int i, int tag)
 
 			if (slime == 0 && j == 0 && r == 0 && g == 0 && b == 0) {
 				tmp_pal[j] = get_color_argb1555(0,0,0,0);
-				//pt[i] = 1;
 			} else {
 #if 0
 //				if (r && g && b) {
@@ -193,7 +190,7 @@ void P_Init (void) // 8001F340
 	sector_t    *sector;
 	side_t      *side;
 
-	dbgio_printf("initing the lump caching arrays and indices\n");
+//	dbgio_printf("initing the lump caching arrays and indices\n");
 	if (donebefore) {
 		for (int i=0;i<(575+310);i++) {
 			if (used_lumps[i] != -1) {
@@ -205,7 +202,6 @@ void P_Init (void) // 8001F340
 	memset(lump_frame, 0xff, sizeof(int)*(575+310));
 	used_lump_idx = 0;
 	del_idx = 0;
-	//total_cached_vram = 0;
 	donebefore = 1;
 
 	if (P_Init_calls) {
