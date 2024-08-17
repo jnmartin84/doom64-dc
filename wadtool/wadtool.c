@@ -14,6 +14,7 @@
 #define ORIGINAL_DOOM64_WAD_SIZE 6101168
 
 // original code jnmartin84
+void DecodeD64(unsigned char* input, unsigned char* output); // 8002DFA0
 
 unsigned char *encode(unsigned char *input, int inputlen, int *size);
 int decodedsize(unsigned char *input);
@@ -132,7 +133,7 @@ typedef struct
 	uint8_t		data[0];	// all of the sprite data itself
 } spriteN64_t;
 
-char identifier[4] = {'I','W','A','D'};
+char identifier[4] = {'P','W','A','D'};
 uint8_t *doom64wad;
 
 #define LUMPDATASZ (256*1024)
@@ -1004,6 +1005,8 @@ int main (int argc, char **argv) {
 		}
 	}
 
+	numlumps -= 33;
+
 	size_t numlumwrite = fwrite(&numlumps, 1, 4, fd);
 	if (-1 == numlumwrite) {
 		fprintf(stderr, "Error writing total lump count to Dreamcast Doom 64 IWAD: %s\n", strerror(errno));
@@ -1019,9 +1022,15 @@ int main (int argc, char **argv) {
 		exit(-1);
 	}
 
+	numlumps += 33;
+
+
 	int lastofs = 4 + 4 + 4;
 
 	for (int i=0;i<numlumps;i++) {
+		if ((i > 1488) && (i < 1522)) {
+			continue;
+		}
 		if (((i < 349) || (i > 923)) || ((names[i][0] == 'P') && (names[i][1] == 'A') && (names[i][2] == 'L')) ) {
 			int orig_size = lumpinfo[i].size;
 			if (lumpinfo[i].name[0] & 0x80) {
@@ -1063,6 +1072,29 @@ int main (int argc, char **argv) {
 			int data_size;
 			int orig_size = lumpinfo[i].size;
 			data_size = orig_size;
+			
+			if ((i > 1488) && (i < 1522)) {
+				if (lumpinfo[i].name[0] & 0x80) {
+					data_size = lumpinfo[i+1].filepos - lumpinfo[i].filepos;
+				}
+				memset(lumpdata, 0, LUMPDATASZ);
+				memcpy(lumpdata, doom64wad + lumpinfo[i].filepos, data_size);
+				data_size = (data_size+3)&~3;
+				unsigned char *mapdata = malloc(orig_size);
+				DecodeD64(lumpdata, mapdata);
+				char mapname[9];
+				memset(mapname,0,9);
+				memcpy(mapname,lumpinfo[i].name,8);
+				mapname[0] &= 0x7f;
+				sprintf(output_paths, "%s/maps/%s.wad", output_directory, mapname);
+				FILE *map_fd = fopen(output_paths, "wb");
+				fwrite(mapdata, 1, orig_size, map_fd);
+				fclose(map_fd);
+				free(mapdata);
+
+				continue;
+			}
+			
 			if (lumpinfo[i].name[0] & 0x80) {
 				data_size = lumpinfo[i+1].filepos - lumpinfo[i].filepos;
 			}
@@ -1097,6 +1129,9 @@ int main (int argc, char **argv) {
 	}
 
 	for (int i=0;i<numlumps;i++) {
+		if ((i > 1488) && (i < 1522)) {
+			continue;
+		}		
 //		write(fd, (void*)(&lumpinfo[i]), sizeof(lumpinfo_t));
 		fwrite((void*)(&lumpinfo[i]), 1, sizeof(lumpinfo_t), fd);
 	}

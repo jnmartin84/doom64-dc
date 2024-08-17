@@ -62,7 +62,7 @@ buildtarget:
 	mkdir -p $(BUILD_DIR)
 
 $(TARGET): wadtool $(O_FILES) | buildtarget
-	${KOS_CC} ${KOS_CFLAGS} ${KOS_LDFLAGS} -o ${BUILD_DIR}/$@ ${KOS_START} $(O_FILES) -loggvorbisplay -lvorbis -logg ${KOS_LIBS} -lm
+	${KOS_CC} -I./ -I./LibADX ${KOS_CFLAGS} ${KOS_LDFLAGS} -o ${BUILD_DIR}/$@ ${KOS_START} $(O_FILES) ${KOS_LIBS} -lm -lADX
 
 clean:
 	$(RM) doom64.cdi d64isoldr.iso header.iso bootfile.bin $(O_FILES) $(BUILD_DIR)/$(TARGET)
@@ -73,7 +73,7 @@ wadtool:
 
 cdi: $(TARGET)
 	$(RM) doom64.cdi
-	mkdcdisc -d selfboot/ogg -d selfboot/sfx -d selfboot/vq -f selfboot/doom64monster.pal -f selfboot/doom64nonenemy.pal -f selfboot/pow2.wad -f selfboot/alt.wad -e $(BUILD_DIR)/$(TARGET) -o doom64.cdi -n "Doom 64"
+	mkdcdisc -d selfboot/maps -d selfboot/ogg -d selfboot/sfx -d selfboot/vq -f selfboot/doom64monster.pal -f selfboot/doom64nonenemy.pal -f selfboot/pow2.wad -f selfboot/alt.wad -e $(BUILD_DIR)/$(TARGET) -o doom64.cdi -n "Doom 64"
 
 sdiso: cdi
 	$(RM) d64isoldr.iso

@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define NODITHER 0
+#define NODITHER 1
 
 // adapatation and extension of
 // https://literateprograms.org/floyd-steinberg_dithering__c_.html

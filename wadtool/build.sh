@@ -2,10 +2,11 @@
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 if ! [ -f $SCRIPT_DIR/wadtool ]; then
   echo "Compiling wadtool"
+  gcc -Wno-unused-result -O3 -c $SCRIPT_DIR/decodes.c -o $SCRIPT_DIR/decodes.o
   gcc -Wno-unused-result -O3 -c $SCRIPT_DIR/encode.c -o $SCRIPT_DIR/encode.o
   gcc -Wno-unused-result -O3 -c $SCRIPT_DIR/imgproc.c -o $SCRIPT_DIR/imgproc.o
   gcc -Wno-unused-result -O3 -c $SCRIPT_DIR/wadtool.c -o $SCRIPT_DIR/wadtool.o
-  gcc $SCRIPT_DIR/encode.o $SCRIPT_DIR/imgproc.o $SCRIPT_DIR/wadtool.o -o $SCRIPT_DIR/wadtool
+  gcc $SCRIPT_DIR/decodes.o $SCRIPT_DIR/encode.o $SCRIPT_DIR/imgproc.o $SCRIPT_DIR/wadtool.o -o $SCRIPT_DIR/wadtool
 fi
 
 if [ -f $SCRIPT_DIR/../selfboot/alt.wad ]; then

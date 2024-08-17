@@ -860,10 +860,16 @@ void W_OpenMapWad(int mapnum) // 8002C5B0
     name[4] = '0' + (char)(mapnum % 10);
     name[5] = 0;
 
-	lump = W_GetNumForName(name);
-	size = W_LumpLength(lump);
-	mapfileptr = Z_Alloc(size, PU_STATIC, NULL);
-	W_ReadLump(lump, mapfileptr, dec_d64);
+	sprintf(fnbuf, "%s/maps/%s.wad", fnpre, name);
+	file_t mapfd = fs_open(fnbuf, O_RDONLY);
+	if(-1 == mapfd) {
+		I_Error("Could not open %s for reading.\n", fnbuf);
+	}
+	size_t mapsize = fs_seek(mapfd, 0, SEEK_END);
+	fs_seek(mapfd, 0, SEEK_SET);
+	mapfileptr = Z_Alloc(mapsize, PU_STATIC, NULL);
+	fs_read(mapfd, mapfileptr, mapsize);
+	fs_close(mapfd);
 
     mapnumlumps = (((wadinfo_t*)mapfileptr)->numlumps);
     infotableofs = (((wadinfo_t*)mapfileptr)->infotableofs);
