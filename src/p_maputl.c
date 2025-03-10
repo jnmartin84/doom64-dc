@@ -87,8 +87,8 @@ If the function returns false, exit with false without checking anything else.
 ===================
 */
 
-boolean P_BlockLinesIterator(int x, int y,
-			     boolean (*func)(line_t *)) // 80017FE8
+bool P_BlockLinesIterator(int x, int y,
+			     bool (*func)(line_t *)) // 80017FE8
 {
 	int offset;
 	short *list;
@@ -122,8 +122,8 @@ boolean P_BlockLinesIterator(int x, int y,
 ==================
 */
 
-boolean P_BlockThingsIterator(int x, int y,
-			      boolean (*func)(mobj_t *)) // 8001811C
+bool P_BlockThingsIterator(int x, int y,
+			      bool (*func)(mobj_t *)) // 8001811C
 {
 	mobj_t *mobj;
 
@@ -158,8 +158,8 @@ divline_t trace; // 800A5D58
 // Returns true if the traverser function returns true
 // for all lines.
 //
-boolean P_PathTraverse(fixed_t x1, fixed_t y1, fixed_t x2, fixed_t y2,
-		       int flags, boolean (*trav)(intercept_t *))
+bool P_PathTraverse(fixed_t x1, fixed_t y1, fixed_t x2, fixed_t y2,
+		       int flags, bool (*trav)(intercept_t *))
 {
 	fixed_t xt1, yt1, xt2, yt2;
 	fixed_t xstep, ystep;
@@ -274,7 +274,7 @@ boolean P_PathTraverse(fixed_t x1, fixed_t y1, fixed_t x2, fixed_t y2,
 // A line is crossed if its endpoints
 // are on opposite sides of the trace.
 //
-boolean PIT_AddLineIntercepts(line_t *ld) // 80018574
+bool PIT_AddLineIntercepts(line_t *ld) // 80018574
 {
 	fixed_t frac;
 
@@ -301,10 +301,10 @@ boolean PIT_AddLineIntercepts(line_t *ld) // 80018574
 //
 // PIT_AddThingIntercepts
 //
-boolean PIT_AddThingIntercepts(mobj_t *thing) // 8001860C
+bool PIT_AddThingIntercepts(mobj_t *thing) // 8001860C
 {
 	fixed_t x1, y1, x2, y2;
-	boolean tracepositive;
+	bool tracepositive;
 	fixed_t frac;
 	line_t templine;
 	vertex_t tempvertex1, tempvertex2;
@@ -424,7 +424,7 @@ fixed_t P_InterceptLine(line_t *line, divline_t *trace) // 8001872C
 // Returns true if the traverser function returns true
 // for all lines.
 //
-boolean P_TraverseIntercepts(traverser_t func, fixed_t maxfrac) // 800188F0
+bool P_TraverseIntercepts(traverser_t func, fixed_t maxfrac) // 800188F0
 {
 	int count;
 	fixed_t dist;

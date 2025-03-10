@@ -26,7 +26,7 @@ uint32_t am_plyblink;
 
 extern pvr_dr_state_t dr_state;
 
-extern boolean M_BoxIntersect(fixed_t a[static 4], fixed_t b[static 4]);
+extern bool M_BoxIntersect(fixed_t a[static 4], fixed_t b[static 4]);
 
 void AM_DrawSubsectors(player_t *player, fixed_t cx, fixed_t cy, fixed_t bbox[static 4]);
 void AM_DrawThings(fixed_t x, fixed_t y, angle_t angle, uint32_t color);
@@ -392,7 +392,7 @@ void AM_Drawer(void)
 void R_RenderPlane(leaf_t *leaf, int numverts, float zpos, int texture, int xpos,
 	int ypos, int color, int ceiling, int lightlevel, int alpha);
 
-static boolean AM_DrawSubsector(player_t *player, int bspnum)
+static bool AM_DrawSubsector(player_t *player, int bspnum)
 {
 	subsector_t *sub;
 	sector_t *sec;

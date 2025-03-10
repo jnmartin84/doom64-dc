@@ -19,7 +19,7 @@ int t1xs, t1ys, t2xs, t2ys; //800A5F48,800A5F4C,800A5F50,800A5F54
 = tic and have MF_COUNTKILL set
 ===============
 */
-boolean PS_CrossBSPNode(int bspnum);
+bool PS_CrossBSPNode(int bspnum);
 void P_CheckSights(void) // 8001EB00
 {
 	mobj_t *mobj;
@@ -55,7 +55,7 @@ Returns true if a straight line between t1 and t2 is unobstructed
 
 **********************************/
 extern int reject_length;
-boolean /* __attribute__((noinline)) */ P_CheckSight(mobj_t *t1, mobj_t *t2) // 8001EBCC
+bool /* __attribute__((noinline)) */ P_CheckSight(mobj_t *t1, mobj_t *t2) // 8001EBCC
 {
 	int s1, s2;
 	int pnum, bytenum, bitnum;
@@ -216,7 +216,7 @@ fixed_t PS_SightCrossLine(line_t *line) {
 =================
 */
 
-boolean /* __attribute__((noinline)) */ PS_CrossSubsector(subsector_t *sub) // 8001EF10
+bool /* __attribute__((noinline)) */ PS_CrossSubsector(subsector_t *sub) // 8001EF10
 {
 	seg_t *seg;
 	line_t *line;
@@ -301,7 +301,7 @@ boolean /* __attribute__((noinline)) */ PS_CrossSubsector(subsector_t *sub) // 8
 =================
 */
 #if 0
-boolean PS_CrossBSPNode(int bspnum) // 8001F15C
+bool PS_CrossBSPNode(int bspnum) // 8001F15C
 {
 	node_t *bsp;
 	int side1, side2;
@@ -361,7 +361,7 @@ boolean PS_CrossBSPNode(int bspnum) // 8001F15C
 #define CROSSBSP_STACK_SIZE 192
 static int crossstack[CROSSBSP_STACK_SIZE];
 
-boolean /* __attribute__((noinline)) */ PS_CrossBSPNode(int bspnum)
+bool /* __attribute__((noinline)) */ PS_CrossBSPNode(int bspnum)
 {
 	size_t crossstack_top = 0;
  

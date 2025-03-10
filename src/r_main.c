@@ -17,7 +17,7 @@ int validcount;
 /* */
 /* sky mapping */
 /* */
-boolean rendersky;
+bool rendersky;
 
 
 uint8_t __attribute__((aligned(32))) solidcols[SOLIDCOLSC];

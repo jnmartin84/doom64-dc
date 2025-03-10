@@ -2,7 +2,7 @@
 #include "p_local.h"
 #include "st_main.h"
 
-boolean gamepaused = true; // 800A6270
+bool gamepaused = true; // 800A6270
 
 /*
 ===============================================================================

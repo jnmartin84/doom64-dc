@@ -120,7 +120,7 @@ typedef struct vissprite_s {
 	int zdistance; // *
 	mobj_t *thing; // * 4
 	int lump; // * 8
-	boolean flip; // * 12
+	bool flip; // * 12
 	sector_t *sector; // * 16
 	struct vissprite_s *next; // * 20
 } vissprite_t;
@@ -199,7 +199,7 @@ typedef struct {
 /* for all views.   */
 
 typedef struct {
-	boolean rotate; /* if false use 0 for any position */
+	bool rotate; /* if false use 0 for any position */
 	int lump[8]; /* lump to use for view angles 0-7 */
 	uint8_t flip[8]; /* flip (1 = flip) to use for view angles 0-7 */
 } spriteframe_t;
@@ -323,7 +323,7 @@ extern int validcount;
 /* */
 /* R_data.c */
 /* */
-extern boolean rendersky;
+extern bool rendersky;
 #define SOLIDCOLSC 2560
 extern uint8_t __attribute__((aligned(32))) solidcols[SOLIDCOLSC];
 

@@ -6,9 +6,7 @@
 #ifndef __DOOMDATA__
 #define __DOOMDATA__
 
-#undef false
-#undef true
-typedef enum { false, true } boolean;
+#include <stdbool.h>
 //typedef unsigned char byte;
 
 /*

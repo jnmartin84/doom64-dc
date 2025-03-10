@@ -413,7 +413,7 @@ void M_ResetSettings(doom64_settings_t *s) {
 int MenuIdx = 0;
 int text_alpha = 255;
 int ConfgNumb = 0;
-const boolean FeaturesUnlocked = true;
+const bool FeaturesUnlocked = true;
 int force_filter_flush = 0;
 //int FlashBrightness = 16;
 
@@ -477,7 +477,7 @@ int M_ControllerPak(void)
 {
 	int exit;
 	int ret;
-	boolean PakBad;
+	bool PakBad;
 
 	PakBad = false;
 
@@ -659,7 +659,7 @@ void M_SaveMenuData(void)
 	MiniLoop(M_AlphaOutStart, NULL, M_AlphaInOutTicker, M_MenuGameDrawer);
 }
 
-void M_RestoreMenuData(boolean alpha_in)
+void M_RestoreMenuData(bool alpha_in)
 {
 	menudata_t *mdat;
 

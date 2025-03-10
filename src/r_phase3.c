@@ -2401,7 +2401,7 @@ void R_RenderThings(subsector_t *sub)
 	vissprite_t *vissprite_p;
 
 	mobj_t *thing;
-	boolean flip;
+	bool flip;
 	int lump;
 
 	int height;

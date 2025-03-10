@@ -49,7 +49,7 @@ void P_Telefrag(mobj_t *thing, fixed_t x, fixed_t y) // 8000E29C
 int EV_Teleport(line_t *line, mobj_t *thing) // 8000E3A0
 {
 	int tag;
-	boolean flag;
+	bool flag;
 	mobj_t *m, *fog;
 	unsigned an;
 	fixed_t oldx, oldy, oldz;

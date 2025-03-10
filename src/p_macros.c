@@ -81,7 +81,7 @@ int P_SuspendMacro(void) // 80021148
 	return 1;
 }
 
-void P_ToggleMacros(int tag, boolean toggleon) // 80021214
+void P_ToggleMacros(int tag, bool toggleon) // 80021214
 {
 	macro_t *macro = macros[tag - 256];
 

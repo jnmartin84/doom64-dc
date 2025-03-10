@@ -22,8 +22,8 @@
 ==============================================================================
 */
 
-static boolean crushchange; // 800A5690
-static boolean nofit; // 800A5694
+static int crushchange; // 800A5690
+static bool nofit; // 800A5694
 
 /*
 ==================
@@ -40,9 +40,9 @@ static boolean nofit; // 800A5694
 ==================
 */
 
-boolean P_ThingHeightClip(mobj_t *thing) // 80010180
+bool P_ThingHeightClip(mobj_t *thing) // 80010180
 {
-	boolean onfloor;
+	bool onfloor;
 
 	onfloor = (thing->z == thing->floorz);
 
@@ -74,7 +74,7 @@ boolean P_ThingHeightClip(mobj_t *thing) // 80010180
 ===============
 */
 
-boolean PIT_ChangeSector(mobj_t *thing) // 80010234
+bool PIT_ChangeSector(mobj_t *thing) // 80010234
 {
 	mobj_t *mo;
 
@@ -138,7 +138,7 @@ boolean PIT_ChangeSector(mobj_t *thing) // 80010234
 ===============
 */
 
-boolean P_ChangeSector(sector_t *sector, boolean crunch) // 800103BC
+bool P_ChangeSector(sector_t *sector, bool crunch) // 800103BC
 {
 	int x, y;
 
@@ -189,8 +189,8 @@ boolean P_ChangeSector(sector_t *sector, boolean crunch) // 800103BC
 ==============================================================================
 */
 
-static boolean  crushchange;// 800A5690
-static boolean  nofit;      // 800A5694
+static bool  crushchange;// 800A5690
+static bool  nofit;      // 800A5694
 
 /*
 ==================
@@ -207,9 +207,9 @@ static boolean  nofit;      // 800A5694
 ==================
 */
 
-boolean P_ThingHeightClip (mobj_t *thing) // 80010180
+bool P_ThingHeightClip (mobj_t *thing) // 80010180
 {
-	boolean		onfloor;
+	bool		onfloor;
 
 	onfloor = (thing->z == thing->floorz);
 
@@ -243,7 +243,7 @@ boolean P_ThingHeightClip (mobj_t *thing) // 80010180
 ===============
 */
 
-boolean PIT_ChangeSector (mobj_t *thing) // 80010234
+bool PIT_ChangeSector (mobj_t *thing) // 80010234
 {
 	mobj_t		*mo;
 
@@ -307,7 +307,7 @@ boolean PIT_ChangeSector (mobj_t *thing) // 80010234
 ===============
 */
 
-boolean P_ChangeSector (sector_t *sector, boolean crunch) // 800103BC
+bool P_ChangeSector (sector_t *sector, bool crunch) // 800103BC
 {
 	int x,y;
 

@@ -414,7 +414,7 @@ void P_DropWeapon(player_t *player) // 8001B580
 ================
 */
 
-boolean P_CheckAmmo(player_t *player) // 8001B5BC
+bool P_CheckAmmo(player_t *player) // 8001B5BC
 {
 	ammotype_t ammo;
 	int count;
@@ -1020,7 +1020,7 @@ void P_BulletSlope(mobj_t *mo) // 8001BF88
 ===============
 */
 
-void P_GunShot(mobj_t *mo, boolean accurate) // 8001C024
+void P_GunShot(mobj_t *mo, bool accurate) // 8001C024
 {
 	angle_t angle;
 	int damage;

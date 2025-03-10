@@ -440,7 +440,7 @@ static finalestage_t finalestage; // 80063200
 static int castnum; // 80063204
 static int casttics; // 80063208
 static state_t *caststate; // 8006320C
-static boolean castdeath; // 80063210
+static bool castdeath; // 80063210
 static int castframes; // 80063214
 static int castonmelee; // 80063218
 static int castrotation; // 8006321C
@@ -959,7 +959,7 @@ void BufferedDrawSprite(int type, state_t *state, int rotframe, int color, int x
 	spritedef_t *sprdef;
 	spriteframe_t *sprframe;
 	int lump;
-	boolean flip;
+	bool flip;
 
 	uint8_t *data;
 
@@ -976,7 +976,7 @@ void BufferedDrawSprite(int type, state_t *state, int rotframe, int color, int x
 	sprdef = &sprites[state->sprite];
 	sprframe = &sprdef->spriteframes[state->frame & FF_FRAMEMASK];
 	lump = sprframe->lump[rotframe];
-	flip = (boolean)sprframe->flip[rotframe];
+	flip = (bool)sprframe->flip[rotframe];
 
 	data = W_CacheLumpNum(lump, PU_CACHE, dec_jag);
 

@@ -180,7 +180,7 @@ void IN_Stop(int exit) // 80004DB0
 int IN_Ticker(void) // 80004E24
 {
 	static int last_f_gametic = 0;
-	boolean state;
+	bool state;
 	int buttons, oldbuttons;
 
 	buttons = ticbuttons[0] & 0xffff0000;

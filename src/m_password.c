@@ -9,13 +9,13 @@ char *passwordChar = "bcdfghjklmnpqrstvwxyz0123456789?";
 const int passwordTable[10] = { 1, 8, 9, 5, 6, 2, 7, 0, 4, 3 };
 
 char *hectic_demo = "rvnh3ct1cd3m0???";
-boolean run_hectic_demo = false;
+bool run_hectic_demo = false;
 
 uint8_t __attribute__((aligned(32))) Passwordbuff[16];
 int PassCodePos;
 int PassInvalidTic;
 
-boolean doPassword = false;
+bool doPassword = false;
 int CurPasswordSlot = 0;
 
 char *passFeatures = "3n4bl3f34tvr3s??"; // New Pass Code By [GEC]
@@ -494,7 +494,7 @@ int M_PasswordTicker(void)
 	char *fpassbuf;
 	unsigned int buttons;
 	unsigned int oldbuttons;
-	boolean playsound;
+	bool playsound;
 	int exit;
 	int skill;
 	int levelnum;

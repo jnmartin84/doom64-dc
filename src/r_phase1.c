@@ -17,7 +17,7 @@ int checkcoord[12][4] = { { 3, 0, 2, 1 }, /* Above,Left */
 			{ 0, 0, 0, 0 } };
 
 void R_RenderBSPNode(int bspnum);
-static boolean R_CheckBBox(const fixed_t bspcoord[static 4]);
+static bool R_CheckBBox(const fixed_t bspcoord[static 4]);
 static void R_Subsector(int num);
 static void R_AddLine(seg_t *line);
 static void R_AddSprite(subsector_t *sub);
@@ -462,7 +462,7 @@ skip_player_light:
 	}
 }
 
-static boolean R_RenderBspSubsector(int bspnum)
+static bool R_RenderBspSubsector(int bspnum)
 {
 	// Found a subsector?
 	if (bspnum & NF_SUBSECTOR) {
@@ -558,7 +558,7 @@ void R_RenderBSPNode(int bspnum)
 // might be visible.
 //
 
-static boolean R_CheckBBox(const fixed_t bspcoord[static 4])
+static bool R_CheckBBox(const fixed_t bspcoord[static 4])
 {
 	int boxx;
 	int boxy;
@@ -910,7 +910,7 @@ void R_AddSprite(subsector_t *sub) // 80024A98
 
 	angle_t ang;
 	unsigned int rot;
-	boolean flip;
+	bool flip;
 	int lump;
 	fixed_t tx, tz;
 	fixed_t x, y;
@@ -948,10 +948,10 @@ void R_AddSprite(subsector_t *sub) // 80024A98
 				ang = R_PointToAngle2(viewx, viewy, thing->x, thing->y);
 				rot = ((ang - thing->angle) + ((unsigned int)(ANG45 / 2) * 9)) >> 29;
 				lump = sprframe->lump[rot];
-				flip = (boolean)(sprframe->flip[rot]);
+				flip = (bool)(sprframe->flip[rot]);
 			} else {
 				lump = sprframe->lump[0];
-				flip = (boolean)(sprframe->flip[0]);
+				flip = (bool)(sprframe->flip[0]);
 			}
 
 			int random_factor = I_Random() % 24;
@@ -1804,7 +1804,7 @@ void R_AddSpriteNoLight(subsector_t *sub) // 80024A98
 
 	angle_t ang;
 	unsigned int rot;
-	boolean flip;
+	bool flip;
 	int lump;
 	fixed_t tx, tz;
 	fixed_t x, y;
@@ -1849,10 +1849,10 @@ void R_AddSpriteNoLight(subsector_t *sub) // 80024A98
 				ang = R_PointToAngle2(viewx, viewy, thing->x, thing->y);
 				rot = ((ang - thing->angle) + ((unsigned int)(ANG45 / 2) * 9)) >> 29;
 				lump = sprframe->lump[rot];
-				flip = (boolean)(sprframe->flip[rot]);
+				flip = (bool)(sprframe->flip[rot]);
 			} else {
 				lump = sprframe->lump[0];
-				flip = (boolean)(sprframe->flip[0]);
+				flip = (bool)(sprframe->flip[0]);
 			}
 
 			visspritehead->zdistance = tz;

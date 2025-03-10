@@ -103,7 +103,7 @@ extern fixed_t testradius;
 extern fixed_t testx;
 extern fixed_t testy;
 
-extern boolean PB_CheckPosition(void);
+extern bool PB_CheckPosition(void);
 mobj_t *P_SpawnMapThing(mapthing_t *mthing) // 80018C24
 {
 	int i, bit = 1;
@@ -313,7 +313,7 @@ void P_RemoveMobj(mobj_t *mobj) // 80019130
 ================
 */
 
-boolean P_SetMobjState(mobj_t *mobj, statenum_t state) // 80019184
+bool P_SetMobjState(mobj_t *mobj, statenum_t state) // 80019184
 {
 	state_t *st;
 

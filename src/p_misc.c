@@ -43,7 +43,7 @@ void T_AimCamera(aimcamera_t *camera) // 8000DE60
 	}
 }
 
-int P_SetAimCamera(line_t *line, boolean aim) // 8000DF20
+int P_SetAimCamera(line_t *line, bool aim) // 8000DF20
 {
 	aimcamera_t *camera;
 	mobj_t *mo;

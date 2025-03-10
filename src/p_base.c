@@ -17,15 +17,15 @@ void P_XYMovement(mobj_t *mo);
 void P_FloatChange(mobj_t *mo);
 void P_ZMovement(mobj_t *mo);
 void P_MobjThinker(mobj_t *mobj);
-boolean PB_TryMove(int tryx, int tryy);
+bool PB_TryMove(int tryx, int tryy);
 void PB_UnsetThingPosition(mobj_t *thing);
 void PB_SetThingPosition(mobj_t *thing);
-boolean PB_CheckPosition(void);
-boolean PB_BoxCrossLine(line_t *ld);
-boolean PB_CheckLine(line_t *ld);
-boolean PB_CheckThing(mobj_t *thing);
-boolean PB_BlockLinesIterator(int x, int y);
-boolean PB_BlockThingsIterator(int x, int y);
+bool PB_CheckPosition(void);
+bool PB_BoxCrossLine(line_t *ld);
+bool PB_CheckLine(line_t *ld);
+bool PB_CheckThing(mobj_t *thing);
+bool PB_BlockLinesIterator(int x, int y);
+bool PB_BlockThingsIterator(int x, int y);
 
 /*
 =================
@@ -304,7 +304,7 @@ void P_ZMovement(mobj_t *mo)
 ===================
 */
 
-boolean PB_TryMove(int tryx, int tryy)
+bool PB_TryMove(int tryx, int tryy)
 {
 	testradius = checkthing->radius;
 	testflags = checkthing->flags;
@@ -450,7 +450,7 @@ hitthing
 ==================
 */
 
-boolean PB_CheckPosition(void)
+bool PB_CheckPosition(void)
 {
 	int xl, xh, yl, yh, bx, by;
 
@@ -516,14 +516,14 @@ boolean PB_CheckPosition(void)
 =================
 */
 
-boolean PB_BoxCrossLine(line_t *ld)
+bool PB_BoxCrossLine(line_t *ld)
 {
 	fixed_t x1, x2;
 	fixed_t lx, ly;
 	fixed_t ldx, ldy;
 	fixed_t dx1, dy1;
 	fixed_t dx2, dy2;
-	boolean side1, side2;
+	bool side1, side2;
 
 	// entirely outside bounding box of line?
 	if ((testbbox[BOXRIGHT] <= ld->bbox[BOXLEFT]) ||
@@ -566,7 +566,7 @@ boolean PB_BoxCrossLine(line_t *ld)
 ==================
 */
 
-boolean PB_CheckLine(line_t *ld)
+bool PB_CheckLine(line_t *ld)
 {
 	fixed_t opentop, openbottom;
 	fixed_t lowfloor;
@@ -632,7 +632,7 @@ boolean PB_CheckLine(line_t *ld)
 ==================
 */
 
-boolean PB_BlockLinesIterator(int x, int y)
+bool PB_BlockLinesIterator(int x, int y)
 {
 	int offset;
 	short *list;
@@ -670,7 +670,7 @@ boolean PB_BlockLinesIterator(int x, int y)
 ==================
 */
 
-boolean PB_CheckThing(mobj_t *thing)
+bool PB_CheckThing(mobj_t *thing)
 {
 	fixed_t blockdist;
 	int delta;
@@ -747,7 +747,7 @@ boolean PB_CheckThing(mobj_t *thing)
 ==================
 */
 
-boolean PB_BlockThingsIterator(int x, int y)
+bool PB_BlockThingsIterator(int x, int y)
 {
 	mobj_t *mobj;
 

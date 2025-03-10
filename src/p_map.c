@@ -15,16 +15,16 @@
 
 mobj_t *tmthing; // 800A56B0
 fixed_t tmx, tmy; // 800A56B4, 800A56B8
-boolean checkposonly; // 800A56C8
+bool checkposonly; // 800A56C8
 
 /*================== */
 /* */
 /* out */
 /* */
 /*================== */
-extern boolean trymove2; // 800A5D80
+extern bool trymove2; // 800A5D80
 
-extern boolean floatok; /* if true, move would be ok if */
+extern bool floatok; /* if true, move would be ok if */
 /* within tmfloorz - tmceilingz */
 
 extern fixed_t tmfloorz, tmceilingz, tmdropoffz;
@@ -59,7 +59,7 @@ void P_TryMove2(void);
 
 //int checkpostics;
 
-boolean P_CheckPosition(mobj_t *thing, fixed_t x, fixed_t y) // 800166e0
+bool P_CheckPosition(mobj_t *thing, fixed_t x, fixed_t y) // 800166e0
 {
 	checkposonly = true;
 
@@ -72,7 +72,7 @@ boolean P_CheckPosition(mobj_t *thing, fixed_t x, fixed_t y) // 800166e0
 	return trymove2;
 }
 
-boolean P_TryMove(mobj_t *thing, fixed_t x, fixed_t y) // 80016724
+bool P_TryMove(mobj_t *thing, fixed_t x, fixed_t y) // 80016724
 {
 	int damage;
 	mobj_t *latchedmovething;
@@ -135,7 +135,7 @@ fixed_t closedist; // 800A56F4
 ================
 */
 
-boolean P_CheckUseHeight(line_t *line) // 80016858
+bool P_CheckUseHeight(line_t *line) // 80016858
 {
 	int flags;
 	fixed_t rowoffset;
@@ -200,7 +200,7 @@ fixed_t P_InterceptVector(divline_t *v2, divline_t *v1) // 80016954
 ================
 */
 
-boolean PIT_UseLines(line_t *li) // 80016A28
+bool PIT_UseLines(line_t *li) // 80016A28
 {
 	divline_t dl;
 	fixed_t frac;
@@ -354,7 +354,7 @@ int bombdamage; //iGp000008b4
 =================
 */
 
-boolean PIT_RadiusAttack(mobj_t *thing) // 80016E3C
+bool PIT_RadiusAttack(mobj_t *thing) // 80016E3C
 {
 	fixed_t dx, dy, dist;
 

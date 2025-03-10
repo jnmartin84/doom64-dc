@@ -18,7 +18,7 @@ mobj_t *slidemo; // 800A5730
 ====================
 */
 
-boolean PTR_SlideTraverse(intercept_t *in) // 800170AC
+bool PTR_SlideTraverse(intercept_t *in) // 800170AC
 {
 	line_t *li;
 

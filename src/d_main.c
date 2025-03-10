@@ -134,7 +134,7 @@ uint64_t framecount = 0;
 //
 
 extern atomic_int rdpmsg;
-extern boolean run_hectic_demo;
+extern bool run_hectic_demo;
 extern int early_error;
 
 //

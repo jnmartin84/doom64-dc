@@ -28,7 +28,7 @@ Most monsters are spawned unaware of all players, but some can be made preaware
 ================
 */
 
-boolean P_CheckMeleeRange(mobj_t *actor) // 80010B90
+bool P_CheckMeleeRange(mobj_t *actor) // 80010B90
 {
 	mobj_t *pl;
 	fixed_t dist;
@@ -55,7 +55,7 @@ boolean P_CheckMeleeRange(mobj_t *actor) // 80010B90
 ================
 */
 
-boolean P_CheckMissileRange(mobj_t *actor) // 80010C10
+bool P_CheckMissileRange(mobj_t *actor) // 80010C10
 {
 	fixed_t dist;
 
@@ -116,10 +116,10 @@ fixed_t yspeed[8] = {
 
 extern line_t *blockline; // 800A5D9C
 
-boolean P_Move(mobj_t *actor) // 80010D08
+bool P_Move(mobj_t *actor) // 80010D08
 {
 	fixed_t tryx, tryy;
-	boolean good;
+	bool good;
 	line_t *blkline;
 
 	if (actor->movedir == DI_NODIR)
@@ -185,7 +185,7 @@ boolean P_Move(mobj_t *actor) // 80010D08
 ==================================
 */
 
-boolean P_TryWalk(mobj_t *actor) // 80010E88
+bool P_TryWalk(mobj_t *actor) // 80010E88
 {
 	if (!P_Move(actor))
 		return false;
@@ -318,7 +318,7 @@ void P_NewChaseDir(mobj_t *actor) // 80010ED0
 ================
 */
 
-boolean P_LookForPlayers(mobj_t *actor, boolean allaround) // 8001115C
+bool P_LookForPlayers(mobj_t *actor, bool allaround) // 8001115C
 {
 	angle_t an;
 	fixed_t dist, dist2;
@@ -1249,7 +1249,7 @@ void A_SkullAttack(mobj_t *actor) // 80012528
 =
 ==============
 */
-boolean PIT_PainCheckLine(intercept_t *in) // 80012654
+bool PIT_PainCheckLine(intercept_t *in) // 80012654
 {
 	if (!(in->d.line->backsector))
 		return false;

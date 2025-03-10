@@ -231,7 +231,7 @@ kthread_attr_t rumble_worker_attr;
 kthread_worker_t *vmufb_worker_thread;
 kthread_attr_t vmufb_worker_attr;
 
-boolean disabledrawing = false;
+bool disabledrawing = false;
 
 mutex_t vbi2mtx;
 condvar_t vbi2cv;

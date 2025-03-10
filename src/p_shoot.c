@@ -40,7 +40,7 @@ extern fixed_t bottomslope; // 800A570C
 ==============
 */
 
-boolean PTR_AimTraverse(intercept_t *in) // 80017508
+bool PTR_AimTraverse(intercept_t *in) // 80017508
 {
 	line_t *li;
 	mobj_t *th;
@@ -146,7 +146,7 @@ boolean PTR_AimTraverse(intercept_t *in) // 80017508
 ==============
 */
 
-boolean PTR_ShootTraverse(intercept_t *in) // 800177A8
+bool PTR_ShootTraverse(intercept_t *in) // 800177A8
 {
 	fixed_t x, y, z;
 	fixed_t frac;

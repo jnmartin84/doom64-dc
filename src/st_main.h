@@ -12,7 +12,7 @@ typedef struct {
 } sbflash_t;
 
 extern sbflash_t flashCards[6];
-extern boolean tryopen[6];
+extern bool tryopen[6];
 
 extern uint8_t *sfontlump;
 extern uint8_t *statuslump;

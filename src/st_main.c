@@ -7,7 +7,7 @@
 #include "st_faces.h"
 
 sbflash_t flashCards[6]; // 800A8180
-boolean tryopen[6]; // 800A81E0
+bool tryopen[6]; // 800A81E0
 
 uint8_t *sfontlump; // 800A81F8
 uint8_t *statuslump; // 800A81FC
@@ -235,7 +235,7 @@ void ST_Init(void) // 80029BA0
 }
 
 // used for evil grin
-static boolean oldweaponsowned[NUMWEAPONS];
+static bool oldweaponsowned[NUMWEAPONS];
 
 // a random number per tick
 static int st_randomnumber;
@@ -1016,7 +1016,7 @@ void ST_updateFaceWidget(void)
 	static int lastattackdown = -1;
 	static int priority = 0;
 	static int last_priority = -1;
-	boolean doevilgrin;
+	bool doevilgrin;
 
 	int new_faceindex = 0;
 

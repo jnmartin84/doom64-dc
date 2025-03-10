@@ -9,7 +9,7 @@
 
 extern mobj_t *tmthing; // 800A56B0
 extern fixed_t tmx, tmy; // 800A56B4, 800A56B8
-extern boolean checkposonly; // 800A56C8
+extern bool checkposonly; // 800A56C8
 
 /*================== */
 /* */
@@ -17,8 +17,8 @@ extern boolean checkposonly; // 800A56C8
 /* */
 /*================== */
 
-boolean trymove2; // 800A5D80	/* Result from P_TryMove2 */
-boolean floatok; // 800A5D84	/* if true, move would be ok if within tmfloorz - tmceilingz */
+bool trymove2; // 800A5D80	/* Result from P_TryMove2 */
+bool floatok; // 800A5D84	/* if true, move would be ok if within tmfloorz - tmceilingz */
 fixed_t tmfloorz; // 800A5D88	/* Current floor z for P_TryMove2 */
 fixed_t tmceilingz; // 800A5D8C	/* Current ceiling z for P_TryMove2 */
 mobj_t *movething; // 800A5D98  /* Either a skull/missile target or a special pickup */
@@ -396,9 +396,9 @@ void PM_CheckPosition(void) // 80019F50
 =
 =================
 */
-boolean PM_BoxCrossLine(line_t *ld) // 8001A280
+bool PM_BoxCrossLine(line_t *ld) // 8001A280
 {
-	boolean side1 = false, side2 = false;
+	bool side1 = false, side2 = false;
 
 	if (tmbbox[BOXRIGHT] <= ld->bbox[BOXLEFT] ||
 	    tmbbox[BOXLEFT] >= ld->bbox[BOXRIGHT] ||
@@ -447,7 +447,7 @@ boolean PM_BoxCrossLine(line_t *ld) // 8001A280
 ==================
 */
 
-boolean PIT_CheckLine(line_t *ld) // 8001A3DC
+bool PIT_CheckLine(line_t *ld) // 8001A3DC
 {
 	fixed_t pm_opentop, pm_openbottom;
 	fixed_t pm_lowfloor;
@@ -520,7 +520,7 @@ boolean PIT_CheckLine(line_t *ld) // 8001A3DC
 ==================
 */
 
-boolean PIT_CheckThing(mobj_t *thing) // 8001A560
+bool PIT_CheckThing(mobj_t *thing) // 8001A560
 {
 	fixed_t blockdist;
 	fixed_t x, y;
@@ -634,7 +634,7 @@ If the function returns false, exit with false without checking anything else.
 ==================
 */
 
-boolean PM_BlockLinesIterator(int x, int y) // 8001A710
+bool PM_BlockLinesIterator(int x, int y) // 8001A710
 {
 	int offset;
 	short *list;
@@ -667,7 +667,7 @@ boolean PM_BlockLinesIterator(int x, int y) // 8001A710
 ==================
 */
 
-boolean PM_BlockThingsIterator(int x, int y) // 8001A810
+bool PM_BlockThingsIterator(int x, int y) // 8001A810
 {
 	mobj_t *mobj;
 

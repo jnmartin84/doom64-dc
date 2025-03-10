@@ -20,7 +20,7 @@ int consoleplayer; /* player taking events and displaying  */
 int displayplayer; /* view being displayed  */
 int totalkills, totalitems, totalsecret; /* for intermission  */
 
-boolean demoplayback;
+bool demoplayback;
 int *demo_p = NULL, *demobuffer = NULL;
 
 mapthing_t playerstarts[MAXPLAYERS];

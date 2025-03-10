@@ -84,7 +84,7 @@ typedef struct {
 	int tics;
 	int delay;
 	int delaycnt;
-	boolean isreverse;
+	bool isreverse;
 	float f_delaycnt;
 } anim_t;
 
@@ -105,8 +105,8 @@ typedef struct {
 	char startname[9];
 	int frames;
 	int speed;
-	boolean isreverse;
-	boolean ispalcycle;
+	bool isreverse;
+	bool ispalcycle;
 } animdef_t;
 
 #define MAXANIMS 15 //[d64] is 15
@@ -142,9 +142,9 @@ void P_UpdateSpecials(void);
 
 /* when needed */
 #if RANGECHECK
-boolean P_UseSpecialLine(line_t *line, mobj_t *thing, int level);
+bool P_UseSpecialLine(line_t *line, mobj_t *thing, int level);
 #else
-boolean P_UseSpecialLine(line_t *line, mobj_t *thing);
+bool P_UseSpecialLine(line_t *line, mobj_t *thing);
 #endif
 //void	P_ShootSpecialLine ( mobj_t *thing, line_t *line);
 //void P_CrossSpecialLine (line_t *line,mobj_t *thing);
@@ -165,9 +165,9 @@ sector_t *getNextSector(line_t *line, sector_t *sec);
 
 int P_FindLightFromLightTag(int tag, int start);
 #if RANGECHECK
-boolean P_ActivateLineByTag(int tag, mobj_t *thing, int level);
+bool P_ActivateLineByTag(int tag, mobj_t *thing, int level);
 #else
-boolean P_ActivateLineByTag(int tag, mobj_t *thing);
+bool P_ActivateLineByTag(int tag, mobj_t *thing);
 #endif
 /* */
 /*	SPECIAL */
@@ -271,7 +271,7 @@ int P_ModifySectorColor(line_t *line, int index, int type);
 #define SEQUENCELIGHTMAX 48
 
 void T_SequenceGlow(sequenceglow_t *seq_g);
-void P_SpawnSequenceLight(sector_t *sector, boolean first);
+void P_SpawnSequenceLight(sector_t *sector, bool first);
 
 typedef struct {
 	thinker_t thinker;
@@ -361,7 +361,7 @@ typedef struct {
 	int count;
 	plat_e status;
 	plat_e oldstatus;
-	boolean crush;
+	bool crush;
 	int tag;
 	plattype_e type;
 } plat_t;
@@ -403,7 +403,7 @@ typedef struct {
 	sector_t *sector;
 	fixed_t topheight;
 	fixed_t bottomheight; // D64 new
-	boolean initceiling; // D64 new
+	bool initceiling; // D64 new
 	fixed_t speed;
 	int direction; /* 1 = up, 0 = waiting at top, -1 = down */
 	int topwait; /* tics to wait at the top */
@@ -415,7 +415,7 @@ typedef struct {
 #define VDOORWAIT 120
 
 void EV_VerticalDoor(line_t *line, mobj_t *thing);
-boolean P_CheckKeyLock(line_t *line, mobj_t *thing); // Psx Doom New
+bool P_CheckKeyLock(line_t *line, mobj_t *thing); // Psx Doom New
 int EV_DoDoor(line_t *line, vldoor_e type);
 void T_VerticalDoor(vldoor_t *door);
 void P_SpawnDoorCloseIn30(sector_t *sec);
@@ -446,11 +446,11 @@ typedef struct {
 	sector_t *sector;
 	fixed_t bottomheight, topheight;
 	fixed_t speed;
-	boolean crush;
+	bool crush;
 	int direction; /* 1 = up, 0 = waiting, -1 = down */
 	int tag; /* ID */
 	int olddirection;
-	boolean instant;
+	bool instant;
 } ceiling_t;
 
 #define CEILSPEED FRACUNIT * 2
@@ -497,14 +497,14 @@ typedef enum {
 typedef struct {
 	thinker_t thinker;
 	floor_e type;
-	boolean crush;
+	bool crush;
 	sector_t *sector;
 	int direction;
 	int newspecial;
 	short texture;
 	fixed_t floordestheight;
 	fixed_t speed;
-	boolean instant;
+	bool instant;
 } floormove_t;
 
 typedef struct {
@@ -521,11 +521,11 @@ typedef struct {
 typedef enum { ok, crushed, pastdest, stop } result_e;
 
 result_e T_MovePlane(sector_t *sector, fixed_t speed, fixed_t dest,
-		     boolean crush, int floorOrCeiling, int direction);
+		     bool crush, int floorOrCeiling, int direction);
 
 int EV_BuildStairs(line_t *line, stair_e type);
 int EV_DoFloor(line_t *line, floor_e floortype, fixed_t speed);
-int EV_SplitSector(line_t *line, boolean sync); // New D64
+int EV_SplitSector(line_t *line, bool sync); // New D64
 void T_MoveFloor(floormove_t *floor);
 void T_MoveSplitPlane(splitmove_t *split); // New D64
 
@@ -548,7 +548,7 @@ int EV_SilentTeleport(line_t *line, mobj_t *thing);
 */
 
 void T_AimCamera(aimcamera_t *camera); // 8000DE60
-int P_SetAimCamera(line_t *line, boolean aim); // 8000DF20
+int P_SetAimCamera(line_t *line, bool aim); // 8000DF20
 int EV_SpawnTrapMissile(line_t *line, mobj_t *target,
 			mobjtype_t type); // 8000E02C
 void P_SpawnDelayTimer(int tics, void (*action)()); // 8000E1CC
@@ -602,6 +602,6 @@ extern int macroidx2; // 800A6124
 
 int P_StartMacro(int macroindex, line_t *line, mobj_t *thing); // 80021088
 int P_SuspendMacro(void); // 80021148
-void P_ToggleMacros(int tag, boolean toggleon); // 80021214
+void P_ToggleMacros(int tag, bool toggleon); // 80021214
 void P_RunMacros(void); // 8002126C
 void P_RestartMacro(line_t *line, int id); // 80021384

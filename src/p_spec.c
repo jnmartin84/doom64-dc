@@ -901,9 +901,9 @@ int P_FindLightFromLightTag(int tag, int start)
 /* */
 /*================================================================== */
 #if RANGECHECK
-boolean P_ActivateLineByTag(int tag, mobj_t *thing, int level)
+bool P_ActivateLineByTag(int tag, mobj_t *thing, int level)
 #else
-boolean P_ActivateLineByTag(int tag, mobj_t *thing)
+bool P_ActivateLineByTag(int tag, mobj_t *thing)
 #endif
 {
 	int i;
@@ -1183,13 +1183,13 @@ Only the front sides of lines are usable
 ===============================================================================
 */
 #if RANGECHECK
-boolean P_UseSpecialLine(line_t *line, mobj_t *thing, int level)
+bool P_UseSpecialLine(line_t *line, mobj_t *thing, int level)
 #else
-boolean P_UseSpecialLine(line_t *line, mobj_t *thing)
+bool P_UseSpecialLine(line_t *line, mobj_t *thing)
 #endif
 {
 	player_t *player;
-	boolean ok;
+	bool ok;
 	int actionType;
 
 #if RANGECHECK

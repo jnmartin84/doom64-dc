@@ -15,10 +15,10 @@
 /* */
 /*================================================================== */
 result_e T_MovePlane(sector_t *sector, fixed_t speed, fixed_t dest,
-		     boolean crush, int floorOrCeiling,
+		     bool crush, int floorOrCeiling,
 		     int direction) // 800136C0
 {
-	boolean flag;
+	bool flag;
 	fixed_t lastpos;
 	result_e result;
 
@@ -435,8 +435,8 @@ void T_MoveSplitPlane(splitmove_t *split) // 80014098
 	sector_t *sector;
 	fixed_t lastceilpos;
 	fixed_t lastflrpos;
-	boolean cdone;
-	boolean fdone;
+	bool cdone;
+	bool fdone;
 
 	sector = split->sector;
 	lastceilpos = sector->ceilingheight;
@@ -491,7 +491,7 @@ void T_MoveSplitPlane(splitmove_t *split) // 80014098
 /* */
 /*================================================================== */
 
-int EV_SplitSector(line_t *line, boolean sync) // 80014234
+int EV_SplitSector(line_t *line, bool sync) // 80014234
 {
 	int secnum;
 	int rtn;

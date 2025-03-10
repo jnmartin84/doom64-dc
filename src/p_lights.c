@@ -402,7 +402,7 @@ void T_SequenceGlow(sequenceglow_t *seq) // 80015E5C
 /*	P_SpawnSequenceLight */
 /* */
 /*================================================================== */
-void P_SpawnSequenceLight(sector_t *sector, boolean first) // 80016038
+void P_SpawnSequenceLight(sector_t *sector, bool first) // 80016038
 {
 	sequenceglow_t *seq;
 	sector_t *headsector;

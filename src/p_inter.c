@@ -28,7 +28,7 @@ int clipammo[NUMAMMO] = { 10, 4, 20, 1 }; // 8005AD50
 ===================
 */
 
-boolean P_GiveAmmo(player_t *player, ammotype_t ammo, int num)
+bool P_GiveAmmo(player_t *player, ammotype_t ammo, int num)
 {
 	int oldammo;
 
@@ -115,10 +115,10 @@ boolean P_GiveAmmo(player_t *player, ammotype_t ammo, int num)
 ===================
 */
 
-boolean P_GiveWeapon(player_t *player, weapontype_t weapon,
-		     boolean dropped) // 800145C0
+bool P_GiveWeapon(player_t *player, weapontype_t weapon,
+		     bool dropped) // 800145C0
 {
-	boolean gaveammo, gaveweapon;
+	bool gaveammo, gaveweapon;
 
 	if (weaponinfo[weapon].ammo !=
 	    am_noammo) { /* give one clip with a dropped weapon, two clips with a found weapon */
@@ -151,7 +151,7 @@ boolean P_GiveWeapon(player_t *player, weapontype_t weapon,
 ===================
 */
 
-boolean P_GiveBody(player_t *player, int num) // 80014680
+bool P_GiveBody(player_t *player, int num) // 80014680
 {
 	if (player->health >= MAXHEALTH)
 		return false;
@@ -173,7 +173,7 @@ boolean P_GiveBody(player_t *player, int num) // 80014680
 ===================
 */
 
-boolean P_GiveArmor(player_t *player, int armortype) // 800146C8
+bool P_GiveArmor(player_t *player, int armortype) // 800146C8
 {
 	int hits;
 
@@ -241,7 +241,7 @@ void P_GiveCard(player_t *player, card_t card) // 80014704
 ===================
 */
 
-boolean P_GivePower(player_t *player, powertype_t power) // 8001472C
+bool P_GivePower(player_t *player, powertype_t power) // 8001472C
 {
 	switch (power) {
 	case pw_invulnerability:
@@ -679,7 +679,7 @@ void P_KillMobj(mobj_t *source, mobj_t *target) // 80015080
 {
 	mobjtype_t item;
 	mobj_t *mo;
-	boolean forceXdeath;
+	bool forceXdeath;
 
 	target->flags &= ~(MF_SHOOTABLE | MF_FLOAT | MF_SKULLFLY);
 

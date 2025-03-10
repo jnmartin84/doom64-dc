@@ -30,7 +30,7 @@ static inline uint32_t Swap32(uint32_t val)
 		(((val)&0x0000ff00) << 8) | (((val)&0x000000ff) << 24));
 }
 
-short inline SwapShort(short dat)
+short static inline SwapShort(short dat)
 {
 	return ((((dat << 8) | (dat >> 8 & 0xff)) << 16) >> 16);
 }
@@ -1000,13 +1000,13 @@ typedef struct player_s {
 
 	int powers[NUMPOWERS]; /* invinc and invis are tic counters	 */
 	float f_powers[NUMPOWERS];
-	boolean cards[NUMCARDS];
+	bool cards[NUMCARDS];
 	int artifacts; /* [d64]*/
-	boolean backpack;
+	bool backpack;
 	int frags; /* kills of other player */
 	weapontype_t readyweapon;
 	weapontype_t pendingweapon; /* wp_nochange if not changing */
-	boolean weaponowned[NUMWEAPONS];
+	bool weaponowned[NUMWEAPONS];
 	int ammo[NUMAMMO];
 	int maxammo[NUMAMMO];
 	int attackdown, usedown; /* true if button down last tic */
@@ -1090,7 +1090,7 @@ extern float f_gametic;
 extern float f_lastgametic;
 extern float f_vblsinframe[MAXPLAYERS];
 
-extern boolean gamepaused;
+extern bool gamepaused;
 
 extern int DrawerStatus;
 
@@ -1291,7 +1291,7 @@ void D_DoomMain(void);
 /* GAME */
 /*------*/
 
-extern boolean demoplayback;
+extern bool demoplayback;
 extern int *demo_p, *demobuffer;
 
 void G_InitNew(skill_t skill, int map, gametype_t gametype);
@@ -1369,25 +1369,25 @@ extern int text_alpha; // 8005A7A8
 extern int ConfgNumb; // 8005A7AC
 extern int Display_X; // 8005A7B0
 extern int Display_Y; // 8005A7B4
-//extern boolean enable_messages; // 8005A7B8
+//extern bool enable_messages; // 8005A7B8
 //extern int HUDopacity; // [Immorpher] HUD 0pacity options
 //extern int SfxVolume; // 8005A7C0
 //extern int MusVolume; // 8005A7C4
 //extern int brightness; // 8005A7C8
 //extern int M_SENSITIVITY; // 8005A7CC
-extern const boolean FeaturesUnlocked; // 8005A7D0
+extern const bool FeaturesUnlocked; // 8005A7D0
 //extern int MotionBob; // [Immorpher] Motion Bob
 //extern int VideoFilter; // [GEC & Immorpher] VideoFilter
 
 #define FLASH_BRIGHTNESS 16
 
 //extern int FlashBrightness; // [Immorpher] Strobe brightness adjustment
-//extern boolean Autorun; // [Immorpher] Autorun
-//extern boolean runintroduction; // [Immorpher] New introduction text
-//extern boolean StoryText; // [Immorpher] Enable story text
-//extern boolean MapStats; // [Immorpher] Enable automap statistics
+//extern bool Autorun; // [Immorpher] Autorun
+//extern bool runintroduction; // [Immorpher] New introduction text
+//extern bool StoryText; // [Immorpher] Enable story text
+//extern bool MapStats; // [Immorpher] Enable automap statistics
 //extern int HUDmargin; // [Immorpher] HUD margin options
-//extern boolean ColoredHUD; // [Immorpher] Colored hud
+//extern bool ColoredHUD; // [Immorpher] Colored hud
 
 int M_RunTitle(void); // 80007630
 
@@ -1401,7 +1401,7 @@ void M_FadeInStart(void); // 80007AB4
 void M_FadeOutStart(int exitmode); // 80007AEC
 
 void M_SaveMenuData(void); // 80007B2C
-void M_RestoreMenuData(boolean alpha_in); // 80007BB8
+void M_RestoreMenuData(bool alpha_in); // 80007BB8
 void M_MenuGameDrawer(void); // 80007C48
 int M_MenuTicker(void); // 80007E0C
 void M_MenuClearCall(int); // 80008E6C
@@ -1445,7 +1445,7 @@ void M_ControlPadDrawer(void); // 8000B988
 
 extern char *passwordChar; // 8005AC60
 extern uint8_t __attribute__((aligned(32))) Passwordbuff[16]; // 800A55B0
-extern boolean doPassword; // 8005ACB8
+extern bool doPassword; // 8005ACB8
 extern int CurPasswordSlot; // 8005ACBC
 
 void M_EncodePassword(uint8_t *buff); //8000BC10
@@ -1558,7 +1558,7 @@ int S_AdjustSoundParams(mobj_t *listener, mobj_t *origin, int *vol, int *pan);
 
 extern uint32_t vid_side;
 
-extern boolean disabledrawing;
+extern bool disabledrawing;
 extern volatile int32_t vsync;
 extern volatile int32_t drawsync2;
 extern volatile int32_t drawsync1;
