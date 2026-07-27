@@ -47,6 +47,8 @@ void I_VMUFBThread(void *param);
 static uint8_t __attribute__((aligned(32))) main_stack[128*1024];
 static uint8_t __attribute__((aligned(32))) ticker_stack[8*1024];
 
+maple_device_t *maple_devices[NUM_MAPLE] = {0};
+
 const mapped_buttons_t default_mapping = {
 .map_right = {
 	.n64button = PAD_RIGHT,
@@ -462,11 +464,10 @@ void I_VMUUpdateFace(uint8_t* image, int force_refresh)
 void I_VMUFBThread(void *param)
 {
 	(void)param;
-	maple_device_t *dev = NULL;
 
 	// only draw to first vmu
-	if ((dev = maple_enum_type(0, MAPLE_FUNC_LCD)))
-		vmufb_present(&vmubuf, dev);
+	if (maple_devices[maple_lcd])
+		vmufb_present(&vmubuf, maple_devices[maple_lcd]);
 }
 
 void I_VMUFB(int force_refresh)
@@ -485,92 +486,117 @@ void I_VMUFB(int force_refresh)
 void I_RumbleThread(void *param)
 {
 	(void)param;
+
 	kthread_job_t *next_job = thd_worker_dequeue_job(rumble_worker_thread);
 
 	if (next_job) {
 		uint32_t packet = (uint32_t)next_job->data;
 		Z_Free(next_job);
-		maple_device_t *purudev = NULL;
-		purudev = maple_enum_type(0, MAPLE_FUNC_PURUPURU);
-		if (purudev)
-				purupuru_rumble_raw(purudev, packet);
+		if (maple_devices[maple_rumble])
+			purupuru_rumble_raw(maple_devices[maple_rumble], packet);
 	}
 }
 
-int rumble_patterns[NUM_RUMBLE];
-
-static int striker_rumble_patterns[NUM_RUMBLE] = {
-	0x23084000,
-	0x3339F010,
-	0x23083000,
-	0x0f082000,
-	0x23083000,
-	0x04004001,
-	0x04007001,
-	0x03003001,
-	0x0f082000,
-	0x19083000,
-	0x1e085000,
-	0x0a082000,
-	0x05001001,
-	0x23083000,
-	0x3339c010,
+purupuru_effect_t rumble_patterns[NUM_RUMBLE] = {
+	{ .motor = 1, .fpow = 4, .conv = 1, .freq = 8,  .inc = 2 }, /* hoof */
+	{ .motor = 1, .fpow = 7, .conv = 1, .freq = 57, .inc = 3 }, /* quake */
+	{ .motor = 1, .fpow = 3, .conv = 1, .freq = 8,  .inc = 2 }, /* punch */
+	{ .motor = 1, .fpow = 2, .conv = 1, .freq = 24, .inc = 2 }, /* saw */
+	{ .motor = 1, .fpow = 3, .conv = 1, .freq = 8,  .inc = 1 }, /* sawready */
+	{ .motor = 1, .fpow = 4, .conv = 1, .freq = 7,  .inc = 1 }, /* missile */
+	{ .motor = 1, .fpow = 7, .conv = 1, .freq = 24, .inc = 3 }, /* bfg */
+	{ .motor = 1, .fpow = 3, .conv = 1, .freq = 8,  .inc = 1 }, /* plasma */
+	{ .motor = 1, .fpow = 2, .conv = 1, .freq = 8,  .inc = 1 }, /* pistol */
+	{ .motor = 1, .fpow = 4, .conv = 1, .freq = 12, .inc = 1 }, /* shotgun */
+	{ .motor = 1, .fpow = 6, .conv = 1, .freq = 12, .inc = 1 }, /* shotgun2 */
+	{ .motor = 1, .fpow = 2, .conv = 1, .freq = 8,  .inc = 1 }, /* cgun */
+	{ .motor = 1, .fpow = 2, .conv = 1, .freq = 8,  .inc = 1 }, /* laser */
+	{ .motor = 1, .fpow = 3, .conv = 1, .freq = 8,  .inc = 2 }, /* oof */
+	{ .motor = 1, .fpow = 4, .conv = 1, .freq = 57, .inc = 3 }, /* thunder */
 };
 
-int I_GetDamageRumble(int damage)
+purupuru_effect_t I_GetDamageRumble(int damage)
 {
-	switch (menu_settings.Rumble) {
-	case (int)rumblepak_off:
-		return 0;
-	case (int)rumblepak_strikerdc:
-		rumble_fields_t fields = {.raw = 0x021A7009};
+	purupuru_effect_t effect = { .motor = 1 };
 
-		int rumbledamage;
-		if (damage > 50)
-			rumbledamage = 7;
-		else
-			rumbledamage = 7 * damage / 50;
+	if(menu_settings.Rumble) {
+		effect = (purupuru_effect_t) {
+			/* Select normal motor */
+			.motor = 1,
 
-		fields.fx1_intensity = rumbledamage;
-		fields.fx2_lintensity = 0;
-		fields.fx2_uintensity = 0;
-		fields.fx2_pulse = damage < 25;
-		fields.special_pulse = damage > 40;
-		fields.duration = damage;
+			/* Scale forward motion power from values 2 - 7 based on damage */
+			.fpow = damage > 50 ? 7 : (7 * damage / 50) < 2 ? 2 : (7 * damage / 50),
 
-		return fields.raw;
-	default:
-		return 0;
+			/* Convergent rumble */
+			.conv = 1,
+
+			/* Clamp motor frequency from values 7 - 59 based on damage */
+			.freq = (damage < 7 ) ? 7 : (damage > 59) ? 59 : damage,
+
+			/* Scale inclination from values 1 - 3 based on damage */
+			.inc = damage > 50 ? 3 : (3 * damage / 50) < 1 ? 1 : (3 * damage / 50),
+		};
 	}
+
+	return effect;
 }
 
-void I_InitRumble(i_rumble_pak_t rumblepak)
-{
-	switch (rumblepak) {
-		case rumblepak_off:
-			return;
-		case rumblepak_strikerdc:
-			memcpy(rumble_patterns, striker_rumble_patterns, sizeof(rumble_patterns));
-		default:
-			return;
-	}
-}
-
-void I_Rumble(uint32_t packet)
+void I_Rumble(purupuru_effect_t effect)
 {
 	if ((gamemap != 33) && !demoplayback) {
 		kthread_job_t *next_job = (kthread_job_t *)Z_Malloc(sizeof(*next_job), PU_STATIC, NULL);
-		next_job->data = (void *)packet;
+		next_job->data = (void *)effect.raw;
 
 		thd_worker_add_job(rumble_worker_thread, next_job);
 		thd_worker_wakeup(rumble_worker_thread);
 	}
 }
 
+void Maple_Scan(maple_device_t *dev) {
+	(void)dev;
+	maple_device_t *cont;
+
+	/* Clear existing controller status */
+	for(int i = 0; i < NUM_MAPLE; i++) {
+		maple_devices[i] = NULL;
+	}
+
+	/* Assign the first device found of each type as ours */
+	if((cont = maple_enum_type(0, MAPLE_FUNC_CONTROLLER))) {
+		maple_devices[maple_controller] = cont;
+	}
+
+	if((cont = maple_enum_type(0, MAPLE_FUNC_LCD))) {
+		maple_devices[maple_lcd] = cont;
+	}
+
+	if((cont = maple_enum_type(0, MAPLE_FUNC_MEMCARD))) {
+		maple_devices[maple_memcard] = cont;
+	}
+
+	if((cont = maple_enum_type(0, MAPLE_FUNC_PURUPURU))) {
+		maple_devices[maple_rumble] = cont;
+	}
+
+	if((cont = maple_enum_type(0, MAPLE_FUNC_MOUSE))) {
+		maple_devices[maple_mouse] = cont;
+	}
+
+	if((cont = maple_enum_type(0, MAPLE_FUNC_KEYBOARD))) {
+		maple_devices[maple_keyboard] = cont;
+	}
+}
 
 void I_Init(void)
 {
-	I_InitRumble(rumblepak_off);
+	/* Initial scan of maple devices */
+	Maple_Scan(NULL);
+
+	/* Install callbacks for attachment and detachment
+	   of our various maple device types */
+	maple_attach_callback(0, Maple_Scan);
+	maple_detach_callback(0, Maple_Scan);
+
 	rumble_worker_attr.create_detached = 1;
 	rumble_worker_attr.stack_size = 4096;
 	rumble_worker_attr.stack_ptr = NULL;
@@ -673,16 +699,13 @@ int last_Rtrig;
 
 int I_GetControllerData(void)
 {
-	maple_device_t *controller;
 	cont_state_t *cont;
 	kbd_state_t *kbd;
 	mouse_state_t *mouse;
 	int ret = 0;
 
-	controller = maple_enum_type(0, MAPLE_FUNC_CONTROLLER);
-
-	if (controller) {
-		cont = maple_dev_status(controller);
+	if (maple_devices[maple_controller]) {
+		cont = maple_dev_status(maple_devices[maple_controller]);
 
 #ifdef DCLOCALDEV
 		if ((cont->buttons & CONT_START) && cont->ltrig && cont->rtrig)
@@ -857,10 +880,9 @@ int I_GetControllerData(void)
 	}
 
 	// now move on to the keyboard and mouse additions
-	controller = maple_enum_type(0, MAPLE_FUNC_KEYBOARD);
 
-	if (controller) {
-		kbd = maple_dev_status(controller);
+	if (maple_devices[maple_keyboard]) {
+		kbd = maple_dev_status(maple_devices[maple_keyboard]);
 
 		// ATTACK
 		if (kbd->cond.modifiers.raw & (KBD_MOD_LCTRL | KBD_MOD_RCTRL))
@@ -968,10 +990,8 @@ int I_GetControllerData(void)
 		}
 	}
 
-	controller = maple_enum_type(0, MAPLE_FUNC_MOUSE);
-
-	if (controller) {
-		mouse = maple_dev_status(controller);
+	if (maple_devices[maple_mouse]) {
+		mouse = maple_dev_status(maple_devices[maple_mouse]);
 
 		// ATTACK
 		if (mouse->buttons & MOUSE_LEFTBUTTON)
@@ -1347,19 +1367,16 @@ static char *get_vmu_fn(maple_device_t *vmudev, char *fn) {
 
 int I_CheckControllerPak(void)
 {
-	maple_device_t *vmudev = NULL;
-
 	ControllerPakStatus = 0;
 	FilesUsed = -1;
 
-	vmudev = maple_enum_type(0, MAPLE_FUNC_MEMCARD);
-	if (!vmudev)
+	if (!maple_devices[maple_memcard])
 		return PFS_ERR_NOPACK;
 
 	file_t d;
 	dirent_t *de;
 
-	d = fs_open(get_vmu_fn(vmudev, NULL), O_RDONLY | O_DIR);
+	d = fs_open(get_vmu_fn(maple_devices[maple_memcard], NULL), O_RDONLY | O_DIR);
 	if(-1 == d)
 		return PFS_ERR_ID_FATAL;
 
@@ -1389,17 +1406,15 @@ int I_CheckControllerPak(void)
 
 int I_DeletePakFile(dirent_t *de)
 {
-	maple_device_t *vmudev = NULL;
 	int blocksize;
 	blocksize = de->size >> 9;
 
 	ControllerPakStatus = 0;
 
-	vmudev = maple_enum_type(0, MAPLE_FUNC_MEMCARD);
-	if (!vmudev)
+	if (!maple_devices[maple_memcard])
 		return PFS_ERR_NOPACK;
 
-	int rv = fs_unlink(get_vmu_fn(vmudev, de->name));
+	int rv = fs_unlink(get_vmu_fn(maple_devices[maple_memcard], de->name));
 	if (rv)
 		return PFS_ERR_ID_FATAL;
 
@@ -1416,13 +1431,11 @@ int I_SavePakSettings(doom64_settings_t *msettings)
 {
 	uint8 *pkg_out;
 	ssize_t pkg_size;
-	maple_device_t *vmudev = NULL;
 
-	vmudev = maple_enum_type(0, MAPLE_FUNC_MEMCARD);
-	if (!vmudev)
+	if (!maple_devices[maple_memcard])
 		return PFS_ERR_NOPACK;
 
-	file_t d = fs_open(get_vmu_fn(vmudev, "doom64stg"), O_WRONLY | O_CREAT | O_META);
+	file_t d = fs_open(get_vmu_fn(maple_devices[maple_memcard], "doom64stg"), O_WRONLY | O_CREAT | O_META);
 	if (-1 == d)
 		return PFS_ERR_ID_FATAL;
 
@@ -1473,15 +1486,13 @@ int I_SavePakFile(void)
 {
 	uint8 *pkg_out;
 	ssize_t pkg_size;
-	maple_device_t *vmudev = NULL;
 
 	ControllerPakStatus = 0;
 
-	vmudev = maple_enum_type(0, MAPLE_FUNC_MEMCARD);
-	if (!vmudev)
+	if (!maple_devices[maple_memcard])
 		return PFS_ERR_NOPACK;
 
-	file_t d = fs_open(get_vmu_fn(vmudev, "doom64"), O_WRONLY | O_META);
+	file_t d = fs_open(get_vmu_fn(maple_devices[maple_memcard], "doom64"), O_WRONLY | O_META);
 	if (-1 == d)
 		return PFS_ERR_ID_FATAL;
 
@@ -1537,14 +1548,12 @@ int I_SavePakFile(void)
 int I_ReadPakSettings(doom64_settings_t *msettings)
 {
 	ssize_t size;
-	maple_device_t *vmudev = NULL;
 	uint8_t *data;
 
-	vmudev = maple_enum_type(0, MAPLE_FUNC_MEMCARD);
-	if (!vmudev)
+	if (!maple_devices[maple_memcard])
 		return PFS_ERR_NOPACK;
 
-	file_t d = fs_open(get_vmu_fn(vmudev, "doom64stg"), O_RDONLY | O_META);
+	file_t d = fs_open(get_vmu_fn(maple_devices[maple_memcard], "doom64stg"), O_RDONLY | O_META);
 	if (-1 == d)
 		return PFS_ERR_ID_FATAL;
 
@@ -1614,19 +1623,17 @@ int I_ReadPakSettings(doom64_settings_t *msettings)
 int I_ReadPakFile(void)
 {
 	ssize_t size;
-	maple_device_t *vmudev = NULL;
 	uint8_t *data;
 
 	ControllerPakStatus = 0;
 
-	vmudev = maple_enum_type(0, MAPLE_FUNC_MEMCARD);
-	if (!vmudev)
+	if (!maple_devices[maple_memcard])
 		return PFS_ERR_NOPACK;
 
 	Pak_Data = NULL;
 	Pak_Size = 0;
 
-	file_t d = fs_open(get_vmu_fn(vmudev, "doom64"), O_RDONLY | O_META);
+	file_t d = fs_open(get_vmu_fn(maple_devices[maple_memcard], "doom64"), O_RDONLY | O_META);
 	if (-1 == d)
 		return PFS_ERR_ID_FATAL;
 
@@ -1682,12 +1689,10 @@ int I_CreatePakFile(void)
 {
 	uint8 *pkg_out;
 	ssize_t pkg_size;
-	maple_device_t *vmudev = NULL;
 
 	ControllerPakStatus = 0;
 
-	vmudev = maple_enum_type(0, MAPLE_FUNC_MEMCARD);
-	if (!vmudev)
+	if (!maple_devices[maple_memcard])
 		return PFS_ERR_NOPACK;
 
 	memset(&pkg, 0, sizeof(vmu_pkg_t));
@@ -1703,7 +1708,7 @@ int I_CreatePakFile(void)
 	memset(Pak_Data, 0, Pak_Size);
 	pkg.data = Pak_Data;
 
-	file_t d = fs_open(get_vmu_fn(vmudev, "doom64"), O_RDWR | O_CREAT | O_META);
+	file_t d = fs_open(get_vmu_fn(maple_devices[maple_memcard], "doom64"), O_RDWR | O_CREAT | O_META);
 	if (-1 == d)
 		return PFS_ERR_ID_FATAL;
 

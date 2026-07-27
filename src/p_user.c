@@ -193,19 +193,6 @@ void P_PlayerZMovement(mobj_t *mo) // 80021f38
 				S_StartSound(mo, sfx_oof);
 
 				if (menu_settings.Rumble) {
-				/*	rumble_fields_t fields = {.raw = 0};
-					fields.special_pulse = 0;
-					fields.special_motor1 = 0;
-					fields.special_motor2 = 0;
-					fields.fx1_pulse = 0;
-					fields.fx1_powersave = 0;
-					fields.fx1_intensity = 3;
-					fields.fx2_lintensity = 0;
-					fields.fx2_pulse = 1;
-					fields.fx2_uintensity = 0;
-					fields.fx2_decay = 0;
-					fields.duration = 35;
-					//dbgio_printf("oof %08lx\n", fields.raw);*/
 					I_Rumble(rumble_patterns[rumble_oof]);
 				}
 			}

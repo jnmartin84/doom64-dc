@@ -142,9 +142,9 @@ char *ControlText[] =
 
 #define M_TXT97 "VMU Display:"
 
-#define M_TXT98 "StrikerDC"
-#define M_TXT99 "OEM"
-#define M_TXT100 "Rocker"
+#define M_TXT98 "On"
+#define M_TXT99 "Unused"
+#define M_TXT100 "Unused"
 
 #define M_TXT101 "WIREFRAME"
 
@@ -406,8 +406,6 @@ void M_ResetSettings(doom64_settings_t *s) {
 	if (I_CheckControllerPak() == 0) {
 		I_ReadPakSettings(s);
 	}
-
-	I_InitRumble((i_rumble_pak_t)s->Rumble);
 
 	s->version = SETTINGS_SAVE_VERSION;
 	s->runintroduction = 0;
@@ -1697,7 +1695,6 @@ int M_MenuTicker(void)
 				if (truebuttons) {
 					S_StartSound(NULL, sfx_switch2);
 					menu_settings.Rumble = (menu_settings.Rumble + 1) % NUM_RUMBLEPAKS;
-					I_InitRumble((i_rumble_pak_t)menu_settings.Rumble);
 					return ga_nothing;
 				}
 				break;

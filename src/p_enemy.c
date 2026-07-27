@@ -1647,20 +1647,6 @@ void A_Hoof(mobj_t *mo) // 800130E0
 	S_StartSound(mo, sfx_cybhoof);
 	A_Chase(mo);
 	if (menu_settings.Rumble) {
-/* 			rumble_fields_t fields = {.raw = 0};
-			fields.special_pulse = 0;
-			fields.special_motor1 = 0;
-			fields.special_motor2 = 0;
-			fields.fx1_pulse = 0;
-			fields.fx1_powersave = 0;
-			fields.fx1_intensity = 4;
-			fields.fx2_lintensity = 0;
-			fields.fx2_pulse = 1;
-			fields.fx2_uintensity = 0;
-			fields.fx2_decay = 0;
-			fields.duration = 35;
-			dbgio_printf("a_hoof %08lx\n", fields.raw);
-			purupuru_rumble_raw(purudev, fields.raw); */
 		I_Rumble(rumble_patterns[rumble_hoof]);
 	}
 }

@@ -125,8 +125,7 @@ void D_SplashScreen(void)
 {
 	// Check if any dreamcast controller is connected
 	// if not connected, it will show the Warning screen
-	maple_device_t *device = maple_enum_type(0, MAPLE_FUNC_CONTROLLER);
-	if (!device)
+	if (!maple_devices[maple_controller])
 		MiniLoop(NULL, NULL, D_WarningTicker, D_DrawWarning);
 
 	/* */
