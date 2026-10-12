@@ -1,6 +1,7 @@
 #include <kos.h>
 #include <dc/sound/sound.h>
 #include "sndwav.h"
+#include "aica_dsp.h"
 
 /* s_sound.c */
 #include "doomdef.h"
@@ -10,6 +11,190 @@
 
 int activ = 0;
 wav_stream_hnd_t cur_hnd = SND_STREAM_INVALID;
+
+/*
+ * Reverb. Doom 64 starts WESS with libultra's big room (S_Init in Doom64-RE: reverb_id
+ * WESS_REVERB_BIGROOM at a 22050 Hz output rate), and its S_StartSound sends a sound to it at
+ * effect mix 16 when the origin is in an MS_REVERB sector, 32 in an MS_REVERBHEAVY one, else 0.
+ * The big room runs on the AICA's DSP beside KOS's stock driver (aica_dsp_gen.c, aica_dsp_kos.c,
+ * shared with the quake64-decomp port), and each sound's channel is split as libultra splits a
+ * voice: the dry share in the channel's volume, the wet share, relative to it, in the channel's
+ * DSP send (the send comes after the channel's volume). The music stream stays dry.
+ *
+ * The send also carries the difference between the two pan laws. libultra pans a voice with
+ * equal power (a centred one plays at -3 dB on each side), its effect takes the two wet sides
+ * mixed at 0.707 each, and the effect returns to both sides at unity. The AICA plays the near
+ * side at full level whatever the pan (a centred channel at 0 dB on both sides) and sends the
+ * channel to the DSP unpanned. So on the near side the N64's effect stood
+ * 0.707 (eqpower[pan] + eqpower[127 - pan]) / max(eqpower[pan], eqpower[127 - pan]) above
+ * libultra's wet share relative to the dry: +3 dB centred, -3 dB panned hard.
+ */
+#define REVERB_OUTPUT_RATE 22050 /* Doom 64's wess_config.outputsamplerate */
+#define REVERB_MS 40 /* libultra's "ms" in its effect tables: 40 samples at any rate */
+#define REVERB_RETURN 15 /* the DSP's output level (EFSDL, 3 dB steps, 15 = 0 dB): libultra adds the effect at unity */
+
+#define REVERB_NONE 0
+#define REVERB_LIGHT 1 /* MS_REVERB: effect mix 16 */
+#define REVERB_HEAVY 2 /* MS_REVERBHEAVY: effect mix 32 */
+
+/* libultra's equal-power table (env.c): the pan law, and the dry and wet shares of an effect
+   mix (eqpower[fxMix], eqpower[127 - fxMix]), Q15 */
+static const short eqpower[128] = {
+	32767, 32764, 32757, 32744, 32727, 32704, 32677, 32644, 32607, 32564, 32517, 32464,
+	32407, 32344, 32277, 32205, 32127, 32045, 31958, 31866, 31770, 31668, 31561, 31450,
+	31334, 31213, 31087, 30957, 30822, 30682, 30537, 30388, 30234, 30075, 29912, 29744,
+	29572, 29395, 29214, 29028, 28838, 28643, 28444, 28241, 28033, 27821, 27605, 27385,
+	27160, 26931, 26698, 26461, 26220, 25975, 25726, 25473, 25216, 24956, 24691, 24423,
+	24151, 23875, 23596, 23313, 23026, 22736, 22442, 22145, 21845, 21541, 21234, 20924,
+	20610, 20294, 19974, 19651, 19325, 18997, 18665, 18331, 17993, 17653, 17310, 16965,
+	16617, 16266, 15913, 15558, 15200, 14840, 14477, 14113, 13746, 13377, 13006, 12633,
+	12258, 11881, 11503, 11122, 10740, 10357, 9971, 9584, 9196, 8806, 8415, 8023,
+	7630, 7235, 6839, 6442, 6044, 5646, 5246, 4845, 4444, 4042, 3640, 3237,
+	2833, 2429, 2025, 1620, 1216, 810, 405, 0
+};
+static const int reverb_mix[3] = { 0, 16, 32 }; /* REVERB_NONE, REVERB_LIGHT, REVERB_HEAVY */
+/* the channel's DSP send for each reverb at each pan (KOS's 0-255, the N64's twice over),
+   0 (off) to 15 (0 dB); all 0 if the DSP is not up */
+static unsigned char reverb_send[3][256];
+static int reverb_up = 0;
+static int channel_send[64]; /* each channel's DSP send as last written (snd_init zeroes them) */
+
+static void S_InitReverb(void)
+{
+	/* libultra's big room (drvrnew.c BIGROOM_PARAMS), in samples at the synthesizer's rate */
+	static const int bigroom[2 + 4 * 8] = {
+		/* sections   length */
+		4, 100 * REVERB_MS,
+		/* input           output           fbcoef  ffcoef   gain    chorus rate, depth   filter coef */
+		0,                 66 * REVERB_MS,  9830,   -9830,   0,      0, 0,                0,
+		22 * REVERB_MS,    54 * REVERB_MS,  3276,   -3276,   0x3fff, 0, 0,                0,
+		66 * REVERB_MS,    91 * REVERB_MS,  3276,   -3276,   0x3fff, 0, 0,                0,
+		0,                 94 * REVERB_MS,  8000,   0,       0,      0, 0,                0x5000
+	};
+	static aica_dsp_image_t img;
+	aica_fx_desc_t fx;
+	int i, pan;
+
+	memset(&fx, 0, sizeof(fx));
+	fx.rate = REVERB_OUTPUT_RATE;
+	fx.sections = bigroom[0];
+	fx.length = bigroom[1];
+	for (i = 0; i < fx.sections; i++) {
+		const int *s = &bigroom[2 + 8 * i];
+		fx.section[i].input = s[0];
+		fx.section[i].output = s[1];
+		fx.section[i].fbcoef = (int16_t)s[2];
+		fx.section[i].ffcoef = (int16_t)s[3];
+		fx.section[i].gain = (int16_t)s[4];
+		fx.section[i].chorus = (uint8_t)(s[5] != 0);
+		fx.section[i].lp_fc = (int16_t)s[7];
+	}
+
+	if (!aica_dsp_build_libultra_fx(&fx, &img)) {
+		dbgio_printf("S_InitReverb: the big room does not fit the DSP\n");
+		return;
+	}
+
+	if (!aica_dsp_load(&img, REVERB_RETURN))
+		return;
+
+	for (i = REVERB_LIGHT; i <= REVERB_HEAVY; i++) {
+		int mix = reverb_mix[i];
+		double wet = (double)eqpower[127 - mix] / eqpower[mix];
+
+		for (pan = 0; pan < 256; pan++) {
+			int left = eqpower[pan >> 1];
+			int right = eqpower[127 - (pan >> 1)];
+			int near = left > right ? left : right;
+			double send = wet * 0.70709 * (left + right) / near;
+
+			reverb_send[i][pan] = aica_dsp_level((int32_t)(send * 32768.0 + 0.5));
+		}
+	}
+
+	reverb_up = 1;
+}
+
+static void S_WriteChannelSend(int chn, int level)
+{
+	if (chn < 0 || chn >= 64 || channel_send[chn] == level)
+		return;
+
+	aica_dsp_send(chn, level);
+	channel_send[chn] = level;
+}
+
+/* The reverb a sound from origin gets from its sector. Doom 64 read
+   origin->subsector->sector->flags for every origin, the sectors' sound origins
+   (degenmobj_t, cast to mobj_t *) included: there the two structs shared their first fields.
+   Here mobj_t keeps old_x, old_y, old_z before its subsector, so a sector's sound origin is
+   told apart by its address and read through its own subsec. */
+int S_SoundReverb(mobj_t *origin)
+{
+	subsector_t *ss;
+	int flags;
+
+	if (!origin)
+		return REVERB_NONE;
+
+	if ((uintptr_t)origin >= (uintptr_t)sectors &&
+		(uintptr_t)origin < (uintptr_t)&sectors[numsectors])
+		ss = ((degenmobj_t *)origin)->subsec;
+	else
+		ss = origin->subsector;
+
+	if (!ss)
+		return REVERB_NONE;
+
+	flags = ss->sector->flags;
+
+	if (flags & MS_REVERB)
+		return REVERB_LIGHT;
+	else if (flags & MS_REVERBHEAVY)
+		return REVERB_HEAVY;
+
+	return REVERB_NONE;
+}
+
+/* a channel's volume with libultra's dry share for that reverb */
+int S_ReverbDryVolume(int vol, int reverb)
+{
+	if (!reverb_up || reverb == REVERB_NONE)
+		return vol;
+
+	return (vol * eqpower[reverb_mix[reverb]]) >> 15;
+}
+
+/* a channel's DSP send for that reverb at that pan (0-255; written whatever the reverb, so a
+   channel a reverberant sound used last does not keep its send) */
+void S_SetChannelReverb(int chn, int reverb, int pan)
+{
+	if (pan < 0)
+		pan = 0;
+	else if (pan > 255)
+		pan = 255;
+
+	S_WriteChannelSend(chn, reverb_send[reverb][pan]);
+}
+
+/* The music is dry. KOS's snd_stream_alloc takes the two lowest free channels
+   (snd_sfx_chn_alloc), and a sound may have left its send on either: find them the same way
+   and clear their sends before the stream takes them. */
+static void S_DryStreamChannels(void)
+{
+	int chn[2];
+	int i;
+
+	for (i = 0; i < 2; i++)
+		chn[i] = snd_sfx_chn_alloc();
+
+	for (i = 0; i < 2; i++) {
+		if (chn[i] >= 0) {
+			snd_sfx_chn_free(chn[i]);
+			S_WriteChannelSend(chn[i], 0);
+		}
+	}
+}
 
 void S_RemoveOrigin(mobj_t *origin)
 {
@@ -142,6 +327,9 @@ void S_Init(void)
 	int wi_rv = wav_init();
 	if (!wi_rv)
 		dbgio_printf("could not wav_init\n");
+
+	/* after wav_init (snd_stream_init runs snd_init) and before the sounds take sound RAM */
+	S_InitReverb();
 
 	init_all_sounds();
 
@@ -311,6 +499,7 @@ void S_StartMusic(int mus_seq)
 		}
 	}
 
+	S_DryStreamChannels();
 	cur_hnd = wav_create(itname, looping);
 
 	if (cur_hnd == SND_STREAM_INVALID) {
@@ -372,6 +561,8 @@ int S_StartSound(mobj_t *origin, int sound_id)
 {
 	int vol;
 	int pan;
+	int reverb;
+	int chn;
 
 #if RANGECHECK
 	if (sound_id < 0 || sound_id > sfx_rectsit)
@@ -387,7 +578,12 @@ int S_StartSound(mobj_t *origin, int sound_id)
 			pan = 128;
 		}
 
-		return snd_sfx_play(sounds[sound_id], (int)((float)vol * soundscale), pan);
+		reverb = S_SoundReverb(origin);
+		vol = S_ReverbDryVolume((int)((float)vol * soundscale), reverb);
+
+		chn = snd_sfx_play(sounds[sound_id], vol, pan);
+		S_SetChannelReverb(chn, reverb, pan);
+		return chn;
 	}
 	return -1;
 }

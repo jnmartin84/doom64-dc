@@ -1530,6 +1530,10 @@ int S_SoundStatus(int seqnum);
 int S_StartSound(mobj_t *origin, int sound_id);
 int S_AdjustSoundParams(mobj_t *listener, mobj_t *origin, int *vol, int *pan);
 
+int S_SoundReverb(mobj_t *origin);
+int S_ReverbDryVolume(int vol, int reverb);
+void S_SetChannelReverb(int chn, int reverb, int pan);
+
 /*--------*/
 /* I_MAIN */
 /*--------*/

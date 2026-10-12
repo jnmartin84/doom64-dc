@@ -346,13 +346,16 @@ weaponinfo_t weaponinfo[NUMWEAPONS] = // 8005AD80
 void P_StartElectricLoop(void)
 {
 	sfx_play_data_t data = {0};
+	/* Doom 64 started the buzz with S_StartSound(player->mo, sfx_electric): the player's sector's reverb */
+	int reverb = S_SoundReverb(players[0].mo);
 	plasma_loop_channel = snd_sfx_chn_alloc();
 	data.chn = plasma_loop_channel;
 	data.idx = sounds[sfx_electric];
-	data.vol = (int)((float)124 * soundscale);
+	data.vol = S_ReverbDryVolume((int)((float)124 * soundscale), reverb);
 	data.pan = 128;
 	data.loop = 1;
 	data.loopstart = 1713;
+	S_SetChannelReverb(plasma_loop_channel, reverb, data.pan);
 	snd_sfx_play_ex(&data);
 }
 

@@ -684,7 +684,8 @@ int I_GetControllerData(void)
 	if (controller) {
 		cont = maple_dev_status(controller);
 
-#ifdef DCLOCALDEV
+#if 1
+//#ifdef DCLOCALDEV
 		if ((cont->buttons & CONT_START) && cont->ltrig && cont->rtrig)
 			exit(0);
 #endif
